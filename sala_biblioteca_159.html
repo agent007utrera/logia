@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biblioteca</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cinzel+Decorative:wght@700&family=IM+Fell+English:ital@0;1&family=Special+Elite&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --negro:        #040806;
+    --bosque:       #0a1510;
+    --musgo:        #12261b;
+    --esmeralda:    #2f7d57;
+    --verdin:       #5fb98a;
+    --brillo:       #9bf0c0;
+    --laton:        #b49a55;
+    --laton-osc:    #6e5c2e;
+    --pergamino:    #d9d3b3;
+    --pergamino-osc:#a9a285;
+    --sangre:       #a8423a;
+    --fuente-titulo: 'Cinzel Decorative', 'Cinzel', Georgia, serif;
+    --fuente-sub:    'Cinzel', Georgia, serif;
+    --fuente-cuerpo: 'IM Fell English', Georgia, 'Times New Roman', serif;
+    --fuente-maquina:'Special Elite', 'Courier New', monospace;
+
+    --ratio-w: 16;
+    --ratio-h: 9;
+}
+
+body, html {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background-color: var(--negro);
+    background-image: radial-gradient(circle at 50% 40%, #0f2318 0%, #050a07 75%);
+    font-family: var(--fuente-cuerpo);
+    color: var(--pergamino);
+}
+* { box-sizing: border-box; }
+
+body::before {
+    content: "";
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 4999;
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.65) 100%);
+}
+body::after {
+    content: "";
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 5000;
+    opacity: 0.09;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+.layout-container {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 8px;
+    padding: 8px;
+    width: 100%;
+    height: 100%;
+}
+
+.room-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    background-color: #000;
+    border: 2px solid var(--laton-osc);
+    box-shadow: inset 0 0 0 3px #000, inset 0 0 0 4px var(--laton-osc), 0 0 30px rgba(47,125,87,0.18);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.game-container {
+    position: relative;
+    width: min(100%, calc((100vh - 28px) * var(--ratio-w) / var(--ratio-h)));
+    aspect-ratio: var(--ratio-w) / var(--ratio-h);
+    background: linear-gradient(135deg, #0c1a13 0%, #07110c 60%, #0c1a13 100%);
+}
+.game-image {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+.hotspot {
+    position: absolute;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+.hotspot:hover {
+    background-color: rgba(95, 185, 138, 0.38);
+    box-shadow: inset 0 0 22px rgba(155, 240, 192, 0.85);
+}
+
+#hsTomo1 {
+    top: 75%;
+    left: 63%;
+    width: 20%;
+    height: 15%;
+    clip-path: polygon(0% 47%, 2% 28%, 22% 9%, 22% 9%, 32% 10%, 32% 10%, 52% 0%, 52% 0%, 94% 34%, 100% 49%, 100% 49%, 44% 100%, 44% 100%);
+}
+
+#hsTomo2 {
+    top: 68%;
+    left: 52%;
+    width: 14%;
+    height: 9%;
+    clip-path: polygon(0% 28%, 32% 9%, 65% 0%, 96% 35%, 100% 52%, 29% 100%, 1% 57%);
+}
+
+#hsTomo3 {
+    top: 65%;
+    left: 61%;
+    width: 9%;
+    height: 8%;
+    clip-path: polygon(0% 42%, 29% 4%, 49% 0%, 99% 16%, 100% 50%, 65% 100%, 20% 76%);
+}
+
+#hsPasadizo { top: 28.0%; left: 29.2%; width: 9.4%; height: 44.9%; clip-path: polygon(0.0% 2.9%, 74.2% 0.0%, 97.7% 5.8%, 100.0% 94.2%, 62.5% 100.0%, 3.9% 95.7%); }
+#hsEstanteria { top: 26.0%; left: 38.6%; width: 12.7%; height: 44.9%; clip-path: polygon(0.0% 1.4%, 96.0% 0.0%, 100.0% 98.6%, 4.0% 100.0%); }
+#hsTapiz { top: 0.0%; left: 27.1%; width: 13.2%; height: 17.6%; clip-path: polygon(0.0% 3.7%, 98.9% 0.0%, 100.0% 100.0%, 1.7% 92.6%); }
+#hsLampara { top: 53.6%; left: 68.8%; width: 8.2%; height: 20.8%; clip-path: polygon(0.0% 5.0%, 89.3% 0.0%, 100.0% 20.6%, 80.4% 36.2%, 67.0% 98.8%, 17.9% 100.0%, 31.2% 36.2%); }
+#hsLibroDibujos { top: 75.9%; left: 64.0%; width: 18.3%; height: 12.9%; clip-path: polygon(0.0% 39.4%, 42.0% 0.0%, 100.0% 37.4%, 84.0% 69.7%, 36.0% 100.0%); }
+#hsLibroCentral { top: 65.8%; left: 52.5%; width: 13.3%; height: 10.8%; clip-path: polygon(0.0% 42.2%, 50.5% 0.0%, 100.0% 27.7%, 89.0% 66.3%, 28.6% 100.0%); }
+#hsPergaminos { top: 76.8%; left: 45.2%; width: 12.5%; height: 9.4%; clip-path: polygon(0.0% 48.6%, 36.5% 11.1%, 89.4% 0.0%, 100.0% 69.4%, 36.5% 100.0%, 7.1% 97.2%); }
+#hsLupa { top: 81.8%; left: 59.8%; width: 8.6%; height: 7.6%; clip-path: polygon(0.0% 6.9%, 53.0% 0.0%, 100.0% 75.9%, 91.5% 100.0%, 44.4% 55.2%, 3.4% 37.9%); }
+#hsTelescopio { top: 47.5%; left: 0.0%; width: 16.4%; height: 46.2%; clip-path: polygon(0.0% 0.0%, 56.6% 1.4%, 57.5% 18.3%, 100.0% 29.6%, 100.0% 57.7%, 62.0% 71.8%, 57.5% 95.8%, 0.0% 100.0%); }
+#hsMapas { top: 38.8%; left: 16.6%; width: 10.1%; height: 10.4%; clip-path: polygon(0.0% 0.0%, 99.3% 2.5%, 100.0% 92.5%, 1.4% 100.0%); }
+
+.player-hud {
+    position: fixed; top: 15px; right: 20px;
+    background: rgba(5, 12, 8, 0.94);
+    border: 1px solid var(--laton);
+    outline: 1px solid var(--laton-osc); outline-offset: 2px;
+    color: var(--verdin); padding: 8px 16px;
+    font-family: var(--fuente-maquina); font-size: 0.9rem;
+    letter-spacing: 2px; z-index: 1500;
+    box-shadow: 0 0 14px rgba(47, 125, 87, 0.45); text-align: center;
+}
+
+#timerContainer {
+    position: fixed; top: 15px; left: 15px;
+    background: linear-gradient(135deg, #0a1510 0%, #12261b 100%);
+    color: var(--brillo); border: 1px solid var(--laton);
+    outline: 1px solid var(--laton-osc); outline-offset: 2px;
+    box-shadow: inset 0 0 10px rgba(95,185,138,0.2), 0 0 12px rgba(47,125,87,0.35);
+    padding: 8px 14px; font-family: var(--fuente-maquina);
+    font-size: 0.95rem; letter-spacing: 2px; z-index: 1500;
+}
+
+.back-btn {
+    display: none; position: fixed; top: 15px; left: 15px;
+    background: var(--musgo); color: var(--brillo);
+    border: 1px solid var(--laton); outline: 1px solid var(--laton-osc); outline-offset: 2px;
+    padding: 8px 14px; font-family: var(--fuente-sub); font-size: 0.8rem;
+    letter-spacing: 2px; text-decoration: none; z-index: 1500;
+}
+
+.video-sidebar {
+    background: rgba(4, 9, 6, 0.96);
+    border: 2px solid var(--laton-osc);
+    box-shadow: inset 0 0 0 3px #000, inset 0 0 0 4px var(--laton-osc), 0 0 15px rgba(0,0,0,0.8);
+    display: flex; flex-direction: column; overflow: hidden;
+    font-family: var(--fuente-maquina); border-radius: 3px;
+}
+.video-header {
+    padding: 12px 10px; background: linear-gradient(180deg, #0f2318, #08120d);
+    border-bottom: 1px solid var(--laton-osc); color: var(--laton);
+    font-family: var(--fuente-sub); font-size: 0.85rem; text-align: center; letter-spacing: 3px;
+}
+#video-grid { flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 10px; }
+.video-card { position: relative; width: 100%; aspect-ratio: 4 / 3; background: #000; border: 1px solid var(--laton-osc); overflow: hidden; }
+.video-card video { width: 100%; height: 100%; object-fit: cover; }
+.video-name {
+    position: absolute;
+    left: 5px; bottom: 5px;
+    max-width: calc(100% - 10px);
+    padding: 2px 7px;
+    background: rgba(4, 9, 6, 0.88);
+    color: var(--brillo);
+    font-size: 0.68rem;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    border: 1px solid rgba(180, 154, 85, 0.5);
+}
+.aforo-aviso {
+    color: var(--laton); font-family: var(--fuente-sub); font-size: 0.72rem; letter-spacing: 3px;
+    text-align: center; margin: 0; padding: 6px; border-top: 1px solid var(--laton-osc);
+    background: #060d09; display: flex; align-items: center; justify-content: space-between;
+}
+.aforo-aviso button { background: var(--musgo); border: 1px solid var(--laton-osc); color: var(--brillo); padding: 2px 8px; cursor: pointer; }
+.aforo-aviso button { position: relative; overflow: hidden; }
+.aforo-aviso button.off { background: #2a0e0b; border-color: var(--sangre); color: var(--sangre); }
+.aforo-aviso button.off::after {   /* tachón diagonal cuando está apagado */
+    content: ""; position: absolute; top: 50%; left: -20%;
+    width: 140%; height: 2px; background: var(--sangre);
+    transform: translateY(-50%) rotate(-45deg); pointer-events: none;
+}
+
+.modal {
+    display: none; position: fixed; inset: 0;
+    background: radial-gradient(circle at center, rgba(6,16,10,0.82), rgba(0,0,0,0.92));
+    backdrop-filter: blur(2px); z-index: 1000; justify-content: center; align-items: center;
+}
+.modal-content {
+    position: relative; width: 90%; max-width: 470px; max-height: 82vh; overflow-y: auto;
+    padding: 30px; background: linear-gradient(180deg, #14291d 0%, #0b1710 100%);
+    border: 2px solid var(--laton); box-shadow: 0 0 0 4px #000, 0 0 0 5px var(--laton-osc), 0 10px 40px rgba(0,0,0,0.9);
+}
+.modal-content h3 { margin: 0; font-family: var(--fuente-titulo); font-size: 1.3rem; text-align: center; color: var(--verdin); }
+.modal-content p { line-height: 1.65; color: var(--pergamino); text-align: center; }
+.close-btn { position: absolute; top: 12px; right: 18px; font-size: 1.7rem; color: var(--laton); background: none; border: none; cursor: pointer; }
+
+.drawer-img { display: block; margin: 14px auto 6px; width: 70%; max-height: 180px; object-fit: contain; border: 1px solid var(--laton); cursor: zoom-in; }
+.fila-botones { display: flex; gap: 12px; justify-content: center; margin-top: 18px; }
+.drawer-btn { background: #1c3d2b; color: var(--brillo); border: 1px solid var(--laton); padding: 9px 20px; font-family: var(--fuente-sub); cursor: pointer; }
+.drawer-btn.no { background: #3a1613; border-color: var(--sangre); color: #e9a29b; }
+.cost-box { margin: 14px 0 4px; padding: 9px; border: 1px dashed var(--laton-osc); background: rgba(47,125,87,0.1); text-align: center; color: var(--brillo); font-family: var(--fuente-maquina); }
+
+/* POP-UP DE TOMOS: libro abierto con alfabeto incomprensible, a gran tamaño y con marco */
+.modal-content.modal-ancho { max-width: 780px; width: 94%; padding: 24px 24px 26px; }
+.tomo-marco {
+    margin: 16px 0 6px; padding: 8px; background: #050b07;
+    border: 1px solid var(--laton);
+    outline: 1px solid var(--laton-osc); outline-offset: 4px;
+    box-shadow: inset 0 0 28px rgba(0,0,0,0.95), 0 0 26px rgba(95,185,138,0.22);
+    animation: tomoAparece 0.6s ease-out;
+}
+.tomo-marco img { display: block; width: 100%; max-height: 58vh; object-fit: contain; cursor: zoom-in; filter: sepia(0.15) contrast(1.05); }
+.tomo-pie { margin: 14px 0 0; font-style: italic; color: var(--pergamino-osc); font-size: 1.02rem; }
+.tomo-ampliar { margin: 8px 0 0; font-family: var(--fuente-sub); font-size: 0.66rem; letter-spacing: 3px; color: var(--laton-osc); text-align: center; text-transform: uppercase; }
+
+/* ---- LOCURA DE LOS TOMOS ---- */
+.tomo-marco { position: relative; overflow: hidden; }
+.tomo-lienzo { position: relative; }
+.tomo-marco .tomo-ghost { position: absolute; inset: 0; height: 100%; max-height: none; pointer-events: none; mix-blend-mode: screen; opacity: 0; cursor: default; }
+.tomo-marco .tomo-ghost.r { filter: url(#lRojo); }
+.tomo-marco .tomo-ghost.c { filter: url(#lCian); }
+.tomo-pie { transition: color 0.2s; }
+@keyframes resaca {
+    0%   { filter: none; transform: none; }
+    15%  { filter: hue-rotate(40deg) blur(3px) saturate(2.2); transform: skewX(1.2deg); }
+    40%  { filter: blur(1px) hue-rotate(-25deg); transform: skewX(-0.8deg); }
+    100% { filter: none; transform: none; }
+}
+.game-container.resaca { animation: resaca 3.2s ease-out; }
+@media (prefers-reduced-motion: reduce) { .game-container.resaca { animation: none; } }
+@keyframes tomoAparece { from { opacity: 0; transform: scale(0.96); filter: blur(3px); } to { opacity: 1; transform: none; filter: none; } }
+
+#fullscreenViewer { display: none; position: fixed; inset: 0; background-color: rgba(0,0,0,0.96); z-index: 3000; justify-content: center; align-items: center; }
+#fullscreenViewer img { max-width: 92%; max-height: 92%; object-fit: contain; border: 1px solid var(--laton-osc); }
+</style>
+</head>
+
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<filter id="lRojo"><feColorMatrix type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0"/></filter>
+<filter id="lCian"><feColorMatrix type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0"/></filter>
+</defs></svg>
+
+<div class="player-hud" id="playerHud">
+    <div id="identidadTexto">IDENTIDAD: CARGANDO...</div>
+    <div id="video-status-hud" style="font-size:0.7rem;color:var(--pergamino-osc);margin-top:4px;letter-spacing:1px;">Conectando...</div>
+</div>
+
+<div id="timerContainer">PUERTA CERRADA: <span id="countdown">00:10</span></div>
+<a href="#" id="backBtn" class="back-btn" onclick="playClick(); volverAlMapa(event)">IR AL PASILLO</a>
+
+<div class="layout-container">
+    <div class="room-section">
+    <div class="game-container" id="gameContainer">
+        <video src="images/sala_biblioteca.mp4" class="game-image" autoplay muted loop playsinline preload="auto" aria-label="Biblioteca de la Logia"></video>
+
+        <!-- HOTSPOTS (los marcados como OBJETO RECOGIBLE dan un objeto; el resto solo describen) -->
+        <!-- Pasadizo secreto
+        <div class="hotspot" id="hsPasadizo" data-etiqueta="Pasadizo secreto" onclick="playClick(); abrirInfo('El pasadizo', 'Tras la estantería entreabierta se abre un corredor de piedra, bajo y húmedo, que desciende en una pendiente que los ojos se niegan a medir. Las losas del suelo están gastadas en el centro, como por la acción de pasos innumerables y arrastrados. El aire que sale de él es frío y huele a mar subterráneo, y trae, desde muy lejos, el eco de algo que quizá es solo una gota de agua, repetida demasiadas veces con el mismo compás.')"></div>
+ -->
+
+        <!-- Estantería giratoria
+        <div class="hotspot" id="hsEstanteria" data-etiqueta="Estantería giratoria" onclick="playClick(); abrirInfo('La estantería giratoria', 'La estantería, montada sobre un gozne oculto, gira con un quejido de bisagras sin aceite. Los lomos de los volúmenes que carga carecen de título, y algunos, al rozarlos, os parecen cálidos, de un calor animal. Uno está encuadernado en una piel suave y pálida, de poros apenas perceptibles, y no necesitáis que nadie os diga de qué piel se trata.')"></div>
+ -->
+
+        <!-- Tapiz con sigilo -->
+        <div class="hotspot" id="hsTapiz" data-etiqueta="Tapiz con sigilo" onclick="playClick(); abrirInfo('El tapiz del sigilo', 'Un tapiz desgastado muestra un diagrama de triángulos y círculos concéntricos, trazado en hilo oscuro sobre un fondo color óxido. Siguiendo las líneas descubrís que el dibujo no está en equilibrio: hay un ángulo que no encaja, un vértice que apunta fuera de la tela, hacia un lugar que no existe en la geometría que conocéis. Basta un instante para que os duela la vista, y al apartarla el sigilo persiste unos segundos grabado detrás de los párpados.')"></div>
+
+        <!-- Lámpara verde · OBJETO RECOGIBLE: Taza de té -->
+        <div class="hotspot" id="hsLampara" data-etiqueta="Lámpara verde" onclick="playClick(); accionRecoger('te')"></div>
+
+        <!-- Libro de grabados
+        <div class="hotspot" id="hsLibroDibujos" data-etiqueta="Libro de grabados" onclick="playClick(); abrirInfo('El libro de grabados', 'Un volumen abierto, de pliegos amarillentos, cuajado de grabados anatómicos: cuerpos humanos de los que brotan más extremidades de las debidas, siluetas con cabezas que son racimos de órganos, figuras que reptan sobre signos astronómicos. La letra, apretada y febril, está en un latín bárbaro que casi se deja leer, y es precisamente ese «casi» lo que os llena de inquietud. En el margen, una mano distinta ha escrito, subrayado dos veces: <i>No lo leáis en voz alta</i>.')"></div>
+ -->
+
+        <!-- Libro de constelaciones
+        <div class="hotspot" id="hsLibroCentral" data-etiqueta="Libro de constelaciones" onclick="playClick(); abrirInfo('El libro de constelaciones', 'Un segundo libro, abierto sobre un diagrama de constelaciones que no figuran en atlas alguno. Los astros han sido unidos con líneas de tinta rojiza formando una figura que, mirada con atención, adopta la silueta de algo enorme y encogido. Una nota a pie de página menciona un nombre de lugar que no os suena de nada, pero que, por algún motivo, vuestros labios reconocen.')"></div>
+ -->
+
+        <!-- Pergaminos -->
+        <div class="hotspot" id="hsPergaminos" data-etiqueta="Pergaminos" onclick="playClick(); abrirInfo('Los pergaminos', 'Entre los libros, pergaminos enrollados y atados con cintas de un color imposible de nombrar. Al desplegar uno, el cuero cruje como la piel seca de un reptil y se desprende de él un polvo finísimo que os hace toser. Contiene un plano de galerías subterráneas, trazado con paciente exactitud, que parecen descender bajo toda la ciudad y que terminan, todas, en el mismo punto: un círculo negro sin rótulo.')"></div>
+
+        <!-- Lupa -->
+        <div class="hotspot" id="hsLupa" data-etiqueta="Lupa" onclick="playClick(); abrirInfo('La lupa', 'Una lupa de mango de hueso, junto a unas gafas olvidadas. Al mirar a través de ella, las letras del volumen más cercano se vuelven por un instante legibles y espantosas, y los bordes de las páginas, vistos con aumento, parecen moverse como las patas de una multitud de insectos diminutos. Cuando la retiráis, ya no recordáis qué os pareció leer; solo queda un regusto metálico y el vago horror de haber comprendido.')"></div>
+
+        <!-- Telescopio y globos · OBJETO RECOGIBLE: Bourbon -->
+        <div class="hotspot" id="hsTelescopio" data-etiqueta="Telescopio y globos" onclick="playClick(); accionRecoger('bourbon')"></div>
+
+        <!-- Mapas antiguos -->
+        <div class="hotspot" id="hsMapas" data-etiqueta="Mapas antiguos" onclick="playClick(); abrirInfo('Los mapas antiguos', 'En la estantería, entre astrolabios y relojes, un mapa antiguo de dos hemisferios dibujados con exquisitez. En los márgenes, dragones marinos; y sobre una isla que no figura en ninguna carta náutica, una anotación de letra apresurada: <i>aquí también</i>. El océano parece más oscuro de lo que debería, y la misma mancha en forma de ojo aparece en ambos hemisferios.')"></div>
+
+        <!-- Tomos abiertos · POP-UP con imagen (alfabetos incomprensibles) -->
+        <div class="hotspot" id="hsTomo1" data-etiqueta="Tomo abierto" onclick="playClick(); abrirTomo('tomo1')"></div>
+        <div class="hotspot" id="hsTomo2" data-etiqueta="Tomo abierto" onclick="playClick(); abrirTomo('tomo2')"></div>
+        <div class="hotspot" id="hsTomo3" data-etiqueta="Tomo abierto" onclick="playClick(); abrirTomo('tomo3')"></div>
+    </div>
+    </div>
+
+    <aside class="video-sidebar">
+        <div class="video-header"><span id="video-status">Conectando...</span></div>
+        <div id="video-grid"></div>
+        <p class="aforo-aviso">
+            <button id="btnMic" onclick="toggleMicrofono()">🎤</button>
+            BIBLIOTECA
+            <button id="btnCam" onclick="toggleCamara()">📷</button>
+        </p>
+    </aside>
+</div>
+
+<div id="gameModal" class="modal">
+    <div class="modal-content" id="modalContent">
+        <button class="close-btn" onclick="playClick(); closeModal()">&times;</button>
+        <h3 id="modalTitle">Título</h3>
+        <div id="modalBody"><p id="modalText">Texto...</p></div>
+    </div>
+</div>
+
+<div id="fullscreenViewer" onclick="playClick(); closeFullscreen()">
+    <img id="fullscreenImg" src="" alt="Pantalla completa" style="display:none;">
+</div>
+
+<script>
+// Nombre de ESTA sala dentro de "localizaciones" en Firebase.
+// Tiene que coincidir con el que pongas en MAPA_SALA_OBJETOS de master_objetos.html.
+const SALA_ID = "sala_biblioteca";
+
+const NOMBRES_JUGADORES = {
+    jugador1278: "WETHERBY",
+    jugador2935: "BREWER",
+    jugador3194: "CRANE",
+    jugador4781: "NICHOLS",
+    jugador5261: "PICKMAN",
+    jugador6193: "RICE"
+};
+
+const OBJETOS = {
+    te: {
+        item: "te",
+        titulo: "Taza de té",
+        nombre: "Taza de té",
+        imagen: "images/te.jpg",
+        descripcion: "Bajo la pantalla verde de la lámpara, sobre el escritorio, humea una delicada taza de té de porcelana fina con motivos florales. Alguien la ha servido hace apenas un instante.",
+        // Puntos de Acción que paga CADA jugador ("denegado" = no puede cogerlo)
+        costes: {
+            jugador1278: 1,           // WETHERBY
+            jugador2935: 1,           // BREWER
+            jugador3194: 1,           // CRANE
+            jugador4781: 1,           // NICHOLS
+            jugador5261: 1,           // PICKMAN
+            jugador6193: 1            // RICE
+        },
+        // Descripción normal del hotspot: se ve si ya se han llevado el objeto o si el jugador está denegado
+        info: {
+            titulo: "La lámpara verde",
+            texto: "La lámpara de pantalla verde derrama sobre el escritorio un charco de luz esmeralda, enfermiza, en el que los papeles parecen sumergidos. En su pie de latón, una cadenilla se balancea sin viento. Bajo esa luz, las sombras de los libros se alargan hacia el borde de la mesa de un modo que ningún foco explica, y por un momento os parece que la lámpara no ilumina el despacho, sino que lo observa."
+        },
+        textoExito: "Has cogido la taza de té y la guardas en tu inventario."
+    },
+
+    bourbon: {
+        item: "bourbon",
+        titulo: "Bourbon",
+        nombre: "Bourbon",
+        imagen: "images/bourbon.jpg",
+        descripcion: "Uno de los globos terráqueos se abre en dos mitades, como una tapa, y descubre un pequeño bar: un vaso de cristal tallado, lleno de bourbon, descansa entre botellitas diminutas.",
+        // Puntos de Acción que paga CADA jugador ("denegado" = no puede cogerlo)
+        costes: {
+            jugador1278: 1,           // WETHERBY
+            jugador2935: 1,           // BREWER
+            jugador3194: 1,           // CRANE
+            jugador4781: 1,           // NICHOLS
+            jugador5261: 1,           // PICKMAN
+            jugador6193: 1            // RICE
+        },
+        // Descripción normal del hotspot: se ve si ya se han llevado el objeto o si el jugador está denegado
+        info: {
+            titulo: "El telescopio y los globos",
+            texto: "Un telescopio de latón apunta, a través de una pared sin ventana, hacia un cielo que en ningún caso puede ser el de Arkham. A su lado, los globos terráqueos giran muy despacio, con rumor de rodamientos, mostrando continentes cuya costa no recordáis haber estudiado jamás. En uno de ellos, una región austral ha sido tachada con tanta saña que el papel se ha rasgado."
+        },
+        textoExito: "Has cogido el vaso de bourbon y lo guardas en tu inventario."
+    }
+};
+
+const AUDIO_CLICK = "audio/click.mp3";
+const AUDIO_CLING = "audio/cling.mp3";
+const AUDIO_NOPE = "audio/nope.mp3";
+const AUDIO_PICKUP = "audio/pickup.mp3";
+const AUDIO_PUERTA = "audio/opendoor.mp3";
+
+let jugadorActual = "JUGADOR";
+
+function nombreVisible(id) { return NOMBRES_JUGADORES[id] || id.toUpperCase(); }
+
+function actualizarIdentidadJugador() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const jugadorUrl = urlParams.get('jugador');
+    if (jugadorUrl) {
+        jugadorActual = jugadorUrl.trim();
+        localStorage.setItem('jugador_activo_global', jugadorActual);
+    } else {
+        jugadorActual = localStorage.getItem('jugador_activo_global') || "JUGADOR";
+    }
+    document.getElementById('identidadTexto').innerText = `IDENTIDAD: ${nombreVisible(jugadorActual)}`;
+    localStorage.setItem('jugador_nombre_real', nombreVisible(jugadorActual));
+    registrarUbicacion('biblioteca');
+}
+
+let ubicacionActual = '';
+function registrarUbicacion(sala) {
+    if (jugadorActual === "JUGADOR") return;
+    ubicacionActual = sala;
+    escribirUbicacionFirebase();
+}
+function escribirUbicacionFirebase() {
+    if (!ubicacionActual || jugadorActual === "JUGADOR") return;
+    if (typeof firebase === 'undefined' || !firebase.apps.length) return; // aún no está listo
+    const fichaRef = firebase.database().ref('jugadores/' + jugadorActual);
+    fichaRef.once('value').then(snap => {
+        if (snap.exists()) return fichaRef.child('ubicacion').set(ubicacionActual);
+    }).catch(err => console.error('Error al guardar la ubicación en Firebase:', err));
+}
+
+function sonar(archivo) {
+    if (!archivo) return;
+    new Audio(archivo).play().catch(e => {});
+}
+function playClick() { sonar(AUDIO_CLICK); }
+function sonarNope() { sonar(AUDIO_NOPE); }
+
+// =====================================================================
+// JUGADOR MUERTO (vida 0 en Firebase: jugadores/<id>/vida)
+// Un jugador muerto no puede coger objetos ni hacer nada con ellos. Solo puede mirar.
+// =====================================================================
+let vidaJugador = null;   // se mantiene al día en tiempo real (ver listener tras initializeApp)
+function estoyMuerto() {
+    if (vidaJugador === null || vidaJugador === undefined || vidaJugador === '') return false;
+    const n = Number(vidaJugador);
+    return isFinite(n) && n <= 0;
+}
+// Devuelve true (y avisa) si el jugador está muerto: la acción debe cancelarse.
+function bloquearSiMuerto() {
+    if (!estoyMuerto()) return false;
+    sonar('audio/muerto.mp3');
+    openModal("Has muerto", `<p style="color:var(--sangre)">Lo siento. Estás muerto. No puedes hacer nada.</p>${btnCerrar()}`);
+    return true;
+}
+
+
+
+
+
+// =====================================================================
+// CUENTA ATRÁS DE LA PUERTA AL ENTRAR EN LA SALA
+// ---------------------------------------------------------------------
+// USAR_CUENTA_ATRAS = true  -> cuenta atrás normal: 10 s con el cartel
+//                              "PUERTA CERRADA", suena cling.mp3 al final
+//                              y entonces aparece VOLVER AL PASILLO.
+// USAR_CUENTA_ATRAS = false -> SIN cuenta atrás: el botón VOLVER AL PASILLO
+//                              aparece al instante, sin sonido de cling.
+// Para volver a activarla en el futuro, cambia false por true.
+// =====================================================================
+const USAR_CUENTA_ATRAS = false;
+
+// Segundos que dura la cuenta atrás (solo se usa si USAR_CUENTA_ATRAS = true).
+let timeLeft = 10;
+
+const countdownEl = document.getElementById('countdown');
+const timerContainerEl = document.getElementById('timerContainer');
+const backBtnEl = document.getElementById('backBtn');
+
+if (USAR_CUENTA_ATRAS) {
+    // ---- MODO CON CUENTA ATRÁS (el comportamiento original) ----
+    const timerInterval = setInterval(() => {
+        timeLeft--;
+        if (timeLeft >= 0) countdownEl.innerText = "00:" + (timeLeft < 10 ? "0" : "") + timeLeft;
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            sonar(AUDIO_CLING);                       // mp3 del final de la cuenta atrás
+            timerContainerEl.style.display = 'none';  // oculta el cartel "PUERTA CERRADA"
+            backBtnEl.style.display = 'block';        // muestra VOLVER AL PASILLO
+        }
+    }, 1000);
+} else {
+    // ---- MODO SIN CUENTA ATRÁS ----
+    // No hay intervalo ni sonido de cling: se oculta el cartel y
+    // se muestra directamente el botón VOLVER AL PASILLO.
+    timerContainerEl.style.display = 'none';
+    backBtnEl.style.display = 'block';
+}
+
+
+
+
+
+function volverAlMapa(event) {
+    event.preventDefault();
+    if (typeof salirDeLaLlamada === 'function') salirDeLaLlamada(false);
+    sonar(AUDIO_PUERTA);
+    setTimeout(() => { window.location.href = `mapa_582.html?jugador=${encodeURIComponent(jugadorActual)}`; }, 1600);
+}
+
+function openModal(titulo, html) {
+    document.getElementById('modalContent').classList.remove('modal-ancho');   // el ancho extra solo lo usan los tomos
+    document.getElementById('modalTitle').innerText = titulo;
+    document.getElementById('modalBody').innerHTML = html;
+    document.getElementById('gameModal').style.display = 'flex';
+}
+let audioInfo = null;
+function pararAudioInfo() {
+    if (audioInfo) { audioInfo.pause(); audioInfo = null; }
+}
+function closeModal() {
+    pararAudioInfo();
+    pararLocura();
+    if (!tomoPendiente) pararSusurros();   // al cerrar un tomo siguen sonando hasta pulsar CONTINUAR en el aviso
+    document.getElementById('gameModal').style.display = 'none';
+    // Si se cerraba un tomo (botón CERRAR o la X), sale el aviso de la cordura perdida
+    if (tomoPendiente) { const pendiente = tomoPendiente; tomoPendiente = null; mostrarPerdidaTomo(pendiente); }
+}
+function btnCerrar(t) { return `<div class="fila-botones"><button class="drawer-btn" onclick="playClick(); closeModal()">${t || 'Cerrar'}</button></div>`; }
+function abrirInfo(t, txt, audio) {
+    pararAudioInfo();   // por si había otro sonando
+    openModal(t, `<p>${txt}</p>${btnCerrar()}`);
+    if (audio) { audioInfo = new Audio(audio); audioInfo.play().catch(e => {}); }
+}
+
+function showFullscreenImage(src) {
+    const viewer = document.getElementById('fullscreenViewer');
+    const img = document.getElementById('fullscreenImg');
+    img.style.display = 'block';
+    img.src = src;
+    viewer.style.display = 'flex';
+}
+function closeFullscreen() { document.getElementById('fullscreenViewer').style.display = 'none'; }
+
+// =====================================================================
+// TOMOS (hsTomo1, hsTomo2, hsTomo3)  →  abrirTomo('tomo1')
+// ---------------------------------------------------------------------
+// Pop-up con la imagen del libro abierto (alfabeto incomprensible). Al pulsar la
+// imagen se ve a pantalla completa. Editable: título, imagen y pie de cada tomo
+// (pon pie: "" para no mostrar ninguna frase).
+//
+// CORDURA: al pulsar un tomo el jugador pierde CORDURA_TOMO de cordura (jugadores/<jugador>/cordura
+// en Firebase, nunca baja de 0). Al darle a CERRAR (o a la X) sale el pop-up "¡ADVERTENCIA!" que
+// lo indica, igual que el de los sustos. TOMO_SOLO_UNA_VEZ = true → cada tomo solo resta cordura
+// la primera vez que lo abre ese jugador en esta visita (al salir de la sala y volver a entrar,
+// vuelve a restar). false → resta cada vez que se pulsa.
+// =====================================================================
+const CORDURA_TOMO = 2;
+const TOMO_SOLO_UNA_VEZ = false;
+const TITULO_TRAS_TOMO = "¡ADVERTENCIA!";
+const TEXTO_TRAS_TOMO = "Los signos se retuercen bajo vuestros párpados y algo en vuestra mente cede, como un hilo que se rompe. Por la lectura has perdido";   // + " 1 de cordura."
+const tomosVistos = {};      // tomos ya abiertos por este jugador en esta visita
+let tomoPendiente = null;    // promesa de la cordura descontada, a la espera de que cierre el pop-up
+const TOMOS = {
+    tomo1: {
+        titulo: "Tomo abierto",
+        imagen: "images/tomo1.jpg",
+        pie: "Las líneas de signos se ordenan en hileras que no pertenecen a alfabeto alguno de la Tierra. Cuanto más las miráis, más os parece que son ellas las que os leen."
+    },
+    tomo2: {
+        titulo: "Tomo abierto",
+        imagen: "images/tomo2.jpg",
+        pie: "Los caracteres se curvan como zarcillos sobre el papel amarillento. Os asalta la certeza de haber entendido una palabra, y de que no volveréis a recordarla."
+    },
+    tomo3: {
+        titulo: "Tomo abierto",
+        imagen: "images/tomo3.jpg",
+        pie: "Una escritura apretada, de trazo febril, cubre ambas páginas. Al apartar la vista, los signos siguen moviéndose un instante bajo vuestros párpados."
+    }
+};
+
+// Resta 'cantidad' a una estadística del jugador (nunca baja de 0). Devuelve { nuevo }.
+async function restarEstadistica(campo, cantidad) {
+    if (!jugadorActual || jugadorActual === "JUGADOR") throw new Error("Jugador no identificado.");
+    cantidad = Number(cantidad) || 0;
+    const ref = firebase.database().ref('jugadores/' + jugadorActual + '/' + campo);
+    const saldoLeido = Number((await ref.once('value')).val()) || 0;
+    const res = await ref.transaction(actual => {
+        const saldo = (actual === null) ? saldoLeido : (Number(actual) || 0);
+        return Math.max(0, saldo - cantidad);
+    });
+    return { nuevo: Number(res.snapshot.val()) || 0 };
+}
+
+// Pop-up de aviso tras cerrar el tomo (mismo estilo que el de pérdida de cordura por susto).
+function mostrarPerdidaTomo(promesa) {
+    const gc = document.getElementById('gameContainer'); gc.classList.remove('resaca'); void gc.offsetWidth; gc.classList.add('resaca');
+    openModal(TITULO_TRAS_TOMO, `<p style="color:var(--verdin)">Actualizando cordura...</p>`);
+    promesa
+        .then(res => {
+            let locura = "";
+            if (res.nuevo <= 0) {                    // cordura a 0
+                locura = "<br><br><span style='color:#ff3b30;font-weight:bold;font-size:1.2rem;'>Estás loco de atar</span>";
+            }
+            openModal(TITULO_TRAS_TOMO, `<p>${TEXTO_TRAS_TOMO} ${CORDURA_TOMO} de cordura.${locura}</p>${btnCerrar('Continuar')}`);
+        })
+        .catch(err => {
+            console.error("Error al descontar cordura:", err);
+            openModal("Error", `<p style="color:var(--sangre)">Error de conexión al actualizar la cordura.</p>${btnCerrar('Continuar')}`);
+        });
+}
+
+
+// =====================================================================
+// LOCURA DE LOS TOMOS (intensidad fija, no crece con el tiempo):
+// visión desdoblada + pie de texto corrupto + susurros. Al cerrar, la "resaca" de la sala.
+// =====================================================================
+const INTENSIDAD_LOCURA = 0.6;                   // 0 a 1: fuerza del efecto (siempre igual)
+const AUDIO_SUSURROS = "audio/susurros.mp3";     // opcional: si no existe, no pasa nada
+const VOLUMEN_SUSURROS = 0.4;
+const GLIFOS = "ᚠᚦᛉᛟᛞ҉Ѫ☥¤§ǂ";
+const INTRUSOS = ["NO APARTÉIS LA VISTA", "TODO DA VUELTAS", "MÁS CERCA", "ES POR AQUÍ", "RECORDADLO"];
+let locuraRAF = 0, audioLocura = null;
+function pararLocura() { cancelAnimationFrame(locuraRAF); locuraRAF = 0; }          // para el efecto visual
+function pararSusurros() { if (audioLocura) { audioLocura.pause(); audioLocura = null; } }
+function iniciarLocura() {
+    pararLocura(); pararSusurros();
+    const marco = document.querySelector('.tomo-marco'); if (!marco) return;
+    const gR = marco.querySelector('.tomo-ghost.r'), gC = marco.querySelector('.tomo-ghost.c');
+    const pie = document.querySelector('.tomo-pie'), orig = pie ? pie.textContent : '';
+    const i = INTENSIDAD_LOCURA * (matchMedia('(prefers-reduced-motion: reduce)').matches ? 0.3 : 1);
+    const t0 = performance.now(); let tTxt = 0, intruso = 0;
+    gR.style.opacity = gC.style.opacity = (0.1 + i * 0.7).toFixed(2);
+    try { audioLocura = new Audio(AUDIO_SUSURROS); audioLocura.loop = true; audioLocura.volume = VOLUMEN_SUSURROS; audioLocura.play().catch(() => {}); } catch (e) {}
+    const bucle = now => {
+        if (!marco.isConnected) { pararLocura(); return; }
+        const lat = (Math.sin((now - t0) / 1000 * 3) + 1) / 2;           // pulso suave, siempre de la misma amplitud
+        const d = i * 9 * (0.6 + lat * 0.8);
+        gR.style.transform = `translate(${-d}px, ${d * 0.4}px)`;
+        gC.style.transform = `translate(${d}px, ${-d * 0.4}px)`;
+        if (pie && now - tTxt > 150) {
+            tTxt = now;
+            if (now < intruso) { /* se mantiene el mensaje intruso */ }
+            else if (Math.random() < 0.03 * i) { intruso = now + 900; pie.textContent = INTRUSOS[Math.random() * INTRUSOS.length | 0]; pie.style.color = 'var(--sangre)'; }
+            else { pie.style.color = ''; pie.textContent = [...orig].map(c => (c !== ' ' && Math.random() < i * 0.1) ? GLIFOS[Math.random() * GLIFOS.length | 0] : c).join(''); }
+        }
+        locuraRAF = requestAnimationFrame(bucle);
+    };
+    locuraRAF = requestAnimationFrame(bucle);
+}
+
+function abrirTomo(clave) {
+    if (bloquearSiMuerto()) return;
+    const cfg = TOMOS[clave];
+    pararAudioInfo();
+    openModal(cfg.titulo, `
+        <div class="tomo-marco">
+            <div class="tomo-lienzo">
+                <img src="${cfg.imagen}" alt="${cfg.titulo}" onclick="playClick(); showFullscreenImage('${cfg.imagen}')">
+                <img class="tomo-ghost r" src="${cfg.imagen}" alt="">
+                <img class="tomo-ghost c" src="${cfg.imagen}" alt="">
+            </div>
+        </div>
+        <p class="tomo-ampliar">Pulsa la imagen para ampliarla</p>
+        ${cfg.pie ? `<p class="tomo-pie">${cfg.pie}</p>` : ''}
+        ${btnCerrar()}`);
+    document.getElementById('modalContent').classList.add('modal-ancho');
+    iniciarLocura();
+
+    // Pierde cordura al pulsar el tomo; el aviso sale cuando cierre el pop-up.
+    if (TOMO_SOLO_UNA_VEZ && tomosVistos[clave]) return;
+    tomosVistos[clave] = true;
+    tomoPendiente = restarEstadistica('cordura', CORDURA_TOMO);
+    tomoPendiente.catch(() => {});                   // evita avisos de promesa sin capturar; el error se muestra al cerrar
+}
+
+// =====================================================================
+// COSTE DE PA POR JUGADOR  +  "DENEGADO"
+// ---------------------------------------------------------------------
+// Cada objeto tiene una tabla "costes" con lo que paga CADA jugador:
+//   · un número  → Puntos de Acción que le cuesta cogerlo a ESE jugador
+//   · "denegado" → ese jugador no puede cogerlo
+//   · jugador que no aparezca en la tabla → también denegado
+// Si el objeto ya se lo llevaron, o el jugador está denegado, NO se avisa de nada:
+// se muestra la descripción normal del hotspot (cfg.info), igual que si no hubiese objeto.
+// =====================================================================
+function costeDe(tabla) {
+    const c = tabla ? tabla[jugadorActual] : undefined;
+    if (c === undefined || c === "denegado") return null;
+    const n = Number(c);
+    return (isFinite(n) && n >= 0) ? n : null;
+}
+
+// Descripción normal del hotspot (la de siempre): se usa cuando no hay objeto que coger.
+function mostrarDescripcion(cfg) {
+    abrirInfo(cfg.info.titulo, cfg.info.texto);
+}
+
+let recogidaActual = null;
+
+function accionRecoger(clave) {
+    if (bloquearSiMuerto()) return;
+    const cfg = OBJETOS[clave];
+
+    // Jugador denegado: ve solo la descripción del hotspot, sin pistas de que hay un objeto.
+    if (costeDe(cfg.costes) === null) { mostrarDescripcion(cfg); return; }
+
+    openModal(cfg.info.titulo, `<p style="color:var(--verdin)">Examinando...</p>`);
+
+    // Consulta en la base de datos correcta (logia-rol-vivo)
+    firebase.database().ref('localizaciones/' + SALA_ID + '/' + cfg.item).once('value')
+        .then(snapshot => {
+            const datos = snapshot.val();
+            if (datos && datos.disponible === false) {   // ya se lo han llevado
+                mostrarDescripcion(cfg);
+                return;
+            }
+
+            const coste = costeDe(cfg.costes);
+            recogidaActual = cfg;
+            openModal(cfg.titulo, `
+                <p>${cfg.descripcion}</p>
+                <img src="${cfg.imagen}" alt="${cfg.nombre}" class="drawer-img" onclick="playClick(); showFullscreenImage('${cfg.imagen}')">
+                <div class="cost-box">¿Deseas coger «${cfg.nombre}»?<br>Coste: ${coste} Punto de Acción</div>
+                <div class="fila-botones">
+                    <button class="drawer-btn" onclick="playClick(); procesarRecogidaFirebase('${cfg.item}')">Sí, coger</button>
+                    <button class="drawer-btn no" onclick="playClick(); closeModal()">No, dejar</button>
+                </div>
+            `);
+        })
+        .catch(err => {
+            console.error("Error leyendo Firebase:", err);
+            openModal("Error", `<p style="color:var(--sangre)">No se pudo conectar con Firebase.</p>${btnCerrar()}`);
+        });
+}
+
+function procesarRecogidaFirebase(itemKey) {
+    if (bloquearSiMuerto()) return;
+    const cfg = OBJETOS[itemKey];
+    const coste = costeDe(cfg.costes);
+    if (coste === null) { mostrarDescripcion(cfg); return; }   // por seguridad (denegado)
+    openModal(cfg.titulo, `<p style="color:var(--verdin)">Guardando objeto en tu inventario...</p>`);
+
+    // Los Puntos de Acción se cobran en Firebase (jugadores/<jugador>/puntos_accion).
+    const refPA = firebase.database().ref('jugadores/' + jugadorActual + '/puntos_accion');
+    const devolverPA = () => refPA.transaction(a => (Number(a) || 0) + coste);
+
+    refPA.once('value')
+        .then(snap => {
+            const pa = Number(snap.val()) || 0;
+            if (pa < coste) return { sinPA: true };
+            return refPA.transaction(actual => {
+                if (actual === null) return pa - coste;       // primera pasada (sin caché): el servidor la corrige
+                const saldo = Number(actual) || 0;
+                if (saldo < coste) return;                    // sin PA suficientes: se cancela
+                return saldo - coste;
+            }).then(res => ({ sinPA: !res.committed }));
+        })
+        .then(cobro => {
+            if (cobro.sinPA) {
+                sonarNope();
+                openModal(cfg.titulo, `<p style="color:var(--sangre)">No tienes suficientes Puntos de Acción.</p>${btnCerrar()}`);
+                return;
+            }
+
+            // PA ya cobrados en Firebase: en una sola escritura atómica el objeto pasa al inventario
+            // del jugador (inventarios/<jugador>/<objeto> = true, lo que ve inventario.html) y queda
+            // marcado como cogido en la sala (localizaciones/<SALA_ID>/<objeto>/disponible = false).
+            const actualizacion = {};
+            actualizacion['inventarios/' + jugadorActual + '/' + cfg.item] = true;
+            actualizacion['localizaciones/' + SALA_ID + '/' + cfg.item + '/disponible'] = false;
+
+            return firebase.database().ref().update(actualizacion)
+                .then(() => {
+                    sonar(AUDIO_PICKUP);
+                    openModal(cfg.titulo, `<p style="color:var(--brillo)">${cfg.textoExito}</p>${btnCerrar('Continuar')}`);
+                })
+                .catch(err => { devolverPA(); throw err; }); // si no se guarda, se devuelven los PA
+        })
+        .catch(err => {
+            console.error("Error de red:", err);
+            openModal("Error", `<p style="color:var(--sangre)">Error de conexión con el servidor.</p>${btnCerrar()}`);
+        });
+}
+
+actualizarIdentidadJugador();
+</script>
+
+<script>
+    const VIDEO_ROOM = "logia_sala_biblioteca";
+</script>
+
+<!-- CREDENCIALES DE FIREBASE CORREGIDAS (IGUALES A LAS DEL PANEL) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script>
+    firebase.initializeApp({
+        apiKey: "AIzaSyDBMQU4fRGw-BjfAx8dv84GmcHzA-1ncoY",
+        authDomain: "logia-rol-vivo.firebaseapp.com",
+        databaseURL: "https://logia-rol-vivo-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "logia-rol-vivo",
+        storageBucket: "logia-rol-vivo.firebasestorage.app",
+        messagingSenderId: "432574172065",
+        appId: "1:432574172065:web:0e1d93921e84f51cb099e0"
+    });
+    escribirUbicacionFirebase();
+
+    // Vida del jugador en tiempo real: si llega a 0 queda muerto; si la recupera, vuelve a poder actuar.
+    if (jugadorActual && jugadorActual !== "JUGADOR") {
+        firebase.database().ref('jugadores/' + jugadorActual + '/vida').on('value', snap => { vidaJugador = snap.val(); });
+    }
+</script>
+
+<script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
+<script src="webcams.js"></script>
+
+<script>
+    const SONIDO_LOCALIZACION = { archivo: 'audio/amb_biblioteca.mp3', volumen: 40, loop: true };
+</script>
+<script src="sonido_localizacion.js"></script>
+
+</body>
+</html>

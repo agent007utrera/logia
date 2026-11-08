@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Celdas</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cinzel+Decorative:wght@700&family=IM+Fell+English:ital@0;1&family=Special+Elite&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --negro:        #040806;
+    --bosque:       #0a1510;
+    --musgo:        #12261b;
+    --esmeralda:    #2f7d57;
+    --verdin:       #5fb98a;
+    --brillo:       #9bf0c0;
+    --laton:        #b49a55;
+    --laton-osc:    #6e5c2e;
+    --pergamino:    #d9d3b3;
+    --pergamino-osc:#a9a285;
+    --sangre:       #a8423a;
+    --fuente-titulo: 'Cinzel Decorative', 'Cinzel', Georgia, serif;
+    --fuente-sub:    'Cinzel', Georgia, serif;
+    --fuente-cuerpo: 'IM Fell English', Georgia, 'Times New Roman', serif;
+    --fuente-maquina:'Special Elite', 'Courier New', monospace;
+
+    --ratio-w: 16;
+    --ratio-h: 9;
+}
+
+body, html {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background-color: var(--negro);
+    background-image: radial-gradient(circle at 50% 40%, #0f2318 0%, #050a07 75%);
+    font-family: var(--fuente-cuerpo);
+    color: var(--pergamino);
+}
+* { box-sizing: border-box; }
+
+body::before {
+    content: "";
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 4999;
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.65) 100%);
+}
+body::after {
+    content: "";
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 5000;
+    opacity: 0.09;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+.layout-container {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 8px;
+    padding: 8px;
+    width: 100%;
+    height: 100%;
+}
+
+.room-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    background-color: #000;
+    border: 2px solid var(--laton-osc);
+    box-shadow: inset 0 0 0 3px #000, inset 0 0 0 4px var(--laton-osc), 0 0 30px rgba(47,125,87,0.18);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.game-container {
+    position: relative;
+    width: min(100%, calc((100vh - 28px) * var(--ratio-w) / var(--ratio-h)));
+    aspect-ratio: var(--ratio-w) / var(--ratio-h);
+    background: linear-gradient(135deg, #0c1a13 0%, #07110c 60%, #0c1a13 100%);
+}
+.game-image {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+.hotspot {
+    position: absolute;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+.hotspot:hover {
+    background-color: rgba(95, 185, 138, 0.38);
+    box-shadow: inset 0 0 22px rgba(155, 240, 192, 0.85);
+}
+
+#hsPuerta { top: 7.2%; left: 34.3%; width: 21.4%; height: 84.6%; clip-path: polygon(0.0% 0.0%, 95.9% 8.5%, 100.0% 82.3%, 8.6% 100.0%, 0.0% 91.5%); }
+#hsVentanuco { top: 24.5%; left: 40.8%; width: 9.7%; height: 15.2%; clip-path: polygon(0.0% 0.0%, 100.0% 23.1%, 98.5% 100.0%, 1.5% 95.7%); }
+#hsPlaca { top: 42.1%; left: 43.5%; width: 4.9%; height: 4.2%; clip-path: polygon(0.0% 0.0%, 100.0% 6.2%, 97.0% 100.0%, 3.0% 100.0%); }
+#hsCandado { top: 48.4%; left: 32.7%; width: 9.7%; height: 16.7%; clip-path: polygon(0.0% 0.0%, 100.0% 0.0%, 100.0% 41.4%, 75.8% 53.1%, 75.8% 100.0%, 50.8% 100.0%, 50.8% 53.1%, 0.0% 37.5%); }
+#hsCadena { top: 44.9%; left: 13.5%; width: 4.2%; height: 15.0%; clip-path: polygon(0.0% 0.0%, 100.0% 0.0%, 100.0% 100.0%, 0.0% 100.0%); }
+#hsCamastro { top: 50.5%; left: 19.3%; width: 10.6%; height: 20.4%; clip-path: polygon(0.0% 0.0%, 96.6% 2.5%, 100.0% 84.1%, 65.5% 100.0%, 3.4% 74.5%); }
+#hsFarol { top: 22.1%; left: 62.0%; width: 3.8%; height: 13.7%; clip-path: polygon(0.0% 0.0%, 90.4% 1.9%, 100.0% 71.4%, 51.9% 100.0%, 3.8% 95.2%); }
+#hsRejaFondo { top: 16.3%; left: 67.1%; width: 9.1%; height: 54.0%; clip-path: polygon(0.0% 6.0%, 37.9% 0.0%, 90.3% 16.9%, 100.0% 71.1%, 74.2% 89.2%, 1.6% 100.0%); }
+#hsCorredor { top: 13.0%; left: 78.4%; width: 11.2%; height: 51.4%; clip-path: polygon(0.0% 2.5%, 100.0% 0.0%, 100.0% 100.0%, 24.8% 93.7%, 0.0% 70.9%); }
+#hsLosas { top: 65.1%; left: 49.7%; width: 43.9%; height: 34.9%; clip-path: polygon(16.7% 56.0%, 60.0% 0.0%, 90.0% 22.4%, 100.0% 100.0%, 0.0% 100.0%); }
+#hsMuro { top: 0.0%; left: 89.3%; width: 10.7%; height: 91.1%; clip-path: polygon(3.4% 0.0%, 100.0% 0.0%, 100.0% 100.0%, 0.0% 98.6%); }
+
+.player-hud {
+    position: fixed; top: 15px; right: 20px;
+    background: rgba(5, 12, 8, 0.94);
+    border: 1px solid var(--laton);
+    outline: 1px solid var(--laton-osc); outline-offset: 2px;
+    color: var(--verdin); padding: 8px 16px;
+    font-family: var(--fuente-maquina); font-size: 0.9rem;
+    letter-spacing: 2px; z-index: 1500;
+    box-shadow: 0 0 14px rgba(47, 125, 87, 0.45); text-align: center;
+}
+
+#timerContainer {
+    position: fixed; top: 15px; left: 15px;
+    background: linear-gradient(135deg, #0a1510 0%, #12261b 100%);
+    color: var(--brillo); border: 1px solid var(--laton);
+    outline: 1px solid var(--laton-osc); outline-offset: 2px;
+    box-shadow: inset 0 0 10px rgba(95,185,138,0.2), 0 0 12px rgba(47,125,87,0.35);
+    padding: 8px 14px; font-family: var(--fuente-maquina);
+    font-size: 0.95rem; letter-spacing: 2px; z-index: 1500;
+}
+
+.back-btn {
+    display: none; position: fixed; top: 15px; left: 15px;
+    background: var(--musgo); color: var(--brillo);
+    border: 1px solid var(--laton); outline: 1px solid var(--laton-osc); outline-offset: 2px;
+    padding: 8px 14px; font-family: var(--fuente-sub); font-size: 0.8rem;
+    letter-spacing: 2px; text-decoration: none; z-index: 1500;
+}
+
+.video-sidebar {
+    background: rgba(4, 9, 6, 0.96);
+    border: 2px solid var(--laton-osc);
+    box-shadow: inset 0 0 0 3px #000, inset 0 0 0 4px var(--laton-osc), 0 0 15px rgba(0,0,0,0.8);
+    display: flex; flex-direction: column; overflow: hidden;
+    font-family: var(--fuente-maquina); border-radius: 3px;
+}
+.video-header {
+    padding: 12px 10px; background: linear-gradient(180deg, #0f2318, #08120d);
+    border-bottom: 1px solid var(--laton-osc); color: var(--laton);
+    font-family: var(--fuente-sub); font-size: 0.85rem; text-align: center; letter-spacing: 3px;
+}
+#video-grid { flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 10px; }
+.video-card { position: relative; width: 100%; aspect-ratio: 4 / 3; background: #000; border: 1px solid var(--laton-osc); overflow: hidden; }
+.video-card video { width: 100%; height: 100%; object-fit: cover; }
+.video-name {
+    position: absolute;
+    left: 5px; bottom: 5px;
+    max-width: calc(100% - 10px);
+    padding: 2px 7px;
+    background: rgba(4, 9, 6, 0.88);
+    color: var(--brillo);
+    font-size: 0.68rem;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    border: 1px solid rgba(180, 154, 85, 0.5);
+}
+.aforo-aviso {
+    color: var(--laton); font-family: var(--fuente-sub); font-size: 0.72rem; letter-spacing: 3px;
+    text-align: center; margin: 0; padding: 6px; border-top: 1px solid var(--laton-osc);
+    background: #060d09; display: flex; align-items: center; justify-content: space-between;
+}
+.aforo-aviso button { background: var(--musgo); border: 1px solid var(--laton-osc); color: var(--brillo); padding: 2px 8px; cursor: pointer; }
+.aforo-aviso button { position: relative; overflow: hidden; }
+.aforo-aviso button.off { background: #2a0e0b; border-color: var(--sangre); color: var(--sangre); }
+.aforo-aviso button.off::after {   /* tachón diagonal cuando está apagado */
+    content: ""; position: absolute; top: 50%; left: -20%;
+    width: 140%; height: 2px; background: var(--sangre);
+    transform: translateY(-50%) rotate(-45deg); pointer-events: none;
+}
+
+.modal {
+    display: none; position: fixed; inset: 0;
+    background: radial-gradient(circle at center, rgba(6,16,10,0.82), rgba(0,0,0,0.92));
+    backdrop-filter: blur(2px); z-index: 1000; justify-content: center; align-items: center;
+}
+.modal-content {
+    position: relative; width: 90%; max-width: 470px; max-height: 82vh; overflow-y: auto;
+    padding: 30px; background: linear-gradient(180deg, #14291d 0%, #0b1710 100%);
+    border: 2px solid var(--laton); box-shadow: 0 0 0 4px #000, 0 0 0 5px var(--laton-osc), 0 10px 40px rgba(0,0,0,0.9);
+}
+.modal-content h3 { margin: 0; font-family: var(--fuente-titulo); font-size: 1.3rem; text-align: center; color: var(--verdin); }
+.modal-content p { line-height: 1.65; color: var(--pergamino); text-align: center; }
+.close-btn { position: absolute; top: 12px; right: 18px; font-size: 1.7rem; color: var(--laton); background: none; border: none; cursor: pointer; }
+
+.drawer-img { display: block; margin: 14px auto 6px; width: 70%; max-height: 180px; object-fit: contain; border: 1px solid var(--laton); cursor: zoom-in; }
+.fila-botones { display: flex; gap: 12px; justify-content: center; margin-top: 18px; }
+.drawer-btn { background: #1c3d2b; color: var(--brillo); border: 1px solid var(--laton); padding: 9px 20px; font-family: var(--fuente-sub); cursor: pointer; }
+.drawer-btn.no { background: #3a1613; border-color: var(--sangre); color: #e9a29b; }
+.cost-box { margin: 14px 0 4px; padding: 9px; border: 1px dashed var(--laton-osc); background: rgba(47,125,87,0.1); text-align: center; color: var(--brillo); font-family: var(--fuente-maquina); }
+
+#fullscreenViewer { display: none; position: fixed; inset: 0; background-color: rgba(0,0,0,0.96); z-index: 3000; justify-content: center; align-items: center; }
+#fullscreenViewer img { max-width: 92%; max-height: 92%; object-fit: contain; border: 1px solid var(--laton-osc); }
+/* SUSTO: el vídeo rellena TODA la zona de juego (sin franjas negras); no tapa la columna de webcams */
+#sustoOverlay { display: none; position: absolute; inset: 0; z-index: 50; background: #000; overflow: hidden; }
+/* El vídeo cubre toda la capa SIN franjas ni deformarse: se recorta por los lados izquierdo y derecho si es más alargado */
+#sustoOverlay video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; object-position: center; transform-origin: center center; display: block; }
+/* Mientras suena el susto se ocultan HUD y botón de volver, para que no se pueda escapar */
+body.susto-activo .player-hud, body.susto-activo .back-btn, body.susto-activo #timerContainer { visibility: hidden; }
+</style>
+</head>
+
+<body>
+
+<div class="player-hud" id="playerHud">
+    <div id="identidadTexto">IDENTIDAD: CARGANDO...</div>
+    <div id="video-status-hud" style="font-size:0.7rem;color:var(--pergamino-osc);margin-top:4px;letter-spacing:1px;">Conectando...</div>
+</div>
+
+<div id="timerContainer">PUERTA CERRADA: <span id="countdown">00:10</span></div>
+<a href="#" id="backBtn" class="back-btn" onclick="playClick(); volverAlMapa(event)">IR AL PASILLO</a>
+
+<div class="layout-container">
+    <div class="room-section">
+    <div class="game-container" id="gameContainer">
+        <video src="images/sala_celdas.mp4" class="game-image" autoplay muted loop playsinline preload="auto" aria-label="Calabozos de la Logia"></video>
+
+        <!-- HOTSPOTS (los marcados como OBJETO RECOGIBLE dan un objeto; el resto solo describen) -->
+        <!-- Puerta de la celda -->
+        <div class="hotspot" id="hsPuerta" data-etiqueta="Puerta de la celda" onclick="playClick(); abrirInfo('La puerta de la celda', 'La puerta de roble, reforzada con flejes de hierro devorados por el óxido, está cerrada desde fuera. Y sin embargo la madera ha sido arañada desde dentro: surcos largos y profundos, agrupados de tres en tres, que a medida que ascienden por las tablas se hacen más desesperados y menos humanos. Algunas uñas, o lo que hayan sido, siguen incrustadas en la veta. Al apoyar el oído oís un lento rasgueo, como de alguien que contase algo contra la madera.')"></div>
+
+        <!-- Ventanuco -->
+        <div class="hotspot" id="hsVentanuco" data-etiqueta="Ventanuco" onclick="playClick(); abrirInfo('El ventanuco', 'Por el ventanuco enrejado solo se ve una oscuridad compacta, más espesa que la de la propia celda. No sentís una corriente de aire, sino un tibio vaho, como si algo hubiera estado respirando al otro lado hasta hace un segundo. Retiráis el rostro justo a tiempo: sobre los barrotes brilla un reguero húmedo y filamentoso, a la altura exacta de vuestros ojos.')"></div>
+
+        <!-- Placa de la celda -->
+        <div class="hotspot" id="hsPlaca" data-etiqueta="Placa de la celda" onclick="playClick(); abrirInfo('La placa', 'Una placa de latón ennegrecida, atornillada con torpeza: <i>CELL 3</i>. No hay nombre ni fecha, solo el número, con la fría pulcritud de los reglamentos. Alguien ha rascado el metal para borrar algo que había debajo, y no lo ha logrado del todo: bajo la cifra asoman unos trazos que, vistos de soslayo, parecen decir otra cosa, y que dejan de decirla en cuanto los miráis de frente.')"></div>
+
+        <!-- Cerrojo y candado -->
+        <div class="hotspot" id="hsCandado" data-etiqueta="Cerrojo y candado" onclick="playClick(); abrirInfo('El cerrojo y el candado', 'Un cerrojo macizo y un candado de hierro, negros de óxido, aseguran la puerta. No parecen haber sido forzados ni abiertos jamás: hay telarañas en el ojo de la cerradura. Y sin embargo la superficie del metal está cubierta de huellas diminutas y recientes, de dedos demasiado largos y delgados, que parecen haberlo tanteado durante toda la noche.')"></div>
+
+        <!-- Cadena -->
+        <div class="hotspot" id="hsCadena" data-etiqueta="Cadena" onclick="playClick(); abrirInfo('La cadena', 'Una cadena cuelga de la pared de la celda, hundida en la mampostería por una argolla del tamaño de una muñeca. Los eslabones están pulidos por el uso, y el último se halla roto, no cortado ni limado, sino reventado hacia fuera, como por una fuerza que quería salir. En el muro, debajo, alguien ha escrito con un dedo sobre la humedad una palabra que se va borrando a medida que la leéis.')"></div>
+
+        <!-- Camastro · OBJETO RECOGIBLE: Cargador para pistola -->
+        <div class="hotspot" id="hsCamastro" data-etiqueta="Camastro" onclick="playClick(); accionRecoger('cargador_pistola1')"></div>
+
+        <!-- Farol de aceite -->
+        <div class="hotspot" id="hsFarol" data-etiqueta="Farol de aceite" onclick="playClick(); abrirInfo('El farol de aceite', 'El farol, colgado de una escuadra de hierro, es la única luz de este corredor, y parece saberlo: su llama se agita como si luchara contra una oscuridad que, cada vez que se aparta la vista, avanza un paso. Las sombras que arroja contra el muro no coinciden con vuestras siluetas, ni siquiera con la de la reja; y una de ellas, la más alta, no hace ningún gesto cuando vosotros los hacéis.')"></div>
+
+        <!-- Reja del fondo · OBJETO RECOGIBLE: Tazón de sopa -->
+        <div class="hotspot" id="hsRejaFondo" data-etiqueta="Reja del fondo" onclick="playClick(); accionRecoger('sopa')"></div>
+
+        <!-- Corredor oscuro · OBJETO RECOGIBLE: Pala -->
+        <div class="hotspot" id="hsCorredor" data-etiqueta="Corredor oscuro" onclick="playClick(); accionRecoger('pala')"></div>
+
+        <!-- Losas del suelo · SUSTO: vídeo a pantalla de juego + resta 2 de cordura -->
+        <div class="hotspot" id="hsLosas" data-etiqueta="Losas del suelo" onclick="playClick(); accionSusto('losas')"></div>
+
+        <!-- Muro húmedo -->
+        <div class="hotspot" id="hsMuro" data-etiqueta="Muro húmedo" onclick="playClick(); abrirInfo('El muro húmedo', 'El muro de la derecha rezuma. Un líquido espeso y negruzco desciende por la piedra, a veces en hilos, a veces en láminas, y acumula en las grietas una pátina irisada, de un verde que no es de moho. Al tocarlo, la humedad se os pega a los dedos y tarda en secarse; y durante todo ese rato os parece que el muro, muy despacio, os devuelve el tacto.')"></div>
+    </div>
+
+    <!-- CAPA DEL SUSTO: cubre toda la zona de juego (todo el recuadro negro, sin franjas), no las webcams -->
+    <div id="sustoOverlay"><video id="sustoVideo" src="" playsinline></video></div>
+    </div>
+
+    <aside class="video-sidebar">
+        <div class="video-header"><span id="video-status">Conectando...</span></div>
+        <div id="video-grid"></div>
+        <p class="aforo-aviso">
+            <button id="btnMic" onclick="toggleMicrofono()">🎤</button>
+            CELDAS
+            <button id="btnCam" onclick="toggleCamara()">📷</button>
+        </p>
+    </aside>
+</div>
+
+<div id="gameModal" class="modal">
+    <div class="modal-content" id="modalContent">
+        <button class="close-btn" onclick="playClick(); closeModal()">&times;</button>
+        <h3 id="modalTitle">Título</h3>
+        <div id="modalBody"><p id="modalText">Texto...</p></div>
+    </div>
+</div>
+
+<div id="fullscreenViewer" onclick="playClick(); closeFullscreen()">
+    <img id="fullscreenImg" src="" alt="Pantalla completa" style="display:none;">
+</div>
+
+<script>
+// Nombre de ESTA sala dentro de "localizaciones" en Firebase.
+// Tiene que coincidir con el que pongas en MAPA_SALA_OBJETOS de master_objetos.html.
+const SALA_ID = "sala_celdas";
+
+const NOMBRES_JUGADORES = {
+    jugador1278: "WETHERBY",
+    jugador2935: "BREWER",
+    jugador3194: "CRANE",
+    jugador4781: "NICHOLS",
+    jugador5261: "PICKMAN",
+    jugador6193: "RICE"
+};
+
+const OBJETOS = {
+    sopa: {
+        item: "sopa",
+        titulo: "Tazón de sopa",
+        nombre: "Tazón de sopa",
+        imagen: "images/sopa.jpg",
+        descripcion: "Sobre una repisa de ladrillo, entre los barrotes de la reja del fondo, alguien ha dejado un tazón de barro grabado con la luna y la estrella de la Logia, del que brota un vapor denso sobre un caldo espeso.",
+        // Puntos de Acción que paga CADA jugador ("denegado" = no puede cogerlo)
+        costes: {
+            jugador1278: 1,           	// WETHERBY
+            jugador2935: 1,           	// BREWER
+            jugador3194: 1,  		// CRANE
+            jugador4781: 1,           	// NICHOLS
+            jugador5261: 1,           	// PICKMAN
+            jugador6193: 1            	// RICE
+        },
+        // Descripción normal del hotspot: se ve si ya se han llevado el objeto o si el jugador está denegado
+        info: {
+            titulo: "La reja del fondo",
+            texto: "Más allá se alza otra puerta enrejada, bajo un arco de ladrillo cuya argamasa supura una salmuera tibia y verdosa. Entre los barrotes se adivina una celda gemela de la primera, con idéntico camastro, idéntica cadena e idéntica placa, mas dispuestos todos a la inversa, como los devolvería un espejo que hubiese olvidado vuestro rostro. Un perfume de algas muertas y de mareas que jamás tocaron estas costas se desliza entre los hierros, y os asalta la certeza, innombrable y helada, de que algo, en el fondo de aquella otra celda, acaba de apartar la mirada un instante antes de que alcéis los ojos."
+        },
+        textoExito: "Has cogido el tazón de sopa y lo guardas en tu inventario."
+    },
+
+    cargador_pistola1: {
+        item: "cargador_pistola1",
+        titulo: "Cargador para pistola",
+        nombre: "Cargador para pistola",
+        imagen: "images/cargador_pistola1.jpg",
+        descripcion: "Entre la paja del jergón, todavía tibia, asoma el brillo de un cargador de acero monohilera para pistola, con las balas dentro.",
+        // Puntos de Acción que paga CADA jugador ("denegado" = no puede cogerlo)
+        costes: {
+            jugador1278: 1,           // WETHERBY
+            jugador2935: 1,           // BREWER
+            jugador3194: 1,           // CRANE
+            jugador4781: 1,           // NICHOLS
+            jugador5261: 1,           // PICKMAN
+            jugador6193: 1            // RICE
+        },
+        // Descripción normal del hotspot: se ve si ya se han llevado el objeto o si el jugador está denegado
+        info: {
+            titulo: "El camastro",
+            texto: "Un camastro de tablas, con un jergón de paja y una manta raída que conserva el hueco de un cuerpo. La paja aún está tibia, y entre ella brillan escamas finas y translúcidas, como las de un pez abisal. Sobre el cabecero, en la madera, un conteo de rayas hechas con un clavo: son demasiadas para los días que la casa lleva abierta, y las últimas ya no son rayas, sino espirales."
+        },
+        textoExito: "Has sacado el cargador de entre la paja y lo guardas en tu inventario."
+    },
+
+    pala: {
+        item: "pala",
+        titulo: "Pala",
+        nombre: "Pala",
+        imagen: "images/pala.jpg",
+        descripcion: "En la penumbra del corredor, apoyada contra el muro, descansa una pala de hierro forjado y tosca madera, manchada de tierra.",
+        // Puntos de Acción que paga CADA jugador ("denegado" = no puede cogerlo)
+        costes: {
+            jugador1278: 1,           	// WETHERBY
+            jugador2935: 1,  		// BREWER
+            jugador3194: 1,           	// CRANE
+            jugador4781: 1,           	// NICHOLS
+            jugador5261: 1,           	// PICKMAN
+            jugador6193: 1            	// RICE
+        },
+        // Descripción normal del hotspot: se ve si ya se han llevado el objeto o si el jugador está denegado
+        info: {
+            titulo: "El corredor oscuro",
+            texto: "El corredor continúa, estrechándose, hasta una oscuridad que no refleja la luz del farol, sino que la bebe. De allí llega un goteo lento y un murmullo gutural, de muchas voces superpuestas, que parece formarse en la garganta antes que en la boca. A medida que lo escucháis, el pasillo parece alargarse, y las losas se hunden una pizca bajo vuestros pies, como las de un suelo hecho de algo vivo."
+        },
+        textoExito: "Has cogido la pala y la guardas en tu inventario."
+    }
+};
+
+// =====================================================================
+// SUSTOS   →   accionSusto('clave')
+// ---------------------------------------------------------------------
+// Vídeo sobre la pantalla de juego (no sobre las webcams) que NO se puede cerrar
+// mientras suena. Al acabar, sale el aviso y se resta cordura en Firebase
+// (jugadores/<jugador>/cordura). Cada jugador lo ve UNA vez por visita: si vuelve
+// a pulsarlo ve el pop-up "No pienso mirar ahí otra vez"; si sale de la sala y
+// entra de nuevo, vuelve a tener el susto.
+// Campos:
+//   video        → vídeo del susto (con sonido).
+//                  (se muestra con object-fit: cover: rellena la zona de juego y se recorta por los lados si hace falta).
+//   zoom         → acercamiento del vídeo; sirve para recortar franjas negras que vengan dentro del .mp4.
+//   cordura      → cuánta cordura pierde.
+//   titulo       → título del pop-up si vuelve a pulsarlo.
+//   textoYaVisto → frase del pop-up si el mismo jugador vuelve a pulsarlo en esta visita.
+//   textoOriginal→ (alternativa a textoYaVisto) descripción original del hotspot: es lo que ve
+//                  ese jugador cada vez que vuelve a pulsarlo tras haber visto el susto.
+//   tituloTras   → título del aviso tras el susto.
+//   textoTras    → mensaje tras el susto (se añade " N de cordura.").
+//   audioTras    → (opcional) sonido tras el susto;  loopAudioTras: true = en bucle.
+// =====================================================================
+const SUSTOS = {
+    losas: {
+        video: "videos/jumpscare_rat.mp4",
+        cordura: 2,
+        titulo: "Las losas",
+        // Tras ver el susto, las siguientes veces ESE jugador ve la descripción original del hotspot.
+        // (si quieres volver a la frase corta tipo "No pienso mirar ahí otra vez", usa textoYaVisto en vez de textoOriginal)
+        textoOriginal: "Grandes losas de piedra, desiguales, ennegrecidas por siglos de humedad. Entre las juntas se acumulan manchas oscuras y viscosas que alguien ha intentado fregar, sin éxito, con un cepillo cuyas cerdas aún yacen en los surcos. Las manchas trazan un arrastre, ancho como un cuerpo, que arranca a los pies de la celda 3 y se pierde en el corredor sin que las marcas permitan saber si lo que se arrastraba iba hacia dentro o hacia fuera.",
+        zoom: 1.3,   // acerca el vídeo para dejar fuera franjas negras que lleve el propio .mp4 (1 = sin zoom). Prueba con &zoom=1.5 en la dirección
+        tituloTras: "¡ADVERTENCIA!",
+        textoTras: "Una rata enorme surge de entre las juntas de las losas con un chillido que os hiela la sangre. Del susto has perdido"   // + " 2 de cordura."
+    }
+};
+
+const AUDIO_CLICK = "audio/click.mp3";
+const AUDIO_CLING = "audio/cling.mp3";
+const AUDIO_NOPE = "audio/nope.mp3";
+const AUDIO_PICKUP = "audio/pickup.mp3";
+const AUDIO_PUERTA = "audio/opendoor.mp3";
+
+let jugadorActual = "JUGADOR";
+
+function nombreVisible(id) { return NOMBRES_JUGADORES[id] || id.toUpperCase(); }
+
+function actualizarIdentidadJugador() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const jugadorUrl = urlParams.get('jugador');
+    if (jugadorUrl) {
+        jugadorActual = jugadorUrl.trim();
+        localStorage.setItem('jugador_activo_global', jugadorActual);
+    } else {
+        jugadorActual = localStorage.getItem('jugador_activo_global') || "JUGADOR";
+    }
+    document.getElementById('identidadTexto').innerText = `IDENTIDAD: ${nombreVisible(jugadorActual)}`;
+    localStorage.setItem('jugador_nombre_real', nombreVisible(jugadorActual));
+    registrarUbicacion('celdas');
+}
+
+let ubicacionActual = '';
+function registrarUbicacion(sala) {
+    if (jugadorActual === "JUGADOR") return;
+    ubicacionActual = sala;
+    escribirUbicacionFirebase();
+}
+function escribirUbicacionFirebase() {
+    if (!ubicacionActual || jugadorActual === "JUGADOR") return;
+    if (typeof firebase === 'undefined' || !firebase.apps.length) return; // aún no está listo
+    const fichaRef = firebase.database().ref('jugadores/' + jugadorActual);
+    fichaRef.once('value').then(snap => {
+        if (snap.exists()) return fichaRef.child('ubicacion').set(ubicacionActual);
+    }).catch(err => console.error('Error al guardar la ubicación en Firebase:', err));
+}
+
+function sonar(archivo) {
+    if (!archivo) return;
+    new Audio(archivo).play().catch(e => {});
+}
+function playClick() { sonar(AUDIO_CLICK); }
+function sonarNope() { sonar(AUDIO_NOPE); }
+
+// =====================================================================
+// JUGADOR MUERTO (vida 0 en Firebase: jugadores/<id>/vida)
+// Un jugador muerto no puede coger objetos ni hacer nada con ellos. Solo puede mirar.
+// =====================================================================
+let vidaJugador = null;   // se mantiene al día en tiempo real (ver listener tras initializeApp)
+function estoyMuerto() {
+    if (vidaJugador === null || vidaJugador === undefined || vidaJugador === '') return false;
+    const n = Number(vidaJugador);
+    return isFinite(n) && n <= 0;
+}
+// Devuelve true (y avisa) si el jugador está muerto: la acción debe cancelarse.
+function bloquearSiMuerto() {
+    if (!estoyMuerto()) return false;
+    sonar('audio/muerto.mp3');
+    openModal("Has muerto", `<p style="color:var(--sangre)">Lo siento. Estás muerto. No puedes hacer nada.</p>${btnCerrar()}`);
+    return true;
+}
+
+
+
+
+
+// =====================================================================
+// CUENTA ATRÁS DE LA PUERTA AL ENTRAR EN LA SALA
+// ---------------------------------------------------------------------
+// USAR_CUENTA_ATRAS = true  -> cuenta atrás normal: 10 s con el cartel
+//                              "PUERTA CERRADA", suena cling.mp3 al final
+//                              y entonces aparece VOLVER AL PASILLO.
+// USAR_CUENTA_ATRAS = false -> SIN cuenta atrás: el botón VOLVER AL PASILLO
+//                              aparece al instante, sin sonido de cling.
+// Para volver a activarla en el futuro, cambia false por true.
+// =====================================================================
+const USAR_CUENTA_ATRAS = false;
+
+// Segundos que dura la cuenta atrás (solo se usa si USAR_CUENTA_ATRAS = true).
+let timeLeft = 10;
+
+const countdownEl = document.getElementById('countdown');
+const timerContainerEl = document.getElementById('timerContainer');
+const backBtnEl = document.getElementById('backBtn');
+
+if (USAR_CUENTA_ATRAS) {
+    // ---- MODO CON CUENTA ATRÁS (el comportamiento original) ----
+    const timerInterval = setInterval(() => {
+        timeLeft--;
+        if (timeLeft >= 0) countdownEl.innerText = "00:" + (timeLeft < 10 ? "0" : "") + timeLeft;
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            sonar(AUDIO_CLING);                       // mp3 del final de la cuenta atrás
+            timerContainerEl.style.display = 'none';  // oculta el cartel "PUERTA CERRADA"
+            backBtnEl.style.display = 'block';        // muestra VOLVER AL PASILLO
+        }
+    }, 1000);
+} else {
+    // ---- MODO SIN CUENTA ATRÁS ----
+    // No hay intervalo ni sonido de cling: se oculta el cartel y
+    // se muestra directamente el botón VOLVER AL PASILLO.
+    timerContainerEl.style.display = 'none';
+    backBtnEl.style.display = 'block';
+}
+
+
+
+
+
+function volverAlMapa(event) {
+    event.preventDefault();
+    if (typeof salirDeLaLlamada === 'function') salirDeLaLlamada(false);
+    sonar(AUDIO_PUERTA);
+    setTimeout(() => { window.location.href = `mapa_582.html?jugador=${encodeURIComponent(jugadorActual)}`; }, 1600);
+}
+
+function openModal(titulo, html) {
+    document.getElementById('modalTitle').innerText = titulo;
+    document.getElementById('modalBody').innerHTML = html;
+    document.getElementById('gameModal').style.display = 'flex';
+}
+let audioInfo = null;
+function pararAudioInfo() {
+    if (audioInfo) { audioInfo.pause(); audioInfo = null; }
+}
+function closeModal() {
+    pararAudioInfo();
+    document.getElementById('gameModal').style.display = 'none';
+}
+function btnCerrar(t) { return `<div class="fila-botones"><button class="drawer-btn" onclick="playClick(); closeModal()">${t || 'Cerrar'}</button></div>`; }
+function abrirInfo(t, txt, audio) {
+    pararAudioInfo();   // por si había otro sonando
+    openModal(t, `<p>${txt}</p>${btnCerrar()}`);
+    if (audio) { audioInfo = new Audio(audio); audioInfo.play().catch(e => {}); }
+}
+
+function showFullscreenImage(src) {
+    const viewer = document.getElementById('fullscreenViewer');
+    const img = document.getElementById('fullscreenImg');
+    img.style.display = 'block';
+    img.src = src;
+    viewer.style.display = 'flex';
+}
+function closeFullscreen() { document.getElementById('fullscreenViewer').style.display = 'none'; }
+
+// =====================================================================
+// COSTE DE PA POR JUGADOR  +  "DENEGADO"
+// ---------------------------------------------------------------------
+// Cada objeto tiene una tabla "costes" con lo que paga CADA jugador:
+//   · un número  → Puntos de Acción que le cuesta cogerlo a ESE jugador
+//   · "denegado" → ese jugador no puede cogerlo
+//   · jugador que no aparezca en la tabla → también denegado
+// Si el objeto ya se lo llevaron, o el jugador está denegado, NO se avisa de nada:
+// se muestra la descripción normal del hotspot (cfg.info), igual que si no hubiese objeto.
+// =====================================================================
+function costeDe(tabla) {
+    const c = tabla ? tabla[jugadorActual] : undefined;
+    if (c === undefined || c === "denegado") return null;
+    const n = Number(c);
+    return (isFinite(n) && n >= 0) ? n : null;
+}
+
+// Descripción normal del hotspot (la de siempre): se usa cuando no hay objeto que coger.
+function mostrarDescripcion(cfg) {
+    abrirInfo(cfg.info.titulo, cfg.info.texto);
+}
+
+let recogidaActual = null;
+
+function accionRecoger(clave) {
+    if (bloquearSiMuerto()) return;
+    const cfg = OBJETOS[clave];
+
+    // Jugador denegado: ve solo la descripción del hotspot, sin pistas de que hay un objeto.
+    if (costeDe(cfg.costes) === null) { mostrarDescripcion(cfg); return; }
+
+    openModal(cfg.info.titulo, `<p style="color:var(--verdin)">Examinando...</p>`);
+
+    // Consulta en la base de datos correcta (logia-rol-vivo)
+    firebase.database().ref('localizaciones/' + SALA_ID + '/' + cfg.item).once('value')
+        .then(snapshot => {
+            const datos = snapshot.val();
+            if (datos && datos.disponible === false) {   // ya se lo han llevado
+                mostrarDescripcion(cfg);
+                return;
+            }
+
+            const coste = costeDe(cfg.costes);
+            recogidaActual = cfg;
+            openModal(cfg.titulo, `
+                <p>${cfg.descripcion}</p>
+                <img src="${cfg.imagen}" alt="${cfg.nombre}" class="drawer-img" onclick="playClick(); showFullscreenImage('${cfg.imagen}')">
+                <div class="cost-box">¿Deseas coger «${cfg.nombre}»?<br>Coste: ${coste} Punto de Acción</div>
+                <div class="fila-botones">
+                    <button class="drawer-btn" onclick="playClick(); procesarRecogidaFirebase('${cfg.item}')">Sí, coger</button>
+                    <button class="drawer-btn no" onclick="playClick(); closeModal()">No, dejar</button>
+                </div>
+            `);
+        })
+        .catch(err => {
+            console.error("Error leyendo Firebase:", err);
+            openModal("Error", `<p style="color:var(--sangre)">No se pudo conectar con Firebase.</p>${btnCerrar()}`);
+        });
+}
+
+function procesarRecogidaFirebase(itemKey) {
+    if (bloquearSiMuerto()) return;
+    const cfg = OBJETOS[itemKey];
+    const coste = costeDe(cfg.costes);
+    if (coste === null) { mostrarDescripcion(cfg); return; }   // por seguridad (denegado)
+    openModal(cfg.titulo, `<p style="color:var(--verdin)">Guardando objeto en tu inventario...</p>`);
+
+    // Los Puntos de Acción se cobran en Firebase (jugadores/<jugador>/puntos_accion).
+    const refPA = firebase.database().ref('jugadores/' + jugadorActual + '/puntos_accion');
+    const devolverPA = () => refPA.transaction(a => (Number(a) || 0) + coste);
+
+    refPA.once('value')
+        .then(snap => {
+            const pa = Number(snap.val()) || 0;
+            if (pa < coste) return { sinPA: true };
+            return refPA.transaction(actual => {
+                if (actual === null) return pa - coste;       // primera pasada (sin caché): el servidor la corrige
+                const saldo = Number(actual) || 0;
+                if (saldo < coste) return;                    // sin PA suficientes: se cancela
+                return saldo - coste;
+            }).then(res => ({ sinPA: !res.committed }));
+        })
+        .then(cobro => {
+            if (cobro.sinPA) {
+                sonarNope();
+                openModal(cfg.titulo, `<p style="color:var(--sangre)">No tienes suficientes Puntos de Acción.</p>${btnCerrar()}`);
+                return;
+            }
+
+            // PA ya cobrados en Firebase: en una sola escritura atómica el objeto pasa al inventario
+            // del jugador (inventarios/<jugador>/<objeto> = true, lo que ve inventario.html) y queda
+            // marcado como cogido en la sala (localizaciones/<SALA_ID>/<objeto>/disponible = false).
+            const actualizacion = {};
+            actualizacion['inventarios/' + jugadorActual + '/' + cfg.item] = true;
+            actualizacion['localizaciones/' + SALA_ID + '/' + cfg.item + '/disponible'] = false;
+
+            return firebase.database().ref().update(actualizacion)
+                .then(() => {
+                    sonar(AUDIO_PICKUP);
+                    openModal(cfg.titulo, `<p style="color:var(--brillo)">${cfg.textoExito}</p>${btnCerrar('Continuar')}`);
+                })
+                .catch(err => { devolverPA(); throw err; }); // si no se guarda, se devuelven los PA
+        })
+        .catch(err => {
+            console.error("Error de red:", err);
+            openModal("Error", `<p style="color:var(--sangre)">Error de conexión con el servidor.</p>${btnCerrar()}`);
+        });
+}
+
+// =====================================================================
+// SUSTO: vídeo sobre la pantalla de juego + resta de cordura
+// =====================================================================
+const sustosVistos = {};   // qué sustos ya ha visto este jugador en esta visita
+
+// Resta 'cantidad' a una estadística del jugador (nunca baja de 0). Devuelve { nuevo }.
+async function restarEstadistica(campo, cantidad) {
+    if (!jugadorActual || jugadorActual === "JUGADOR") throw new Error("Jugador no identificado.");
+    cantidad = Number(cantidad) || 0;
+    const ref = firebase.database().ref('jugadores/' + jugadorActual + '/' + campo);
+    const saldoLeido = Number((await ref.once('value')).val()) || 0;
+    const res = await ref.transaction(actual => {
+        const saldo = (actual === null) ? saldoLeido : (Number(actual) || 0);
+        return Math.max(0, saldo - cantidad);
+    });
+    return { nuevo: Number(res.snapshot.val()) || 0 };
+}
+
+function accionSusto(clave) {
+    if (bloquearSiMuerto()) return;
+    const cfg = SUSTOS[clave];
+    if (sustosVistos[clave]) {                       // ya lo vio en esta visita → pop-up
+        if (cfg.textoOriginal) { abrirInfo(cfg.titulo, cfg.textoOriginal); return; }   // descripción original del hotspot
+        openModal(cfg.titulo, `<p style="font-style:italic;font-size:1.15rem;">${cfg.textoYaVisto}</p>${btnCerrar()}`);
+        return;
+    }
+    const capa  = document.getElementById('sustoOverlay');
+    const video = document.getElementById('sustoVideo');
+
+    document.body.classList.add('susto-activo');
+    capa.style.display = 'block';
+    // Zoom opcional (config o &zoom=1.5 en la dirección): recorta franjas negras que traiga el propio .mp4
+    let zoom = Number(new URLSearchParams(location.search).get('zoom')) || Number(cfg.zoom) || 1;
+    zoom = Math.max(1, Math.min(4, zoom));
+    video.style.transform = zoom > 1 ? 'scale(' + zoom + ')' : '';
+    video.src = cfg.video;
+
+    let terminado = false;
+    const fin = () => {                              // se ejecuta UNA vez cuando acaba (o falla) el vídeo
+        if (terminado) return;
+        terminado = true;
+        video.onended = null; video.onerror = null;
+        capa.style.display = 'none';
+        document.body.classList.remove('susto-activo');
+        video.removeAttribute('src'); video.load();
+        resolverSusto(clave);
+    };
+    video.onended = fin;
+    video.onerror = fin;                             // si el archivo no existe, no se queda atascado
+    video.play().catch(e => { console.log("Video error:", e); fin(); });
+}
+
+function resolverSusto(clave) {
+    const cfg = SUSTOS[clave];
+    sustosVistos[clave] = true;
+    if (cfg.audioTras) { const a = new Audio(cfg.audioTras); a.loop = !!cfg.loopAudioTras; a.play().catch(e => {}); }
+    openModal(cfg.tituloTras || "¡ADVERTENCIA!", `<p style="color:var(--verdin)">Actualizando cordura...</p>`);
+
+    restarEstadistica('cordura', cfg.cordura)
+        .then(res => {
+            let locura = "";
+            if (res.nuevo <= 0) {                    // cordura a 0
+                locura = "<br><br><span style='color:#ff3b30;font-weight:bold;font-size:1.2rem;'>Estás loco de atar</span>";
+            }
+            openModal(cfg.tituloTras || "¡ADVERTENCIA!", `<p>${cfg.textoTras} ${cfg.cordura} de cordura.${locura}</p>${btnCerrar('Continuar')}`);
+        })
+        .catch(err => {
+            console.error("Error al descontar cordura:", err);
+            openModal("Error", `<p style="color:var(--sangre)">Error de conexión al actualizar la cordura.</p>${btnCerrar('Continuar')}`);
+        });
+}
+
+actualizarIdentidadJugador();
+</script>
+
+<script>
+    const VIDEO_ROOM = "logia_sala_celdas";
+</script>
+
+<!-- CREDENCIALES DE FIREBASE CORREGIDAS (IGUALES A LAS DEL PANEL) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script>
+    firebase.initializeApp({
+        apiKey: "AIzaSyDBMQU4fRGw-BjfAx8dv84GmcHzA-1ncoY",
+        authDomain: "logia-rol-vivo.firebaseapp.com",
+        databaseURL: "https://logia-rol-vivo-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "logia-rol-vivo",
+        storageBucket: "logia-rol-vivo.firebasestorage.app",
+        messagingSenderId: "432574172065",
+        appId: "1:432574172065:web:0e1d93921e84f51cb099e0"
+    });
+    escribirUbicacionFirebase();
+
+    // Vida del jugador en tiempo real: si llega a 0 queda muerto; si la recupera, vuelve a poder actuar.
+    if (jugadorActual && jugadorActual !== "JUGADOR") {
+        firebase.database().ref('jugadores/' + jugadorActual + '/vida').on('value', snap => { vidaJugador = snap.val(); });
+    }
+</script>
+
+<script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
+<script src="webcams.js"></script>
+
+<script>
+    const SONIDO_LOCALIZACION = { archivo: 'audio/amb_celdas.mp3', volumen: 40, loop: true };
+</script>
+<script src="sonido_localizacion.js"></script>
+
+</body>
+</html>

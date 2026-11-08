@@ -1,0 +1,2128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salón</title>
+
+<!--
+╔══════════════════════════════════════════════════════════════════════════╗
+║  ASESINATO EN LA LOGIA DEL CREPÚSCULO DE PLATA                           ║
+║  PLANTILLA DE SALA  ·  copia este archivo para cada sala nueva           ║
+╠══════════════════════════════════════════════════════════════════════════╣
+║  CÓMO CREAR UNA SALA NUEVA (resumen rápido)                              ║
+║   1. Duplica este archivo:  sala_biblioteca.html, sala_cripta.html...    ║
+║   2. Cambia el vídeo de fondo (busca "VÍDEO DE FONDO").                  ║
+║   3. Cambia VIDEO_ROOM (cámaras) y SONIDO_LOCALIZACION (música ambiente).║
+║   4. Pega tus 3 URLs de Google Apps Script (ZONA DE CONFIGURACIÓN).      ║
+║   5. Activa el MODO DISEÑO (tecla D, o añade ?diseno=1 a la URL) para    ║
+║      ver todas las zonas y dibujar polígonos nuevos con el ratón.        ║
+║   6. Deja solo los hotspots que necesites y rellena sus configuraciones. ║
+║                                                                          ║
+║  TIPOS DE HOTSPOT INCLUIDOS (cada uno tiene su bloque en el HTML,        ║
+║  en el CSS de posición y en la ZONA DE CONFIGURACIÓN del script):        ║
+║   1. INFO ............ pop-up bonito con un texto                        ║
+║   2. IMAGEN .......... imagen / documento a pantalla completa            ║
+║   3. RECOGER ......... coger objeto → inventario (coste PA por jugador,  ║
+║                        y "denegado" para quien no puede)                 ║
+║   4. LLAVE ........... usar una llave para abrir algo y obtener objeto   ║
+║   5. ACTIVAR ......... usar un objeto para ACTIVAR algo (≈ gasolina)     ║
+║   6. SUSTO ........... vídeo de susto a pantalla completa + resta cordura║
+║   7. CÓDIGO .......... candado/caja con combinación (extra)              ║
+║   8. MINIJUEGO ....... abre otra página (iframe) y reacciona al ganar    ║
+║   9. SONIDO .......... reproduce/para un sonido al pulsar (extra)        ║
+║  10. ESTADO .......... texto distinto según algo esté activado o no      ║
+╚══════════════════════════════════════════════════════════════════════════╝
+-->
+
+<!-- ===== TIPOGRAFÍAS (Google Fonts) =====
+     Cinzel / Cinzel Decorative → títulos solemnes, estilo grabado de logia
+     IM Fell English            → cuerpo de texto, aspecto de imprenta antigua
+     Special Elite              → máquina de escribir de los años 20 (HUD, códigos) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cinzel+Decorative:wght@700&family=IM+Fell+English:ital@0;1&family=Special+Elite&display=swap" rel="stylesheet">
+
+<style>
+/* ==========================================================================
+   1. PALETA DE COLORES (variables)
+   Cambia aquí un color y cambia en TODA la sala.
+   ========================================================================== */
+:root {
+    --negro:        #040806;   /* fondo más profundo */
+    --bosque:       #0a1510;   /* fondo de paneles */
+    --musgo:        #12261b;   /* fondo de modales / botones */
+    --esmeralda:    #2f7d57;   /* verde principal (bordes, botones) */
+    --verdin:       #5fb98a;   /* verde claro (acentos, títulos) */
+    --brillo:       #9bf0c0;   /* verde brillante (brillos, hover) */
+    --laton:        #b49a55;   /* dorado envejecido (marcos) */
+    --laton-osc:    #6e5c2e;   /* dorado oscuro (marcos interiores) */
+    --pergamino:    #d9d3b3;   /* color del texto principal */
+    --pergamino-osc:#a9a285;   /* texto secundario */
+    --sangre:       #a8423a;   /* errores / peligro (rojo apagado) */
+    --fuente-titulo: 'Cinzel Decorative', 'Cinzel', Georgia, serif;
+    --fuente-sub:    'Cinzel', Georgia, serif;
+    --fuente-cuerpo: 'IM Fell English', Georgia, 'Times New Roman', serif;
+    --fuente-maquina:'Special Elite', 'Courier New', monospace;
+
+    /* Proporción del vídeo de fondo. Si tu vídeo no es 16:9, cámbialo
+       (por ejemplo 4 y 3). Los hotspots (en %) quedan siempre alineados. */
+    --ratio-w: 16;
+    --ratio-h: 9;
+}
+
+/* ==========================================================================
+   2. BASE DE LA PÁGINA
+   ========================================================================== */
+body, html {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background-color: var(--negro);
+    background-image: radial-gradient(circle at 50% 40%, #0f2318 0%, #050a07 75%);
+    font-family: var(--fuente-cuerpo);
+    color: var(--pergamino);
+}
+* { box-sizing: border-box; }
+
+/* Viñeta oscura en los bordes de la pantalla (ambiente de sótano/cripta) */
+body::before {
+    content: "";
+    position: fixed; inset: 0;
+    pointer-events: none;          /* no bloquea los clics */
+    z-index: 4999;
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.65) 100%);
+}
+/* Grano de película antigua (ruido sutil generado con un filtro SVG) */
+body::after {
+    content: "";
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 5000;
+    opacity: 0.09;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* ==========================================================================
+   3. DISPOSICIÓN: 2 columnas  [ sala | barra lateral de cámaras ]
+   ========================================================================== */
+.layout-container {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 8px;
+    padding: 8px;
+    width: 100%;
+    height: 100%;
+}
+
+/* Marco de la sala (columna izquierda) con doble filo de latón */
+.room-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    background-color: #000;
+    border: 2px solid var(--laton-osc);
+    box-shadow: inset 0 0 0 3px #000, inset 0 0 0 4px var(--laton-osc), 0 0 30px rgba(47,125,87,0.18);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+/* Contenedor del vídeo + hotspots. Su ancho se limita para que SIEMPRE quepa
+   en pantalla manteniendo la proporción (así los hotspots no se desplazan). */
+.game-container {
+    position: relative;
+    width: min(100%, calc((100vh - 28px) * var(--ratio-w) / var(--ratio-h)));
+    aspect-ratio: var(--ratio-w) / var(--ratio-h);
+    /* Fondo de relleno por si todavía no existe el vídeo (así ves la zona) */
+    background: linear-gradient(135deg, #0c1a13 0%, #07110c 60%, #0c1a13 100%);
+}
+.game-image {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+/* ==========================================================================
+   4. HOTSPOTS (zonas pulsables sobre el vídeo)
+   Son invisibles; al pasar el ratón se iluminan en verde espectral.
+   ========================================================================== */
+.hotspot {
+    position: absolute;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+.hotspot:hover {
+    background-color: rgba(95, 185, 138, 0.38);
+    box-shadow: inset 0 0 22px rgba(155, 240, 192, 0.85);
+}
+
+/* ---------- POSICIONES DE LOS HOTSPOTS DE EJEMPLO ----------
+   Cada hotspot se coloca con porcentajes sobre el vídeo:
+     top / left     = esquina superior izquierda (% del alto / ancho)
+     width / height = tamaño (%)
+     clip-path      = (opcional) polígono para darle forma irregular.
+   TRUCO: usa el MODO DISEÑO (tecla D) para dibujar el polígono con clics;
+   te escribe este CSS ya hecho para copiar y pegar.
+   Estos 12 ejemplos están en una cuadrícula solo para que los veas todos. */
+
+/* ★ MESA CENTRAL → periódico (retócalo con el MODO DISEÑO: tecla D) */
+#hsPeriodico    { 
+    top: 65%;
+    left: 43%;
+    width: 19%;
+    height: 15%;
+    clip-path: polygon(58% 0%, 100% 16%, 100% 40%, 46% 100%, 1% 81%, 0% 46%);
+}
+
+#hsInvitacion {
+    top: 45%;
+    left: 90%;
+    width: 8%;
+    height: 9%;
+    clip-path: polygon(0% 88%, 17% 0%, 100% 4%, 82% 100%);
+}
+
+#hsGramola {
+    top: 42%;
+    left: 72%;
+    width: 6%;
+    height: 16%;
+    clip-path: polygon(49% 0%, 72% 10%, 73% 28%, 89% 35%, 100% 46%, 97% 66%, 93% 80%, 97% 98%, 76% 100%, 54% 100%, 14% 98%, 0% 91%, 14% 72%, 8% 57%, 7% 33%, 15% 15%);
+}
+
+
+/* ==========================================================================
+   GRAMOLA (pop-up de encender / apagar)
+   ========================================================================== */
+.gramola-icono {
+    text-align: center;
+    font-size: 3.2rem;
+    line-height: 1;
+    margin: 2px 0 6px;
+    color: var(--laton);
+    text-shadow: 0 0 14px rgba(180,154,85,0.45);
+    transform-origin: 50% 80%;
+}
+.gramola-icono.sonando {
+    color: var(--brillo);
+    text-shadow: 0 0 16px rgba(155,240,192,0.7);
+    animation: gramolaBalanceo 1.6s ease-in-out infinite;
+}
+@keyframes gramolaBalanceo { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(7deg); } }
+@media (prefers-reduced-motion: reduce) { .gramola-icono.sonando { animation: none; } }
+.gramola-pregunta {
+    font-family: var(--fuente-sub);
+    font-size: 1.15rem !important;
+    letter-spacing: 1px;
+    color: var(--verdin) !important;
+    margin-top: 6px !important;
+}
+
+/* ==========================================================================
+   5. HUD (identidad del jugador, arriba a la derecha)
+   ========================================================================== */
+.player-hud {
+    position: fixed;
+    top: 15px; right: 20px;
+    background: rgba(5, 12, 8, 0.94);
+    border: 1px solid var(--laton);
+    outline: 1px solid var(--laton-osc);
+    outline-offset: 2px;
+    color: var(--verdin);
+    padding: 8px 16px;
+    font-family: var(--fuente-maquina);
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+    z-index: 1500;
+    box-shadow: 0 0 14px rgba(47, 125, 87, 0.45);
+    text-align: center;
+}
+
+/* Cuenta atrás inicial (arriba a la izquierda): al llegar a 0 aparece "Volver" */
+#timerContainer {
+    position: fixed;
+    top: 15px; left: 15px;
+    background: linear-gradient(135deg, #0a1510 0%, #12261b 100%);
+    color: var(--brillo);
+    border: 1px solid var(--laton);
+    outline: 1px solid var(--laton-osc);
+    outline-offset: 2px;
+    box-shadow: inset 0 0 10px rgba(95,185,138,0.2), 0 0 12px rgba(47,125,87,0.35);
+    padding: 8px 14px;
+    font-family: var(--fuente-maquina);
+    font-size: 0.95rem;
+    letter-spacing: 2px;
+    z-index: 1500;
+    text-shadow: 0 0 6px rgba(155,240,192,0.6);
+}
+
+/* Botón "Volver al vestíbulo" (aparece cuando termina la cuenta atrás) */
+.back-btn {
+    display: none;
+    position: fixed;
+    top: 15px; left: 15px;
+    background: var(--musgo);
+    color: var(--brillo);
+    border: 1px solid var(--laton);
+    outline: 1px solid var(--laton-osc);
+    outline-offset: 2px;
+    padding: 8px 14px;
+    font-family: var(--fuente-sub);
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    text-decoration: none;
+    z-index: 1500;
+    transition: background 0.3s, box-shadow 0.3s;
+}
+.back-btn:hover { background: var(--esmeralda); box-shadow: 0 0 14px rgba(155,240,192,0.5); }
+
+/* ==========================================================================
+   6. BARRA LATERAL DE CÁMARAS (webcams.js rellena #video-grid)
+   OJO: no cambies los id (video-grid, video-status, video-status-hud,
+   btnMic, btnCam) ni las clases video-card / video-name: webcams.js los usa.
+   ========================================================================== */
+.video-sidebar {
+    background: rgba(4, 9, 6, 0.96);
+    border: 2px solid var(--laton-osc);
+    box-shadow: inset 0 0 0 3px #000, inset 0 0 0 4px var(--laton-osc), 0 0 15px rgba(0,0,0,0.8);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: var(--fuente-maquina);
+    border-radius: 3px;
+}
+.video-header {
+    padding: 12px 10px;
+    background: linear-gradient(180deg, #0f2318, #08120d);
+    border-bottom: 1px solid var(--laton-osc);
+    color: var(--laton);
+    font-family: var(--fuente-sub);
+    font-size: 0.85rem;
+    text-align: center;
+    letter-spacing: 3px;
+}
+#video-status {
+    display: block;
+    margin-top: 4px;
+    color: var(--pergamino-osc);
+    font-family: var(--fuente-maquina);
+    font-size: 0.68rem;
+    letter-spacing: 1px;
+}
+#video-grid {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Crea exactamente 2 columnas iguales */
+    gap: 8px;                              /* Espacio de separación entre las webcams */
+    align-content: start;                  /* Alinea las filas hacia arriba ordenadamente */
+}
+
+.video-card {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3; /* Mantiene la proporción clásica de cámara */
+    background: #000;
+    border: 1px solid #1a3a5c;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.video-card video { width: 100%; height: 100%; display: block; object-fit: cover; }
+.video-name {
+    position: absolute;
+    left: 5px; bottom: 5px;
+    max-width: calc(100% - 10px);
+    padding: 2px 7px;
+    background: rgba(4, 9, 6, 0.88);
+    color: var(--brillo);
+    font-size: 0.68rem;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    border: 1px solid rgba(180, 154, 85, 0.5);
+}
+.video-card::before {          /* etiqueta en la esquina de cada cámara */
+    content: "◉ REC";
+    color: var(--sangre);
+    position: absolute;
+    top: 6px; right: 8px;
+    font-size: 0.62rem;
+    letter-spacing: 1px;
+    z-index: 2;
+}
+.aforo-aviso {              /* barra inferior con los botones de micro y cámara */
+    color: var(--laton);
+    font-family: var(--fuente-sub);
+    font-size: 0.72rem;
+    letter-spacing: 3px;
+    text-align: center;
+    margin: 0;
+    padding: 6px 6px;
+    border-top: 1px solid var(--laton-osc);
+    background: #060d09;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.aforo-aviso button {
+    background: var(--musgo);
+    border: 1px solid var(--laton-osc);
+    color: var(--brillo);
+    padding: 2px 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+}
+.aforo-aviso button.off { background: #2a0e0b; border-color: var(--sangre); color: var(--sangre); }
+.aforo-aviso button.off::after {   /* tachón diagonal cuando está apagado */
+    content: ""; position: absolute; top: 50%; left: -20%;
+    width: 140%; height: 2px; background: var(--sangre);
+    transform: translateY(-50%) rotate(-45deg); pointer-events: none;
+}
+
+/* ==========================================================================
+   7. POP-UP (modal) BONITO — el que usan casi todos los hotspots
+   Marco de latón con doble filo, esquinas ornamentadas y aparición suave.
+   ========================================================================== */
+.modal {
+    display: none;                       /* se muestra con JS (display:flex) */
+    position: fixed; inset: 0;
+    background: radial-gradient(circle at center, rgba(6,16,10,0.82), rgba(0,0,0,0.92));
+    backdrop-filter: blur(2px);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+.modal-content {
+    position: relative;
+    width: 90%;
+    max-width: 470px;
+    max-height: 82vh;
+    overflow-y: auto;
+    padding: 30px 30px 26px;
+    background:
+        radial-gradient(ellipse at top, rgba(47,125,87,0.16), transparent 60%),
+        linear-gradient(180deg, #14291d 0%, #0b1710 100%);
+    border: 2px solid var(--laton);
+    box-shadow: 0 0 0 4px #000, 0 0 0 5px var(--laton-osc), 0 10px 40px rgba(0,0,0,0.9), 0 0 40px rgba(47,125,87,0.25);
+    animation: aparecer 0.35s ease-out;
+    scrollbar-width: thin;
+    scrollbar-color: var(--esmeralda) transparent;
+}
+.modal-content::before {                /* filo interior fino */
+    content: ""; position: absolute; inset: 7px;
+    border: 1px solid var(--laton-osc);
+    pointer-events: none;
+}
+@keyframes aparecer {
+    from { opacity: 0; transform: translateY(14px) scale(0.96); }
+    to   { opacity: 1; transform: none; }
+}
+/* Esquinas ornamentadas (4 <span class="esq"> dentro del modal) */
+.esq { position: absolute; width: 18px; height: 18px; border: 2px solid var(--laton); pointer-events: none; }
+.esq.tl { top: 3px;    left: 3px;  border-right: none; border-bottom: none; }
+.esq.tr { top: 3px;    right: 3px; border-left: none;  border-bottom: none; }
+.esq.bl { bottom: 3px; left: 3px;  border-right: none; border-top: none; }
+.esq.br { bottom: 3px; right: 3px; border-left: none;  border-top: none; }
+
+.modal-content h3 {                      /* título del pop-up */
+    margin: 0;
+    padding-bottom: 6px;
+    font-family: var(--fuente-titulo);
+    font-size: 1.3rem;
+    letter-spacing: 2px;
+    text-align: center;
+    color: var(--verdin);
+    text-shadow: 0 0 10px rgba(95,185,138,0.55);
+}
+.divisor {                               /* línea decorativa  ───  ◆  ─── */
+    display: flex; align-items: center; justify-content: center;
+    gap: 10px; margin: 6px 0 16px;
+    color: var(--laton); font-size: 0.7rem;
+}
+.divisor::before, .divisor::after {
+    content: ""; height: 1px; width: 38%;
+    background: linear-gradient(90deg, transparent, var(--laton), transparent);
+}
+.modal-content p {
+    line-height: 1.65;
+    color: var(--pergamino);
+    font-size: 1.08rem;
+    text-align: center;
+    margin: 0 0 10px;
+}
+.close-btn {                             /* la X de cerrar */
+    position: absolute;
+    top: 12px; right: 18px;
+    font-family: var(--fuente-sub);
+    font-size: 1.7rem;
+    color: var(--laton);
+    cursor: pointer;
+    background: none; border: none;
+    z-index: 2;
+}
+.close-btn:hover { color: var(--brillo); text-shadow: 0 0 8px var(--brillo); }
+/* Mientras el servidor responde, se oculta la X (no se puede cerrar a medias) */
+.modal-content.cargando .close-btn { display: none; }
+
+/* Texto de "cargando" con puntos parpadeantes */
+.cargando-txt { color: var(--verdin) !important; font-style: italic; }
+.cargando-txt::after { content: " …"; animation: parpadeo 1.2s infinite; }
+@keyframes parpadeo { 50% { opacity: 0.2; } }
+
+/* Colores de mensajes dentro del pop-up */
+.msg-ok    { color: var(--brillo) !important; }
+.msg-error { color: var(--sangre) !important; }
+.msg-info  { color: var(--pergamino) !important; }
+.msg-sutil { color: var(--pergamino-osc) !important; font-size: 0.92rem !important; }
+
+/* Imagen dentro del pop-up (se amplía al pulsarla) */
+.drawer-img {
+    display: block;
+    margin: 14px auto 6px;
+    width: 100%;
+    max-height: 250px;
+    object-fit: contain;
+    border: 1px solid var(--laton);
+    box-shadow: 0 0 0 3px #000, 0 0 0 4px var(--laton-osc);
+    cursor: zoom-in;
+}
+
+/* Botones de los pop-ups */
+.fila-botones { display: flex; gap: 12px; justify-content: center; margin-top: 18px; flex-wrap: wrap; }
+.drawer-btn {
+    background: linear-gradient(180deg, #1c3d2b, #10261b);
+    color: var(--brillo);
+    border: 1px solid var(--laton);
+    padding: 9px 20px;
+    font-family: var(--fuente-sub);
+    font-size: 0.82rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.25s;
+}
+.drawer-btn:hover { background: var(--esmeralda); color: #fff; box-shadow: 0 0 14px rgba(155,240,192,0.5); }
+.drawer-btn.si { border-color: var(--verdin); }      /* botón de confirmar */
+.drawer-btn.no { border-color: var(--sangre); color: #e9a29b; background: linear-gradient(180deg, #3a1613, #240d0b); }
+.drawer-btn.no:hover { background: var(--sangre); color: #fff; }
+
+/* Caja que muestra el coste en Puntos de Acción */
+.cost-box {
+    margin: 14px 0 4px;
+    padding: 9px;
+    border: 1px dashed var(--laton-osc);
+    background: rgba(47,125,87,0.1);
+    text-align: center;
+    color: var(--brillo);
+    font-family: var(--fuente-maquina);
+    letter-spacing: 1px;
+}
+
+/* Campo de texto del hotspot CÓDIGO (máquina de escribir) */
+.code-input {
+    display: block;
+    width: 80%;
+    margin: 14px auto 6px;
+    padding: 10px;
+    background: #050b07;
+    border: 1px solid var(--laton);
+    color: var(--brillo);
+    font-family: var(--fuente-maquina);
+    font-size: 1.3rem;
+    text-align: center;
+    letter-spacing: 6px;
+}
+.code-input:focus { outline: none; box-shadow: 0 0 12px rgba(95,185,138,0.6); }
+.tiembla { animation: temblor 0.4s; }       /* sacudida cuando el código es erróneo */
+@keyframes temblor {
+    20% { transform: translateX(-8px); } 40% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); } 80% { transform: translateX(5px); }
+}
+
+/* ==========================================================================
+   8. VISOR A PANTALLA COMPLETA (imágenes y vídeo de susto)
+   ========================================================================== */
+#fullscreenViewer {
+    display: none;
+    position: fixed; inset: 0;
+    background-color: rgba(0, 0, 0, 0.96);
+    z-index: 3000;
+    cursor: pointer;
+    justify-content: center;
+    align-items: center;
+}
+#fullscreenViewer img   { max-width: 92%; max-height: 92%; object-fit: contain;
+                          border: 1px solid var(--laton-osc); box-shadow: 0 0 40px rgba(47,125,87,0.4); }
+#fullscreenViewer video { width: 100%; height: 100%; object-fit: cover; }   /* el susto ocupa TODA la pantalla */
+
+/* ==========================================================================
+   9. MINIJUEGO (iframe a pantalla completa) + confirmación de salida
+   ========================================================================== */
+.minigame-modal {
+    display: none;
+    position: fixed; inset: 0;
+    background: #000;
+    z-index: 2500;
+    justify-content: center; align-items: center;
+}
+.minigame-modal iframe { width: 100%; height: 100%; border: none; }
+.minigame-close-btn {
+    position: absolute; top: 12px; right: 18px;
+    z-index: 2600;
+    background: rgba(5,12,8,0.9);
+    color: var(--laton);
+    border: 1px solid var(--laton);
+    width: 40px; height: 40px;
+    font-size: 1.5rem; cursor: pointer;
+}
+.minigame-close-btn:hover { color: var(--brillo); }
+.minigame-confirm-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 2700;
+    justify-content: center; align-items: center;
+}
+.minigame-confirm-box {
+    background: var(--musgo);
+    border: 2px solid var(--laton);
+    box-shadow: 0 0 0 4px #000, 0 0 0 5px var(--laton-osc);
+    padding: 26px; max-width: 420px; width: 88%;
+    text-align: center;
+}
+
+/* ==========================================================================
+   10. MODO DISEÑO (solo para ti, al crear la sala)
+   Tecla D  ó  ?diseno=1 en la URL. Muestra todos los hotspots con su
+   etiqueta y permite dibujar polígonos con clics para sacar el CSS.
+   Los jugadores nunca lo ven si no conocen el truco; si quieres, borra
+   el bloque "MODO DISEÑO" del script al terminar.
+   ========================================================================== */
+body.modo-diseno .hotspot {
+    pointer-events: none;                           /* los clics pasan al lienzo */
+    background-color: rgba(95, 185, 138, 0.22);
+    outline: 1px dashed var(--brillo);
+}
+body.modo-diseno .hotspot::after {                   /* etiqueta con el tipo de hotspot */
+    content: attr(data-etiqueta);
+    position: absolute; left: 3px; top: 3px;
+    background: rgba(0,0,0,0.75);
+    color: var(--brillo);
+    font-family: var(--fuente-maquina);
+    font-size: 0.65rem;
+    padding: 1px 4px;
+    pointer-events: none;
+}
+body.modo-diseno .game-container { cursor: crosshair; }
+#disenoSvg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; display: none; z-index: 50; }
+body.modo-diseno #disenoSvg { display: block; }
+.diseno-punto {
+    position: absolute; width: 9px; height: 9px;
+    background: #ffcf5a; border: 1px solid #000; border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none; z-index: 51;
+}
+#panelDiseno {
+    display: none;
+    position: fixed; left: 12px; bottom: 12px;
+    width: 340px; z-index: 6000;
+    background: rgba(4, 9, 6, 0.96);
+    border: 1px solid var(--laton);
+    padding: 10px;
+    font-family: var(--fuente-maquina);
+    font-size: 0.72rem;
+    color: var(--brillo);
+}
+body.modo-diseno #panelDiseno { display: block; }
+#panelDiseno textarea {
+    width: 100%; height: 130px; margin: 6px 0;
+    background: #000; color: var(--pergamino);
+    border: 1px solid var(--laton-osc);
+    font-family: var(--fuente-maquina); font-size: 0.7rem;
+}
+#panelDiseno button {
+    background: var(--musgo); color: var(--brillo);
+    border: 1px solid var(--laton); padding: 3px 9px; cursor: pointer;
+    font-family: var(--fuente-maquina); font-size: 0.7rem;
+}
+
+/* Ajuste para pantallas pequeñas */
+@media (max-width: 700px) {
+    .player-hud   { right: 10px; top: 10px; font-size: 0.72rem; padding: 6px 9px; }
+    #timerContainer, .back-btn { left: 10px; top: 10px; font-size: 0.75rem; padding: 6px 9px; }
+}
+
+/* ==========================================================================
+   POP-UP DEL PERIÓDICO: imagen casi a pantalla completa con marco de latón.
+   Solo se cierra con la X de la esquina superior derecha del pop-up (o Esc).
+   ========================================================================== */
+#periodicoViewer {
+    display: none;
+    position: fixed; inset: 0;
+    z-index: 3200;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle at center, rgba(10,21,16,0.94) 0%, rgba(0,0,0,0.98) 100%);
+    backdrop-filter: blur(3px);
+}
+#periodicoViewer.abierto { display: flex; }
+.periodico-marco {
+    position: relative;
+    padding: 10px;
+    background: linear-gradient(160deg, var(--musgo), var(--bosque));
+    border: 2px solid var(--laton);
+    outline: 1px solid var(--laton-osc);
+    outline-offset: 4px;
+    border-radius: 3px;
+    box-shadow: 0 0 45px rgba(47,125,87,0.45), inset 0 0 20px rgba(0,0,0,0.6);
+    animation: periodicoEntra 0.45s ease-out;
+}
+.periodico-marco img {
+    display: block;
+    max-width: calc(100vw - 70px);
+    max-height: calc(100vh - 70px);
+    object-fit: contain;
+    border: 1px solid #000;
+}
+.periodico-cerrar {
+    position: absolute;
+    top: -16px; right: -16px;
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--negro);
+    border: 1px solid var(--laton);
+    border-radius: 50%;
+    color: var(--laton);
+    font-family: var(--fuente-sub);
+    font-size: 1.25rem; font-weight: bold; line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0,0,0,0.9);
+    z-index: 2;
+    transition: color 0.2s, box-shadow 0.2s;
+}
+.periodico-cerrar:hover { color: var(--brillo); box-shadow: 0 0 12px var(--brillo); }
+@keyframes periodicoEntra { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .periodico-marco { animation: none; } }
+</style>
+</head>
+
+<body>
+
+<!-- ======================================================================
+     HUD: nombre del jugador + estado de la videollamada (arriba a la derecha)
+     (webcams.js escribe en #video-status-hud)
+     ====================================================================== -->
+<div class="player-hud" id="playerHud">
+    <div id="identidadTexto">IDENTIDAD: CARGANDO...</div>
+    <div id="video-status-hud" style="font-size:0.7rem;color:var(--pergamino-osc);margin-top:4px;letter-spacing:1px;">Conectando...</div>
+</div>
+
+<!-- Cuenta atrás inicial: los jugadores deben quedarse 10 s en la sala.
+     Al llegar a 0 se oculta y aparece el botón de volver. -->
+<div id="timerContainer">PUERTA CERRADA: <span id="countdown">00:10</span></div>
+<a href="#" id="backBtn" class="back-btn" onclick="playClick(); volverAlMapa(event)">IR AL PASILLO</a>
+
+<!-- ======================================================================
+     CONTENEDOR MAESTRO: dos columnas (sala + barra lateral de cámaras)
+     ====================================================================== -->
+<div class="layout-container">
+
+    <!-- ================= COLUMNA IZQUIERDA: la sala y sus hotspots ================= -->
+    <div class="room-section">
+    <div class="game-container" id="gameContainer">
+
+        <!-- ★ VÍDEO DE FONDO ★
+             Cambia "images/sala_salon.mp4" por el vídeo de tu sala.
+             (autoplay + muted + loop + playsinline = se reproduce solo y en bucle) -->
+        <video src="images/sala_salon.mp4"
+               class="game-image"
+               autoplay muted loop playsinline preload="auto"
+               aria-label="Salón de la Logia"></video>
+
+        <!-- ★ LIENZO DEL MODO DISEÑO (dibuja el polígono que vas trazando) -->
+        <svg id="disenoSvg" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <polygon id="disenoPoligono" points="" fill="rgba(255,207,90,0.25)" stroke="#ffcf5a" stroke-width="2" vector-effect="non-scaling-stroke"/>
+        </svg>
+
+        <!-- ==================================================================
+             HOTSPOTS
+             Cada hotspot es un <div class="hotspot"> con:
+               id           → enlaza con su posición en el CSS (sección 4)
+               data-etiqueta→ texto que se ve SOLO en modo diseño
+               onclick      → "playClick()" (sonido) + la función de su tipo,
+                              con la CLAVE de su configuración (zona de
+                              configuración del script, más abajo).
+             ================================================================== -->
+
+        <!-- ★ MESA CENTRAL: abre el periódico (images/periodico.jpg) en un pop-up. -->
+        <div class="hotspot" id="hsPeriodico" data-etiqueta="PERIÓDICO"
+             onclick="playClick(); abrirPeriodico('images/periodico.jpg')"></div>
+
+        <div class="hotspot" id="hsInvitacion" data-etiqueta="INVITACIÓN"
+             onclick="playClick(); abrirPeriodico('images/invitacion.jpg')"></div>
+
+        <!-- ★ GRAMOLA: pop-up para encender/apagar. El estado se comparte por Firebase
+             con todos los jugadores de ESTA sala (ver script "GRAMOLA COMPARTIDA"). -->
+        <div class="hotspot" id="hsGramola" data-etiqueta="GRAMOLA"
+             onclick="playClick(); abrirGramola()"></div>
+
+    </div>
+    </div>
+
+    <!-- ================= COLUMNA DERECHA: barra lateral de cámaras ================= -->
+    <aside class="video-sidebar">
+        <div class="video-header">
+             #                                     <!-- ← nombre de la sala -->
+            <span id="video-status">Conectando...</span>
+        </div>
+        <div id="video-grid"></div>                    <!-- webcams.js pone aquí los vídeos -->
+        <p class="aforo-aviso">
+            <button id="btnMic" onclick="toggleMicrofono()">🎤</button>
+            SALÓN                                       <!-- ← nombre de la sala -->
+            <button id="btnCam" onclick="toggleCamara()">📷</button>
+        </p>
+    </aside>
+
+</div>
+
+<!-- ======================================================================
+     POP-UP GENÉRICO (lo reutilizan INFO, RECOGER, LLAVE, ACTIVAR, CÓDIGO...)
+     Su contenido se rellena por JS en #modalTitle y #modalBody.
+     ====================================================================== -->
+<div id="gameModal" class="modal">
+    <div class="modal-content" id="modalContent">
+        <!-- Esquinas ornamentales -->
+        <span class="esq tl"></span><span class="esq tr"></span>
+        <span class="esq bl"></span><span class="esq br"></span>
+
+        <button class="close-btn" onclick="playClick(); closeModal()">&times;</button>
+        <h3 id="modalTitle">Título</h3>
+        <div class="divisor"><span>◆</span></div>
+        <div id="modalBody">
+            <p id="modalText">Texto...</p>
+        </div>
+    </div>
+</div>
+
+<!-- VISOR A PANTALLA COMPLETA: sirve para imágenes (tipo 2) y para el vídeo de susto (tipo 6) -->
+<div id="fullscreenViewer" onclick="playClick(); closeFullscreen()">
+    <img id="fullscreenImg" src="" alt="Pantalla completa" style="display:none;">
+    <video id="fullscreenVideo" src="" playsinline style="display:none;"></video>
+</div>
+
+<!-- POP-UP DEL PERIÓDICO (hotspot de la mesa central) -->
+<div id="periodicoViewer" role="dialog" aria-modal="true" aria-label="Periódico">
+    <div class="periodico-marco">
+        <span class="periodico-cerrar" onclick="playClick(); cerrarPeriodico()" title="Cerrar">X</span>
+        <img id="periodicoImg" src="" alt="Periódico">
+    </div>
+</div>
+
+<!-- MINIJUEGO (tipo 8): iframe a pantalla completa + aviso al intentar salir -->
+<div id="minijuegoModal" class="minigame-modal">
+    <button class="minigame-close-btn" onclick="playClick(); solicitarSalirMinijuego()">&times;</button>
+    <iframe id="minijuegoFrame" src="" title="Minijuego"></iframe>
+</div>
+<div id="minijuegoConfirm" class="minigame-confirm-overlay">
+    <div class="minigame-confirm-box">
+        <p id="minijuegoConfirmTexto">¿Deseas abandonar? Si sales ahora, perderás el progreso.</p>
+        <div class="fila-botones">
+            <button class="drawer-btn no" onclick="playClick(); confirmarSalirMinijuego()">Sí, salir</button>
+            <button class="drawer-btn si" onclick="playClick(); cancelarSalirMinijuego()">No, continuar</button>
+        </div>
+    </div>
+</div>
+
+<!-- PANEL DEL MODO DISEÑO (solo visible con la tecla D / ?diseno=1) -->
+<div id="panelDiseno">
+    <b>MODO DISEÑO</b> — haz clic en la sala para trazar un polígono.<br>
+    Retroceso = quitar último punto · R = borrar todo · D = salir
+    <textarea id="disenoSalida" readonly placeholder="Aquí aparecerá el CSS del hotspot..."></textarea>
+    <button onclick="disenoCopiar()">Copiar CSS</button>
+    <button onclick="disenoReiniciar()">Borrar</button>
+</div>
+
+
+<!-- ==========================================================================
+     ★★★  SCRIPT PRINCIPAL  ★★★
+     Parte A: ZONA DE CONFIGURACIÓN  → aquí es donde TÚ editas cosas.
+     Parte B: MOTOR                  → la lógica; normalmente no se toca.
+     ========================================================================== -->
+<script>
+/* ##########################################################################
+   ##########################   PARTE A · CONFIGURACIÓN   ###################
+   ########################################################################## */
+
+// ---------------------------------------------------------------------------
+// A1 · URLs DE LOS GOOGLE APPS SCRIPTS
+// Cada una es la URL "/exec" de un despliegue (Aplicación web) de tu juego NUEVO.
+//   INVENTARIO      → hoja con los jugadores, sus PA, cordura y objetos.
+//   LOCALIZACIONES  → hoja que dice si un objeto sigue en su sitio ("yes") o
+//                     ya lo cogieron ("no"), para que nadie lo coja dos veces.
+//   ACTIVACIONES    → hoja con cosas activables ("yes"/"no"), p. ej. la lámpara.
+// ⚠ Pega aquí las de la Logia (NO las de Outpost 31, o escribirías en esas hojas).
+// ---------------------------------------------------------------------------
+const SCRIPT_INVENTARIO_URL      = "https://script.google.com/macros/s/AKfycbyFlw7NweduEa57nhJhGibvkWpVdluFKTJwgRBttp9HdXRNC9IazEld9OMD40V2uP7kPg/exec";
+const SCRIPT_LOCALIZACIONES_URL  = "https://script.google.com/macros/s/AKfycbwbAHuptDPb2POUQgcxhVK2z00vEBnvwVx9h6DjDW_ZGdzSbVLOs1eqZwNbDh_o3XtL/exec";
+const SCRIPT_ACTIVACIONES_URL    = "https://script.google.com/macros/s/AKfycbykm1ehNnO8QoekCMyWBF3NhfJX_66ratokSy2dvmHF2r-dv3kCu53utOqluZuy-rEH/exec";
+
+// ---------------------------------------------------------------------------
+// A2 · NOMBRES DE LOS JUGADORES
+// id interno (el que va en la URL ?jugador=...) → nombre que se ve en el HUD.
+// Los nombres de abajo son solo de ejemplo: cámbialos por los de tus personajes.
+// ---------------------------------------------------------------------------
+const NOMBRES_JUGADORES = {
+    jugador1278: "WETHERBY",
+    jugador2935: "BREWER",
+    jugador3194: "CRANE",
+    jugador4781: "NICHOLS",
+    jugador5261: "PICKMAN",
+    jugador6193: "RICE",
+    // jugador9 (el "denegado" de los ejemplos) no necesita nombre: se mostrará su id.
+};
+
+// ---------------------------------------------------------------------------
+// A3 · TABLAS DE COSTES (Puntos de Acción) POR JUGADOR
+// Cada acción tiene su tabla:  idJugador: coste.
+//   · un número  → lo que cuesta a ESE jugador (pueden ser todos distintos)
+//   · "denegado" → ese jugador NO puede hacerlo (verá un mensaje de rechazo)
+//   · jugador que no aparezca en la tabla → también denegado
+// Para ahorrar escribir, la función costesParaTodos(n, excepciones) crea una
+// tabla donde todos pagan n y las excepciones sobrescriben (ver ejemplos).
+// ---------------------------------------------------------------------------
+const TODOS_LOS_JUGADORES = [
+    "jugador1278", "jugador2935", "jugador3194", "jugador4781",
+    "jugador5261", "jugador6193"
+];
+function costesParaTodos(coste, excepciones) {
+    const tabla = {};
+    TODOS_LOS_JUGADORES.forEach(id => tabla[id] = coste);   // todos pagan "coste"
+    return Object.assign(tabla, excepciones || {});           // y se aplican las excepciones
+}
+
+// ---------------------------------------------------------------------------
+// A4 · 3 · OBJETOS QUE SE PUEDEN RECOGER   →   accionRecoger('clave')
+// Campos:
+//   item        → nombre EXACTO de la columna del objeto en la hoja de INVENTARIO
+//                 y de la fila en la hoja de LOCALIZACIONES (se ignoran mayúsculas).
+//   titulo      → título del pop-up.
+//   nombre      → nombre bonito del objeto (sale en la pregunta de confirmación).
+//   imagen      → imagen del objeto (se amplía al pulsarla).
+//   descripcion → lo que ve el jugador al encontrarlo (admite HTML).
+//   costes      → tabla de costes por jugador (ver A3).
+//   textoVacio     (opcional) → qué se ve si otro jugador ya lo cogió.
+//   textoDenegado  (opcional) → qué se ve si a este jugador le sale "denegado".
+//   textoExito     (opcional) → mensaje al recogerlo con éxito.
+// ---------------------------------------------------------------------------
+const OBJETOS = {
+
+    // Ejemplo 3a: todos pagan 1 PA; jugador9 está denegado.
+    candelabro: {
+        item: "candelabro",
+        titulo: "Candelabro de plata",
+        nombre: "Candelabro de plata",
+        imagen: "images/candelabro.jpg",
+        descripcion: "Sobre el altar descansa un candelabro de plata ennegrecida. La cera aún está tibia, como si alguien lo hubiese usado hace unos minutos.",
+        costes: costesParaTodos(1, { jugador9: "denegado" }),   // ← jugador9 NO puede cogerlo
+        textoDenegado: "Una fuerza helada te impide cerrar la mano sobre el candelabro. No te corresponde llevártelo."
+    },
+
+    // Ejemplo 3b: costes DISTINTOS por jugador y dos denegados (escrito a mano, tabla completa).
+    amuleto: {
+        item: "amuleto_plata",
+        titulo: "Amuleto de la Orden",
+        nombre: "Amuleto de plata",
+        imagen: "images/amuleto.jpg",
+        descripcion: "Entre los pliegues de una cortina asoma un amuleto: una luna menguante de plata con un ojo grabado en el centro.",
+        costes: {
+            jugador1278: 1,          // Wetherby paga 1
+            jugador2935: 2, 
+            jugador3194: 3,
+            jugador4781: "denegado", // NO puede cogerlo
+            jugador5261: 3,
+            jugador6193: 2,
+            jugador7419: 1,
+            jugador8539: 2,
+            jugador9:    "denegado"  // jugador9 tampoco
+        },
+        textoVacio: "Solo queda una cortina polvorienta. El amuleto ya no está.",
+        textoExito: "Guardas el amuleto bajo la camisa. Está helado, pero late como si tuviera pulso."
+    }
+};
+
+// ---------------------------------------------------------------------------
+// A5 · 4 · CONTENEDORES CON LLAVE   →   accionContenedor('clave')
+// Algo cerrado (cofre, armario, cajón...) que exige tener una llave en el
+// inventario. Si la tiene, puede coger el objeto de dentro.
+// Campos: los mismos que OBJETOS más:
+//   llaves          → lista de objetos del inventario que sirven de llave (vale CUALQUIERA).
+//   textoSinLlave   → mensaje si no tiene ninguna llave.
+//   descripcion     → texto al abrirlo (ya con la llave puesta).
+// ⚠ La llave NO se gasta (igual que el armario del generador).
+// ---------------------------------------------------------------------------
+const CONTENEDORES = {
+    cofre: {
+        item: "diario_gran_maestre",
+        titulo: "Cofre de roble",
+        nombre: "Diario del Gran Maestre",
+        imagen: "images/diario.jpg",
+        llaves: ["llave_plata", "llave_maestra"],               // ← con cualquiera de estas se abre
+        costes: costesParaTodos(1, { jugador9: "denegado" }),
+        textoCerrado: "El cofre está cerrado con un candado de plata. Sin la llave adecuada, no cederá.",
+        textoSinLlave: "El cofre está cerrado con llave. No tienes la llave necesaria para abrirlo.",
+        descripcion: "Giras la llave en la cerradura y la tapa se alza con un quejido. Dentro, envuelto en terciopelo verde, hay un diario encuadernado en piel.",
+        textoVacio: "El cofre ya está abierto y vacío. Solo queda el terciopelo.",
+        textoDenegado: "Acceso denegado: la Logia no te permite abrir este cofre."
+    }
+};
+
+// ---------------------------------------------------------------------------
+// A6 · 5 · ACTIVADORES   →   accionActivar('clave')
+// Usar un objeto del inventario (se CONSUME) para activar algo de forma
+// permanente y para todos (como la gasolina del generador).
+// Campos:
+//   activacion   → nombre de la fila en la hoja ACTIVACIONES (yes = activado).
+//   objeto       → objeto del inventario que se gasta.
+//   textoYaActivado, textoFaltaObjeto, textoConfirmar, textoExito, textoDenegado
+//   audioExito   → sonido al activarlo / cuando ya está activo.
+// ---------------------------------------------------------------------------
+const ACTIVADORES = {
+    lampara: {
+        activacion: "lampara_crepusculo",                       // fila en la hoja ACTIVACIONES
+        objeto: "aceite_lampara",                               // lo que hay que gastar
+        titulo: "La Lámpara del Crepúsculo",
+        costes: costesParaTodos(1, { jugador9: "denegado" }),
+        textoComprobando: "Examinando la lámpara",
+        textoYaActivado: "La lámpara arde con una llama verde y estable. Su luz espectral baña toda la sala.",
+        textoFaltaObjeto: "La lámpara está seca. Necesitas aceite para encenderla, y no llevas ninguno encima.",
+        textoConfirmar: "¿Quieres verter el aceite y encender la lámpara?",
+        textoExito: "El aceite prende con un siseo y la llama se vuelve verde. La luz del Crepúsculo vuelve a la Logia.",
+        textoDenegado: "Acceso denegado: no te está permitido manipular la lámpara.",
+        audioExito: "audio/generador.mp3"                       // pon aquí tu sonido de activación
+    }
+};
+
+// ---------------------------------------------------------------------------
+// A7 · 6 · SUSTOS   →   accionSusto('clave')
+// Vídeo a pantalla completa que NO se puede cerrar mientras suena. Al acabar,
+// resta cordura. Cada jugador lo ve UNA vez por visita a la sala.
+// Campos:
+//   video        → vídeo del susto (con sonido).
+//   cordura      → cuánta cordura pierde.
+//   audioTras    → sonido tras el susto;   loopAudioTras: true = en bucle.
+//   textoYaVisto → qué ve si vuelve a pulsarlo.
+//   textoTras    → mensaje tras el susto (se añade el aviso de cordura).
+// ---------------------------------------------------------------------------
+const SUSTOS = {
+    ventana: {
+        video: "images/susto_logia.mp4",
+        cordura: 2,
+        titulo: "La Ventana Cegada",
+        tituloTras: "¡ADVERTENCIA!",
+        textoYaVisto: "No pienso volver a mirar por esa ventana.",
+        textoTras: "Algo ha pasado pegado al cristal. Del susto has perdido",   // + " 2 de cordura."
+        audioTras: "audio/snarl.mp3",
+        loopAudioTras: false
+    }
+};
+
+// ---------------------------------------------------------------------------
+// A8 · 7 · CÓDIGOS   →   accionCodigo('clave')
+// Candado/combinación. Si aciertan, o ven un texto, o pueden recoger un objeto.
+//   codigo       → la solución (no distingue mayúsculas/minúsculas).
+//   claveObjeto  → (opcional) clave de un objeto de OBJETOS que se obtiene al acertar.
+//                  Si lo pones, se ignoran textoAcierto/imagenAcierto.
+//   textoAcierto / imagenAcierto → lo que ve si NO hay objeto.
+// ⚠ El código está en el HTML: un jugador curioso podría verlo con F12. Para una
+//   partida entre amigos suele bastar; si te preocupa, guarda el código en un
+//   Apps Script y compruébalo allí.
+// ---------------------------------------------------------------------------
+const CODIGOS = {
+    caja: {
+        codigo: "1924",
+        longitud: 4,
+        titulo: "Caja de Seguridad",
+        textoIntro: "Una pequeña caja fuerte empotrada en la pared. Cuatro ruedas de latón esperan una combinación.",
+        textoError: "Las ruedas giran, pero el mecanismo no cede.",
+        claveObjeto: "sello",                                   // al acertar → recoger 'sello' (definido abajo)
+        textoAcierto: "",
+        imagenAcierto: ""
+    }
+};
+// Objeto que da la caja del ejemplo anterior (se añade a OBJETOS aquí abajo
+// para no mezclarlo con los otros; funciona igual que cualquiera).
+OBJETOS.sello = {
+    item: "sello_logia",
+    titulo: "Caja de Seguridad",
+    nombre: "Sello de la Logia",
+    imagen: "images/sello.jpg",
+    descripcion: "Un chasquido seco. La puerta de la caja se abre y deja ver un sello de lacre con el emblema de la Logia: un crepúsculo sobre una luna de plata.",
+    costes: costesParaTodos(1, { jugador9: "denegado" }),
+    textoVacio: "La caja fuerte está abierta y vacía."
+};
+
+// ---------------------------------------------------------------------------
+// A9 · 8 · MINIJUEGOS   →   accionMinijuego('clave')
+// Abre otra página HTML tuya (src) a pantalla completa dentro de un iframe.
+// Cuando el minijuego termina bien, esa página debe avisar a la sala con:
+//        window.parent.postMessage({ tipo: 'minijuego_ritual_completado' }, '*');
+// y entonces se ejecuta alCompletar(). Dentro puedes llamar a cualquier otra
+// función del motor: abrirInfo(), accionRecoger('clave'), mostrarMensaje()...
+// ---------------------------------------------------------------------------
+const MINIJUEGOS = {
+    ritual: {
+        src: "m_ritual.html",                                  // ← tu página de minijuego
+        tipoMensaje: "minijuego_ritual_completado",
+        textoSalir: "¿Deseas abandonar el ritual? Si sales antes de tiempo, no se completará.",
+        alCompletar: function () {
+            // EJEMPLO: tras ganar, se muestra un texto. Cambia esto por lo que quieras.
+            abrirInfo("El Ritual", "Las runas se encienden una a una. Cuando la última se apaga, notas que algo, en algún lugar de la Logia, ha despertado.");
+        }
+    }
+};
+
+// ---------------------------------------------------------------------------
+// A10 · 9 · SONIDOS   →   accionSonido('clave')
+// Un pulsado reproduce; otro pulsado lo detiene.
+// ---------------------------------------------------------------------------
+const SONIDOS = {
+    gramofono: {
+        archivo: "audio/gramofono.mp3",
+        loop: true,                                            // true = suena hasta que lo paren
+        volumen: 0.7,                                          // 0 a 1
+        titulo: "El Gramófono",
+        texto: "Posas la aguja sobre el disco. Una melodía lejana y desafinada llena el salón."   // (opcional) pon "" para que no salga pop-up
+    }
+};
+
+// ---------------------------------------------------------------------------
+// A11 · 10 · ESTADOS   →   accionEstado('clave')
+// Pop-up cuyo texto depende de si una ACTIVACIÓN está encendida o no. Lee la
+// misma hoja que ACTIVAR, así que esta chimenea puede reaccionar a la lámpara.
+// ---------------------------------------------------------------------------
+const ESTADOS = {
+    chimenea: {
+        activacion: "lampara_crepusculo",                      // misma fila que usa el activador de la lámpara
+        titulo: "La Chimenea",
+        textoApagado: "El hogar es un agujero negro. Del fondo sube un frío que huele a tierra mojada.",
+        textoEncendido: "Con la lámpara encendida, la luz verde revela unas letras talladas en el fondo del hogar.",
+        imagenEncendido: ""                                    // (opcional) imagen que aparece al estar activado
+    }
+};
+
+// ---------------------------------------------------------------------------
+// A12 · AUDIOS GENERALES (los mismos archivos que ya tienes)
+// ---------------------------------------------------------------------------
+const AUDIO_CLICK    = "audio/click.mp3";      // al pulsar cualquier hotspot
+const AUDIO_CLING    = "audio/cling.mp3";      // al terminar la cuenta atrás inicial
+const AUDIO_NOPE     = "audio/nope.mp3";       // acceso denegado / error / sin PA
+const AUDIO_PICKUP   = "audio/pickup.mp3";     // al coger un objeto
+const AUDIO_PUERTA   = "audio/opendoor.mp3";   // al volver al vestíbulo
+
+// ---------------------------------------------------------------------------
+// A13 · SEGUNDOS DE ESPERA INICIAL antes de poder volver al mapa
+// ---------------------------------------------------------------------------
+let timeLeft = 10;
+
+
+
+/* ##########################################################################
+   ##########################   PARTE B · MOTOR   ###########################
+   (Normalmente no hace falta tocar nada de aquí hacia abajo)
+   ########################################################################## */
+
+// ---------------------------------------------------------------------------
+// B1 · UTILIDADES DE RED
+// ---------------------------------------------------------------------------
+
+// fetch con límite de tiempo, para no quedarse colgado esperando al servidor.
+function fetchConTimeout(url, timeoutMs = 12000) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeoutMs);
+    return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(id));
+}
+
+// Pide una URL y devuelve el JSON ya convertido (o lanza error con un mensaje claro).
+async function pedirJSON(url) {
+    const response = await fetchConTimeout(url);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const text = await response.text();
+    try { return JSON.parse(text); }
+    catch (e) { throw new Error("El servidor no devolvió un JSON válido."); }
+}
+
+const enc = encodeURIComponent;   // abreviatura para codificar parámetros de URL
+
+// ---------------------------------------------------------------------------
+// B2 · IDENTIDAD DEL JUGADOR
+// El id del jugador llega por la URL (?jugador=jugadorXXXX) desde el mapa y se
+// recuerda en localStorage. NO se pide ningún código: se identifica solo.
+// ---------------------------------------------------------------------------
+let jugadorActual = "JUGADOR";
+
+function nombreVisible(id) {
+    return NOMBRES_JUGADORES[id] || id.toUpperCase();
+}
+
+function actualizarIdentidadJugador() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const jugadorUrl = urlParams.get('jugador');
+
+    if (jugadorUrl && jugadorUrl.trim() !== "") {
+        // 1) Viene en la URL → es el que manda, y se guarda para otras salas.
+        jugadorActual = jugadorUrl.trim();
+        localStorage.setItem('jugador_activo_global', jugadorActual);
+    } else {
+        // 2) Si no, el último jugador guardado en este navegador.
+        const jugadorGuardado = localStorage.getItem('jugador_activo_global');
+        if (jugadorGuardado && jugadorGuardado.trim() !== "") {
+            jugadorActual = jugadorGuardado;
+        } else {
+            // 3) Último recurso: leerlo de la página padre (si esta sala va en un iframe).
+            try {
+                if (window.parent && window.parent !== window) {
+                    const parentNameElem = window.parent.document.getElementById('char-name');
+                    if (parentNameElem) {
+                        const textoPadre = parentNameElem.innerText.trim();
+                        if (textoPadre !== "" && textoPadre !== "Cargando...") {
+                            jugadorActual = textoPadre;
+                            localStorage.setItem('jugador_activo_global', jugadorActual);
+                        }
+                    }
+                }
+            } catch (e) {}
+        }
+    }
+
+    document.getElementById('identidadTexto').innerText = `IDENTIDAD: ${nombreVisible(jugadorActual)}`;
+    localStorage.setItem('jugador_nombre_real', nombreVisible(jugadorActual));
+    registrarUbicacion('salon');
+}
+
+// Guarda en Firebase (jugadores/<id>/ubicacion) en qué sala está el jugador.
+let ubicacionActual = '';
+function registrarUbicacion(sala) {
+    if (jugadorActual === "JUGADOR") return;
+    ubicacionActual = sala;
+    escribirUbicacionFirebase();
+}
+function escribirUbicacionFirebase() {
+    if (!ubicacionActual || jugadorActual === "JUGADOR") return;
+    if (typeof dbLogia === 'undefined') return;   // Firebase aún no está listo: se reintenta al crearlo
+    const fichaRef = dbLogia.ref('jugadores/' + jugadorActual);
+    // Solo se escribe si la ficha ya existe (así no se crea un jugador a medias).
+    fichaRef.once('value').then(snap => {
+        if (snap.exists()) return fichaRef.child('ubicacion').set(ubicacionActual);
+    }).catch(err => console.error('Error al guardar la ubicación en Firebase:', err));
+}
+
+// Devuelve el coste de PA para el jugador actual según una tabla,
+// o null si está "denegado" (o no aparece en la tabla).
+function costeDe(tabla) {
+    const c = tabla ? tabla[jugadorActual] : undefined;
+    if (c === undefined || c === "denegado") return null;
+    return Number(c);
+}
+
+// Busca en la lista que devuelve INVENTARIO los datos del jugador actual.
+function buscarJugador(listaJugadores) {
+    if (!Array.isArray(listaJugadores)) throw new Error("Formato de datos inesperado.");
+    return listaJugadores.find(p =>
+        String(p.jugador_id || '').toLowerCase().trim() === jugadorActual.toLowerCase().trim());
+}
+
+// ¿Tiene el jugador este objeto? (compara sin distinguir mayúsculas)
+function tieneObjeto(jugadorData, nombreObjeto) {
+    const inv = jugadorData.inventario || {};
+    const buscado = String(nombreObjeto).toLowerCase().trim();
+    return Object.keys(inv).some(k => k.toLowerCase().trim() === buscado && inv[k] === true);
+}
+
+// ---------------------------------------------------------------------------
+// B3 · SONIDOS
+// ---------------------------------------------------------------------------
+function sonar(archivo, opciones) {
+    if (!archivo) return null;
+    const a = new Audio(archivo);
+    if (opciones && opciones.loop)     a.loop = true;
+    if (opciones && opciones.volumen !== undefined) a.volume = opciones.volumen;
+    a.play().catch(e => console.log("Audio error:", e));
+    return a;
+}
+function playClick() { sonar(AUDIO_CLICK); }
+function sonarNope() { sonar(AUDIO_NOPE); }
+
+// ---------------------------------------------------------------------------
+// JUGADOR MUERTO (vida 0 en Firebase: jugadores/<id>/vida)
+// Un jugador muerto no puede coger objetos, usar llaves u objetos, activar nada,
+// introducir códigos, jugar minijuegos ni usar la gramola. Solo puede mirar.
+// ---------------------------------------------------------------------------
+let vidaJugador = null;   // se mantiene al día en tiempo real (ver listener junto a dbLogia)
+function estoyMuerto() {
+    if (vidaJugador === null || vidaJugador === undefined || vidaJugador === '') return false;
+    const n = Number(vidaJugador);
+    return isFinite(n) && n <= 0;
+}
+// Devuelve true (y avisa) si el jugador está muerto: la acción debe cancelarse.
+function bloquearSiMuerto() {
+    if (!estoyMuerto()) return false;
+    sonar('audio/muerto.mp3');
+    openModal("Has muerto", `<p class="msg-error">Lo siento. Estás muerto. No puedes hacer nada.</p>${btnCerrar()}`);
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+// B4 · CUENTA ATRÁS INICIAL
+// Durante los primeros segundos no se puede volver al mapa; luego aparece el botón.
+// ---------------------------------------------------------------------------
+
+
+
+// =====================================================================
+// INTERRUPTOR DE LA CUENTA ATRÁS
+// ---------------------------------------------------------------------
+// USAR_CUENTA_ATRAS = true  -> cuenta atrás normal: cartel "PUERTA CERRADA"
+//                              con los segundos de timeLeft, suena cling.mp3
+//                              al final y entonces aparece VOLVER AL PASILLO.
+// USAR_CUENTA_ATRAS = false -> SIN cuenta atrás: VOLVER AL PASILLO aparece
+//                              al instante y no suena el cling.
+// Para reactivarla en el futuro, cambia false por true.
+// =====================================================================
+const USAR_CUENTA_ATRAS = false;
+
+const countdownEl      = document.getElementById('countdown');
+const timerContainerEl = document.getElementById('timerContainer');
+const backBtnEl        = document.getElementById('backBtn');
+
+if (USAR_CUENTA_ATRAS) {
+    // ---- MODO CON CUENTA ATRÁS (comportamiento original) ----
+    countdownEl.innerText = "00:" + (timeLeft < 10 ? "0" : "") + timeLeft;
+
+    const timerInterval = setInterval(() => {
+        timeLeft--;
+        if (timeLeft >= 0) {
+            countdownEl.innerText = "00:" + (timeLeft < 10 ? "0" : "") + timeLeft;
+        }
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            sonar(AUDIO_CLING);                        // mp3 del final de la cuenta atrás
+            timerContainerEl.style.display = 'none';   // oculta la cuenta atrás...
+            backBtnEl.style.display = 'block';         // ...y muestra "Volver"
+        }
+    }, 1000);
+} else {
+    // ---- MODO SIN CUENTA ATRÁS ----
+    // Sin intervalo y sin sonido: se oculta el cartel y se muestra el botón ya.
+    timerContainerEl.style.display = 'none';
+    backBtnEl.style.display = 'block';
+}
+
+
+
+
+// Vuelve al mapa conservando al jugador (y apaga la cámara / presencia).
+function volverAlMapa(event) {
+    event.preventDefault();
+    if (typeof salirDeLaLlamada === 'function') {
+        salirDeLaLlamada(false);          // función de webcams.js
+    }
+    sonar(AUDIO_PUERTA);
+    setTimeout(() => {
+        window.location.href = `mapa_582.html?jugador=${enc(jugadorActual)}`;
+    }, 1500);
+}
+
+// ---------------------------------------------------------------------------
+// B5 · POP-UP: funciones básicas para mostrar contenido
+// ---------------------------------------------------------------------------
+let temporizadorCarga = null;     // red de seguridad del estado "cargando"
+let accionReintentable = null;    // función que ejecuta el botón REINTENTAR
+
+// Cambia el contenido del cuerpo del pop-up y restaura la X (ya no está cargando).
+function ponerContenido(html) {
+    clearTimeout(temporizadorCarga);
+    document.getElementById('modalContent').classList.remove('cargando');
+    document.getElementById('modalBody').innerHTML = html;
+}
+
+// Abre el pop-up con título y texto (el texto admite HTML).
+function openModal(titulo, html) {
+    document.getElementById('modalTitle').innerText = titulo;
+    ponerContenido(html);
+    document.getElementById('gameModal').style.display = 'flex';
+}
+
+// Pop-up en estado "cargando": SIN la X, con un mensaje parpadeante,
+// mientras se espera al servidor. Si el servidor no responde en 25 s, vuelve la X.
+function mostrarCargando(texto, titulo) {
+    if (titulo) document.getElementById('modalTitle').innerText = titulo;
+    const contenido = document.getElementById('modalContent');
+    contenido.classList.add('cargando');
+    document.getElementById('modalBody').innerHTML = `<p class="cargando-txt">${texto}</p>`;
+    document.getElementById('gameModal').style.display = 'flex';
+    clearTimeout(temporizadorCarga);
+    temporizadorCarga = setTimeout(() => contenido.classList.remove('cargando'), 25000);
+}
+
+function closeModal() {
+    clearTimeout(temporizadorCarga);
+    document.getElementById('modalContent').classList.remove('cargando');
+    document.getElementById('gameModal').style.display = 'none';
+}
+
+// Botón "Cerrar" estándar.
+function btnCerrar(texto) {
+    return `<div class="fila-botones"><button class="drawer-btn" onclick="playClick(); closeModal()">${texto || 'Cerrar'}</button></div>`;
+}
+
+// Muestra un mensaje con color (tipo: 'ok' verde, 'error' rojo, 'info' normal) + botón Cerrar.
+function mostrarMensaje(html, tipo, textoBoton) {
+    ponerContenido(`<p class="msg-${tipo || 'info'}">${html}</p>${btnCerrar(textoBoton)}`);
+}
+
+// Mensaje de "acceso denegado" (suena el NOPE).
+function mostrarDenegado(texto) {
+    sonarNope();
+    mostrarMensaje(texto || "Tu autorización no permite hacer esto.", 'error');
+}
+
+// Mensaje de "sin Puntos de Acción".
+function mostrarSinPA(coste) {
+    sonarNope();
+    ponerContenido(`
+        <p class="msg-error">No tienes suficientes Puntos de Acción.</p>
+        <p class="msg-sutil">Necesitas ${coste} PA para realizar esta acción.</p>
+        ${btnCerrar('Continuar')}`);
+}
+
+// Guarda qué hacer si el jugador pulsa REINTENTAR tras un error de conexión.
+function recordarReintento(fn) { accionReintentable = fn; }
+function reintentar() { playClick(); if (accionReintentable) accionReintentable(); else closeModal(); }
+
+// Error de red / timeout con botón REINTENTAR.
+function mostrarErrorRed(error) {
+    console.error("Error:", error);
+    const mensaje = (error && error.name === 'AbortError')
+        ? "El servidor está tardando demasiado en responder. Vuelve a intentarlo en unos segundos."
+        : "Error de conexión con el servidor.";
+    ponerContenido(`
+        <p class="msg-error">${mensaje}</p>
+        <div class="fila-botones">
+            <button class="drawer-btn" onclick="reintentar()">Reintentar</button>
+            <button class="drawer-btn no" onclick="playClick(); closeModal()">Cerrar</button>
+        </div>`);
+}
+
+// Texto bonito para los puntos de acción ("1 Punto de Acción" / "3 Puntos de Acción").
+function textoPA(n) { return `${n} Punto${n === 1 ? '' : 's'} de Acción`; }
+
+// ---------------------------------------------------------------------------
+// B6 · VISOR A PANTALLA COMPLETA (imágenes)
+// ---------------------------------------------------------------------------
+function showFullscreenImage(src) {
+    const viewer = document.getElementById('fullscreenViewer');
+    document.getElementById('fullscreenVideo').style.display = 'none';
+    const img = document.getElementById('fullscreenImg');
+    img.style.display = 'block';
+    img.src = src;
+    viewer.style.display = 'flex';
+}
+function closeFullscreen() {
+    const video = document.getElementById('fullscreenVideo');
+    // Si el vídeo de susto se está reproduciendo, NO se puede cerrar con un clic.
+    if (video.style.display === 'block' && !video.paused) return;
+    document.getElementById('fullscreenViewer').style.display = 'none';
+}
+
+
+/* ==========================================================================
+   TIPO 1 · INFO
+   Solo abre un pop-up con título y texto.
+   ========================================================================== */
+function abrirInfo(titulo, texto) {
+    openModal(titulo, `<p>${texto}</p>${btnCerrar()}`);
+}
+
+
+/* ==========================================================================
+   TIPO 3 · RECOGER OBJETO  (y base de LLAVE y CÓDIGO)
+   Flujo:
+     1) LOCALIZACIONES: ¿sigue el objeto en su sitio?  (si no → "nada de interés")
+     2) Coste del jugador (si "denegado" → rechazo)
+     3) Confirmación con imagen y coste
+     4) INVENTARIO: verificarYProcesarObjeto (resta PA y añade objeto)
+     5) LOCALIZACIONES: updateStatus (marca el objeto como ya cogido)
+   ========================================================================== */
+let recogidaActual = null;   // guarda { cfg, coste } entre la confirmación y el proceso
+
+function accionRecoger(clave) {
+    if (bloquearSiMuerto()) return;
+    const cfg = OBJETOS[clave];
+    recordarReintento(() => accionRecoger(clave));
+    mostrarCargando("Rebuscando... Espere un momento", cfg.titulo);
+
+    pedirJSON(`${SCRIPT_LOCALIZACIONES_URL}?action=getStatus&item=${enc(cfg.item)}`)
+        .then(data => {
+            // 1) ¿Ya lo cogió alguien?
+            if (data.disponible === false) {
+                mostrarMensaje(cfg.textoVacio || "No hay nada de interés aquí.", 'info');
+                return;
+            }
+            // 2) ¿Puede este jugador cogerlo?
+            const coste = costeDe(cfg.costes);
+            if (coste === null) {
+                mostrarDenegado(cfg.textoDenegado || "Tu autorización no permite recoger este objeto.");
+                return;
+            }
+            // 3) Pedir confirmación
+            mostrarConfirmacionRecoger(cfg, coste, cfg.descripcion);
+        })
+        .catch(mostrarErrorRed);
+}
+
+// Pantalla "¿Deseas coger el objeto? (Coste: N PA)" — la comparten RECOGER, LLAVE y CÓDIGO.
+function mostrarConfirmacionRecoger(cfg, coste, descripcionHtml) {
+    recogidaActual = { cfg: cfg, coste: coste };
+    ponerContenido(`
+        <p>${descripcionHtml}</p>
+        <img src="${cfg.imagen}" alt="${cfg.nombre}" class="drawer-img"
+             onclick="playClick(); showFullscreenImage('${cfg.imagen}')">
+        <div class="cost-box">¿Deseas coger «${cfg.nombre}»?<br>Coste: ${textoPA(coste)}</div>
+        <div class="fila-botones">
+            <button class="drawer-btn si" onclick="playClick(); procesarRecogida()">Sí, coger</button>
+            <button class="drawer-btn no" onclick="playClick(); closeModal()">No, dejar</button>
+        </div>`);
+}
+
+// Ejecuta la recogida real: resta PA, añade el objeto y marca la localización.
+function procesarRecogida() {
+    if (bloquearSiMuerto()) return;
+    const { cfg, coste } = recogidaActual;
+    recordarReintento(() => procesarRecogida());
+    mostrarCargando(`Procesando recursos para ${nombreVisible(jugadorActual)}...`);
+
+    pedirJSON(`${SCRIPT_INVENTARIO_URL}?action=verificarYProcesarObjeto` +
+              `&jugador=${enc(jugadorActual)}&item=${enc(cfg.item)}&coste=${enc(coste)}`)
+        .then(data => {
+            if (data.suficientesAcciones === false) {            // no le llegan los PA
+                mostrarSinPA(coste);
+            } else if (data.success) {                           // ¡cogido!
+                sonar(AUDIO_PICKUP);
+                // Marca el objeto como ya cogido para que nadie más lo coja.
+                fetchConTimeout(`${SCRIPT_LOCALIZACIONES_URL}?action=updateStatus&item=${enc(cfg.item)}`)
+                    .then(r => r.json())
+                    .catch(err => console.error("Error al actualizar localizaciones:", err));
+                ponerContenido(`
+                    <p class="msg-ok">Operación completada.</p>
+                    <p>${cfg.textoExito || `<strong>${nombreVisible(jugadorActual)}</strong> ha guardado el objeto en su inventario.`}</p>
+                    ${btnCerrar('Continuar')}`);
+            } else {
+                mostrarMensaje("Error al actualizar la base de datos central.", 'error', 'Continuar');
+            }
+        })
+        .catch(mostrarErrorRed);
+}
+
+
+/* ==========================================================================
+   TIPO 4 · LLAVE → OBJETO  (como el armario del generador)
+   Flujo: ¿sigue el objeto dentro? → coste/denegado → ¿tiene PA y llave? →
+          confirmación → procesarRecogida()
+   ========================================================================== */
+function accionContenedor(clave) {
+    if (bloquearSiMuerto()) return;
+    const cfg = CONTENEDORES[clave];
+    recordarReintento(() => accionContenedor(clave));
+    mostrarCargando("Revisando la cerradura... Espere un momento", cfg.titulo);
+
+    pedirJSON(`${SCRIPT_LOCALIZACIONES_URL}?action=getStatus&item=${enc(cfg.item)}`)
+        .then(data => {
+            if (data.disponible === false) {                         // ya lo vaciaron
+                mostrarMensaje(cfg.textoVacio || "Ya está vacío. No queda nada.", 'info');
+                return;
+            }
+            const coste = costeDe(cfg.costes);
+            if (coste === null) {                                    // jugador denegado
+                mostrarDenegado(cfg.textoDenegado);
+                return;
+            }
+            comprobarLlave(cfg, coste);
+        })
+        .catch(mostrarErrorRed);
+}
+
+function comprobarLlave(cfg, coste) {
+    recordarReintento(() => comprobarLlave(cfg, coste));
+    mostrarCargando(`Comprobando inventario de ${nombreVisible(jugadorActual)}...`);
+
+    pedirJSON(`${SCRIPT_INVENTARIO_URL}?t=${Date.now()}`)           // ?t= evita respuestas en caché
+        .then(data => {
+            const jugadorData = buscarJugador(data);
+            if (!jugadorData) {
+                mostrarMensaje("No se ha encontrado al jugador en el sistema.", 'error');
+                return;
+            }
+            // ¿Le llegan los Puntos de Acción?
+            if ((Number(jugadorData.puntos_accion) || 0) < coste) {
+                mostrarSinPA(coste);
+                return;
+            }
+            // ¿Tiene alguna de las llaves válidas? (la llave NO se gasta)
+            const tieneLlave = cfg.llaves.some(llave => tieneObjeto(jugadorData, llave));
+            if (!tieneLlave) {
+                sonarNope();
+                mostrarMensaje(cfg.textoSinLlave || cfg.textoCerrado, 'error');
+                return;
+            }
+            // Todo correcto → pantalla de confirmación (misma que RECOGER)
+            mostrarConfirmacionRecoger(cfg, coste, cfg.descripcion);
+        })
+        .catch(mostrarErrorRed);
+}
+
+
+/* ==========================================================================
+   TIPO 5 · ACTIVAR  (como la gasolina en el generador)
+   Flujo: ACTIVACIONES getStatus → (si ya activo: mensaje) → coste/denegado →
+          ¿tiene PA y el objeto? → confirmación → INVENTARIO consumirObjeto →
+          ACTIVACIONES updateStatus (queda activado para todos)
+   ========================================================================== */
+function accionActivar(clave) {
+    if (bloquearSiMuerto()) return;
+    const cfg = ACTIVADORES[clave];
+    recordarReintento(() => accionActivar(clave));
+    mostrarCargando((cfg.textoComprobando || "Comprobando el estado") + "... Espere un momento", cfg.titulo);
+
+    pedirJSON(`${SCRIPT_ACTIVACIONES_URL}?action=getStatus&item=${enc(cfg.activacion)}`)
+        .then(data => {
+            if (data.activado === true) {                            // ya está activo
+                sonar(cfg.audioExito);
+                mostrarMensaje(cfg.textoYaActivado, 'ok');
+                return;
+            }
+            const coste = costeDe(cfg.costes);
+            if (coste === null) {
+                mostrarDenegado(cfg.textoDenegado);
+                return;
+            }
+            comprobarObjetoActivador(clave, cfg, coste);
+        })
+        .catch(mostrarErrorRed);
+}
+
+function comprobarObjetoActivador(clave, cfg, coste) {
+    recordarReintento(() => comprobarObjetoActivador(clave, cfg, coste));
+    mostrarCargando(`Comprobando inventario de ${nombreVisible(jugadorActual)}...`);
+
+    pedirJSON(`${SCRIPT_INVENTARIO_URL}?t=${Date.now()}`)
+        .then(data => {
+            const jugadorData = buscarJugador(data);
+            if (!jugadorData) {
+                mostrarMensaje("No se ha encontrado al jugador en el sistema.", 'error');
+                return;
+            }
+            if ((Number(jugadorData.puntos_accion) || 0) < coste) {
+                mostrarSinPA(coste);
+                return;
+            }
+            if (!tieneObjeto(jugadorData, cfg.objeto)) {             // le falta el objeto
+                sonarNope();
+                mostrarMensaje(cfg.textoFaltaObjeto, 'error');
+                return;
+            }
+            ponerContenido(`
+                <p>${cfg.textoConfirmar}</p>
+                <div class="cost-box">Coste: ${textoPA(coste)}</div>
+                <div class="fila-botones">
+                    <button class="drawer-btn si" onclick="playClick(); confirmarActivacion('${clave}', ${coste})">Sí</button>
+                    <button class="drawer-btn no" onclick="playClick(); closeModal()">No</button>
+                </div>`);
+        })
+        .catch(mostrarErrorRed);
+}
+
+function confirmarActivacion(clave, coste) {
+    if (bloquearSiMuerto()) return;
+    const cfg = ACTIVADORES[clave];
+    recordarReintento(() => confirmarActivacion(clave, coste));
+    mostrarCargando("Un momento...");
+
+    // consumirObjeto: resta los PA y BORRA el objeto del inventario del jugador.
+    pedirJSON(`${SCRIPT_INVENTARIO_URL}?action=consumirObjeto` +
+              `&jugador=${enc(jugadorActual)}&item=${enc(cfg.objeto)}&coste=${enc(coste)}`)
+        .then(data => {
+            if (data.suficientesAcciones === false) {
+                mostrarSinPA(coste);
+            } else if (data.success) {
+                sonar(cfg.audioExito);
+                // Deja la activación en "yes" para que quede activada para TODOS.
+                fetchConTimeout(`${SCRIPT_ACTIVACIONES_URL}?action=updateStatus&item=${enc(cfg.activacion)}`)
+                    .then(r => r.json())
+                    .catch(err => console.error("Error al actualizar Activaciones:", err));
+                mostrarMensaje(cfg.textoExito, 'ok');
+            } else {
+                mostrarMensaje("Error al actualizar la base de datos central.", 'error');
+            }
+        })
+        .catch(mostrarErrorRed);
+}
+
+
+/* ==========================================================================
+   TIPO 6 · SUSTO  (como la puerta trasera de la perrera)
+   Reproduce el vídeo a pantalla completa (no se puede cerrar mientras suena),
+   y al terminar resta cordura con INVENTARIO restarCordura.
+   ========================================================================== */
+const sustosVistos = {};   // recuerda qué sustos ya vio este jugador en esta visita
+
+function accionSusto(clave) {
+    if (bloquearSiMuerto()) return;
+    const cfg = SUSTOS[clave];
+    if (sustosVistos[clave]) {                       // ya lo vio → solo un texto
+        openModal(cfg.titulo, `<p class="msg-info">${cfg.textoYaVisto}</p>${btnCerrar()}`);
+        return;
+    }
+    const viewer = document.getElementById('fullscreenViewer');
+    const video  = document.getElementById('fullscreenVideo');
+    const img    = document.getElementById('fullscreenImg');
+
+    img.style.display = 'none';
+    video.style.display = 'block';
+    video.src = cfg.video;
+    viewer.style.display = 'flex';
+
+    let terminado = false;
+    const fin = () => {                              // se ejecuta UNA vez cuando acaba (o falla) el vídeo
+        if (terminado) return;
+        terminado = true;
+        video.onended = null; video.onerror = null;
+        viewer.style.display = 'none';
+        video.style.display = 'none';
+        video.removeAttribute('src'); video.load();
+        resolverSusto(clave);
+    };
+    video.onended = fin;
+    video.onerror = fin;                             // si el archivo no existe, no se queda atascado
+    video.play().catch(e => { console.log("Video error:", e); fin(); });
+}
+
+function resolverSusto(clave) {
+    const cfg = SUSTOS[clave];
+    sustosVistos[clave] = true;
+    sonar(cfg.audioTras, { loop: !!cfg.loopAudioTras });
+    mostrarCargando("Actualizando cordura...", cfg.tituloTras || "¡ADVERTENCIA!");
+
+    pedirJSON(`${SCRIPT_INVENTARIO_URL}?action=restarCordura&jugador=${enc(jugadorActual)}&cantidad=${enc(cfg.cordura)}`)
+        .then(data => {
+            let locura = "";
+            if (data.success && data.nuevaCordura <= 0) {            // cordura a 0
+                locura = "<br><br><span style='color:#ff3b30;font-weight:bold;font-size:1.2rem;'>Estás loco de atar</span>";
+            }
+            ponerContenido(`<p>${cfg.textoTras} ${cfg.cordura} de cordura.${locura}</p>${btnCerrar('Continuar')}`);
+        })
+        .catch(error => {
+            console.error("Error al descontar cordura:", error);
+            mostrarMensaje("Error de conexión al actualizar la cordura.", 'error', 'Continuar');
+        });
+}
+
+
+/* ==========================================================================
+   TIPO 7 · CÓDIGO  (candado con combinación)
+   Pide un código. Acierto → recoge un objeto (flujo RECOGER) o muestra un texto.
+   ========================================================================== */
+function accionCodigo(clave) {
+    if (bloquearSiMuerto()) return;
+    const cfg = CODIGOS[clave];
+    openModal(cfg.titulo, `
+        <p>${cfg.textoIntro}</p>
+        <input type="text" id="codigoInput" class="code-input"
+               maxlength="${cfg.longitud || 12}" autocomplete="off" spellcheck="false">
+        <p id="codigoMensaje" class="msg-error msg-sutil" style="min-height:1.4em;"></p>
+        <div class="fila-botones">
+            <button class="drawer-btn si" onclick="playClick(); probarCodigo('${clave}')">Probar</button>
+            <button class="drawer-btn no" onclick="playClick(); closeModal()">Cerrar</button>
+        </div>`);
+    const input = document.getElementById('codigoInput');
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') probarCodigo(clave); });  // Enter = Probar
+    setTimeout(() => input.focus(), 50);
+}
+
+function probarCodigo(clave) {
+    if (bloquearSiMuerto()) return;
+    const cfg = CODIGOS[clave];
+    const input = document.getElementById('codigoInput');
+    const intento = input.value.trim().toLowerCase();
+
+    if (intento === String(cfg.codigo).toLowerCase()) {
+        // ¡ACIERTO!
+        sonar(AUDIO_CLING);
+        if (cfg.claveObjeto) {
+            accionRecoger(cfg.claveObjeto);          // pasa al flujo de recoger el objeto
+        } else {
+            const imagen = cfg.imagenAcierto
+                ? `<img src="${cfg.imagenAcierto}" class="drawer-img" onclick="playClick(); showFullscreenImage('${cfg.imagenAcierto}')">` : "";
+            openModal(cfg.titulo, `<p class="msg-ok">${cfg.textoAcierto}</p>${imagen}${btnCerrar()}`);
+        }
+    } else {
+        // ERROR: suena el NOPE, tiembla el campo y se borra.
+        sonarNope();
+        document.getElementById('codigoMensaje').innerText = cfg.textoError || "Código incorrecto.";
+        input.classList.remove('tiembla'); void input.offsetWidth; input.classList.add('tiembla');
+        input.value = ""; input.focus();
+    }
+}
+
+
+/* ==========================================================================
+   TIPO 8 · MINIJUEGO (iframe)
+   Abre una página tuya a pantalla completa. Cuando esa página envía el
+   mensaje postMessage({tipo: cfg.tipoMensaje}), se cierra y se ejecuta alCompletar().
+   ========================================================================== */
+let minijuegoActual = null;    // clave del minijuego abierto (o null)
+
+function accionMinijuego(clave) {
+    if (bloquearSiMuerto()) return;
+    minijuegoActual = clave;
+    document.getElementById('minijuegoFrame').src = MINIJUEGOS[clave].src;
+    document.getElementById('minijuegoConfirmTexto').innerText = MINIJUEGOS[clave].textoSalir || "¿Deseas abandonar?";
+    document.getElementById('minijuegoModal').style.display = 'flex';
+}
+function cerrarMinijuego() {
+    document.getElementById('minijuegoModal').style.display = 'none';
+    document.getElementById('minijuegoFrame').src = '';
+    document.getElementById('minijuegoConfirm').style.display = 'none';
+    minijuegoActual = null;
+}
+function solicitarSalirMinijuego()  { document.getElementById('minijuegoConfirm').style.display = 'flex'; }
+function cancelarSalirMinijuego()   { document.getElementById('minijuegoConfirm').style.display = 'none'; }
+function confirmarSalirMinijuego()  { cerrarMinijuego(); closeModal(); }
+
+// Escucha el aviso de "minijuego completado" que envía la página del iframe.
+window.addEventListener('message', function (event) {
+    if (!minijuegoActual) return;
+    const frame = document.getElementById('minijuegoFrame');
+    if (event.source !== frame.contentWindow) return;            // solo mensajes de NUESTRO iframe
+    const cfg = MINIJUEGOS[minijuegoActual];
+    if (event.data && event.data.tipo === cfg.tipoMensaje) {
+        cerrarMinijuego();
+        cfg.alCompletar();
+    }
+});
+
+
+/* ==========================================================================
+   TIPO 9 · SONIDO
+   Un clic reproduce; otro clic lo para.
+   ========================================================================== */
+const sonidosActivos = {};
+
+function accionSonido(clave) {
+    const cfg = SONIDOS[clave];
+    if (sonidosActivos[clave]) {                     // ya suena → pararlo
+        sonidosActivos[clave].pause();
+        delete sonidosActivos[clave];
+        return;
+    }
+    const audio = sonar(cfg.archivo, { loop: cfg.loop, volumen: cfg.volumen });
+    sonidosActivos[clave] = audio;
+    audio.onended = () => delete sonidosActivos[clave];
+    if (cfg.texto) abrirInfo(cfg.titulo, cfg.texto);
+}
+
+
+/* ==========================================================================
+   TIPO 10 · ESTADO (texto según una activación)
+   Consulta ACTIVACIONES y enseña el texto "apagado" o "encendido".
+   ========================================================================== */
+function accionEstado(clave) {
+    const cfg = ESTADOS[clave];
+    recordarReintento(() => accionEstado(clave));
+    mostrarCargando("Observando... Espere un momento", cfg.titulo);
+
+    pedirJSON(`${SCRIPT_ACTIVACIONES_URL}?action=getStatus&item=${enc(cfg.activacion)}`)
+        .then(data => {
+            if (data.activado === true) {
+                const imagen = cfg.imagenEncendido
+                    ? `<img src="${cfg.imagenEncendido}" class="drawer-img" onclick="playClick(); showFullscreenImage('${cfg.imagenEncendido}')">` : "";
+                ponerContenido(`<p class="msg-ok">${cfg.textoEncendido}</p>${imagen}${btnCerrar()}`);
+            } else {
+                ponerContenido(`<p>${cfg.textoApagado}</p>${btnCerrar()}`);
+            }
+        })
+        .catch(mostrarErrorRed);
+}
+
+
+/* ==========================================================================
+   MODO DISEÑO  (solo para ti: tecla D, o ?diseno=1 en la URL)
+   · Muestra todos los hotspots con su etiqueta.
+   · Cada clic en la sala añade un punto; con ≥3 puntos genera el CSS completo
+     (top/left/width/height + clip-path) listo para pegar en el apartado 4 del CSS.
+   · Retroceso = quita el último punto · R = borra todo · D = salir.
+   Cuando termines la sala puedes borrar este bloque entero (y su CSS/HTML).
+   ========================================================================== */
+let puntosDiseno = [];   // [{x:%, y:%}, ...]
+
+function alternarModoDiseno() {
+    document.body.classList.toggle('modo-diseno');
+    disenoReiniciar();
+}
+
+function disenoRedibujar() {
+    const cont = document.getElementById('gameContainer');
+    cont.querySelectorAll('.diseno-punto').forEach(p => p.remove());           // quita puntos viejos
+    puntosDiseno.forEach(p => {                                                // dibuja los actuales
+        const d = document.createElement('div');
+        d.className = 'diseno-punto';
+        d.style.left = p.x + '%'; d.style.top = p.y + '%';
+        cont.appendChild(d);
+    });
+    document.getElementById('disenoPoligono').setAttribute('points',
+        puntosDiseno.map(p => `${p.x},${p.y}`).join(' '));
+
+    const salida = document.getElementById('disenoSalida');
+    if (puntosDiseno.length < 3) {
+        salida.value = `Puntos: ${puntosDiseno.length} (necesitas al menos 3)`;
+        return;
+    }
+    // Caja que envuelve todos los puntos → top/left/width/height del hotspot.
+    const xs = puntosDiseno.map(p => p.x), ys = puntosDiseno.map(p => p.y);
+    const minX = Math.min(...xs), maxX = Math.max(...xs);
+    const minY = Math.min(...ys), maxY = Math.max(...ys);
+    const w = (maxX - minX) || 0.1, h = (maxY - minY) || 0.1;
+    // Los puntos del polígono se expresan RELATIVOS a esa caja (0%–100%).
+    const poli = puntosDiseno.map(p =>
+        `${Math.round((p.x - minX) / w * 100)}% ${Math.round((p.y - minY) / h * 100)}%`).join(', ');
+    salida.value =
+`#miHotspot {
+    top: ${minY.toFixed(1)}%;
+    left: ${minX.toFixed(1)}%;
+    width: ${w.toFixed(1)}%;
+    height: ${h.toFixed(1)}%;
+    clip-path: polygon(${poli});
+}`;
+}
+function disenoReiniciar() { puntosDiseno = []; disenoRedibujar(); }
+function disenoCopiar() {
+    const salida = document.getElementById('disenoSalida');
+    salida.select();
+    (navigator.clipboard ? navigator.clipboard.writeText(salida.value) : Promise.resolve(document.execCommand('copy')))
+        .catch(() => {});
+}
+
+// Clic sobre la sala (solo en modo diseño) → añade un punto.
+document.getElementById('gameContainer').addEventListener('click', function (e) {
+    if (!document.body.classList.contains('modo-diseno')) return;
+    const r = this.getBoundingClientRect();
+    puntosDiseno.push({
+        x: +(((e.clientX - r.left) / r.width) * 100).toFixed(1),
+        y: +(((e.clientY - r.top) / r.height) * 100).toFixed(1)
+    });
+    disenoRedibujar();
+});
+
+// Teclas del modo diseño.
+document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;   // no molestar al escribir un código
+    const k = e.key.toLowerCase();
+    if (k === 'd') alternarModoDiseno();
+    if (!document.body.classList.contains('modo-diseno')) return;
+    if (k === 'r') disenoReiniciar();
+    if (e.key === 'Backspace') { puntosDiseno.pop(); disenoRedibujar(); }
+});
+// ?diseno=1 en la URL lo activa nada más cargar.
+if (new URLSearchParams(window.location.search).get('diseno') === '1') alternarModoDiseno();
+
+
+// ---------------------------------------------------------------------------
+// ARRANQUE: identifica al jugador y muestra su nombre en el HUD
+// ---------------------------------------------------------------------------
+actualizarIdentidadJugador();
+
+// ---------------------------------------------------------------------------
+// POP-UP DEL PERIÓDICO (solo se cierra con la X o con Esc)
+// ---------------------------------------------------------------------------
+function abrirPeriodico(src) {
+    sonar('audio/openbook.mp3');   // suena al mirar el periódico o la invitación
+    document.getElementById('periodicoImg').src = src;
+    document.getElementById('periodicoViewer').classList.add('abierto');
+}
+function cerrarPeriodico() {
+    document.getElementById('periodicoViewer').classList.remove('abierto');
+}
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') cerrarPeriodico();
+});
+</script>
+
+
+<!-- ==========================================================================
+     VIDEOLLAMADA ENTRE JUGADORES DE LA SALA (Firebase + PeerJS + webcams.js)
+     Cada sala tiene su propia "habitación" de vídeo: solo se ven entre sí los
+     jugadores que están en la MISMA sala.
+     ========================================================================== -->
+<script>
+    // ★ NOMBRE ÚNICO DE LA HABITACIÓN DE VÍDEO ★
+    // Prefijo "logia_" (ya no "outpost31_") + nombre de la sala.
+    // CAMBIA ESTO en cada sala nueva (logia_sala_biblioteca, logia_sala_santuario...);
+    // si dos salas usan el mismo nombre, sus jugadores se verían entre sí.
+    const VIDEO_ROOM = "logia_sala_salon";
+</script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+    // Firebase ÚNICO de la Logia (proyecto logia-rol-vivo), igual que en sala_comedor.html.
+    // Lo usan a la vez las cámaras (webcams.js), los datos de los jugadores y la gramola.
+    const appLogia = firebase.initializeApp({
+        apiKey: "AIzaSyDBMQU4fRGw-BjfAx8dv84GmcHzA-1ncoY",
+        authDomain: "logia-rol-vivo.firebaseapp.com",
+        databaseURL: "https://logia-rol-vivo-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "logia-rol-vivo",
+        storageBucket: "logia-rol-vivo.firebasestorage.app",
+        messagingSenderId: "432574172065",
+        appId: "1:432574172065:web:0e1d93921e84f51cb099e0"
+    });
+    const dbLogia = appLogia.database();
+    if (typeof escribirUbicacionFirebase === 'function') escribirUbicacionFirebase(); // ubicación registrada antes de que Firebase estuviera listo
+
+// Vida del jugador en tiempo real: si llega a 0 queda muerto; si la recupera, vuelve a poder actuar.
+if (jugadorActual && jugadorActual !== "JUGADOR") {
+    dbLogia.ref('jugadores/' + jugadorActual + '/vida').on('value', snap => { vidaJugador = snap.val(); });
+}
+</script>
+
+<!-- ==========================================================================
+     GRAMOLA COMPARTIDA
+     El estado vive en Firebase (logia-rol-vivo) en  salas/salon/gramola :
+        { encendida: true|false, inicio: <hora del servidor>, por: <jugador> }
+     Todos los que están (o entran) en el salón escuchan ese valor:
+       · encendida = true  → suena audio/gramola.mp3 (en bucle y sincronizado)
+       · encendida = false → no suena para nadie
+     El ambiente de la chimenea sigue aparte (sonido_localizacion.js).
+     ========================================================================== -->
+<script>
+const GRAMOLA_AUDIO = "audio/gramola.mp3";
+const GRAMOLA_VOLUMEN = 0.8;                          // 0 a 1
+const gramolaRef = dbLogia.ref('salas/salon/gramola');
+
+const gramolaSonido = new Audio(GRAMOLA_AUDIO);
+gramolaSonido.loop = true;
+gramolaSonido.preload = 'auto';
+gramolaSonido.volume = GRAMOLA_VOLUMEN;
+
+let gramolaEncendida = false;
+let gramolaInicio = 0;                                // hora (servidor) en que se encendió
+let gramolaListo = false;                             // ¿ya llegó el primer dato de Firebase?
+let relojServidor = 0;                                // diferencia reloj local ↔ servidor
+let gramolaEsperaClic = false;
+
+dbLogia.ref('.info/serverTimeOffset').on('value', snap => { relojServidor = snap.val() || 0; });
+
+// Se ejecuta al abrir la sala y cada vez que alguien enciende o apaga la gramola.
+gramolaRef.on('value', snap => {
+    const v = snap.val() || {};
+    gramolaEncendida = v.encendida === true;
+    gramolaInicio = Number(v.inicio) || 0;
+    gramolaListo = true;
+    sincronizarGramola();
+}, err => console.error('Error al leer la gramola:', err));
+
+function sincronizarGramola() {
+    if (!gramolaEncendida) {                          // apagada → silencio para todos
+        gramolaSonido.pause();
+        try { gramolaSonido.currentTime = 0; } catch (e) {}
+        return;
+    }
+    if (!gramolaSonido.paused) return;                // ya suena
+
+    const arrancar = () => {
+        if (!gramolaEncendida) return;                // la apagaron mientras cargaba
+        const dur = gramolaSonido.duration;
+        if (gramolaInicio && isFinite(dur) && dur > 0) {
+            const seg = (Date.now() + relojServidor - gramolaInicio) / 1000;
+            if (seg > 0) gramolaSonido.currentTime = seg % dur;   // entra "a mitad" de la canción
+        }
+        gramolaSonido.play().catch(() => esperarClicParaGramola());
+    };
+    if (gramolaSonido.readyState >= 1) arrancar();
+    else gramolaSonido.addEventListener('loadedmetadata', arrancar, { once: true });
+}
+
+// Si el navegador bloquea el sonido automático, arranca con el primer toque del jugador.
+function esperarClicParaGramola() {
+    if (gramolaEsperaClic) return;
+    gramolaEsperaClic = true;
+    const alTocar = () => {
+        gramolaEsperaClic = false;
+        document.removeEventListener('pointerdown', alTocar);
+        document.removeEventListener('keydown', alTocar);
+        sincronizarGramola();
+    };
+    document.addEventListener('pointerdown', alTocar);
+    document.addEventListener('keydown', alTocar);
+}
+
+// Pop-up del hotspot: pregunta según el estado actual.
+function abrirGramola() {
+    if (bloquearSiMuerto()) return;
+    if (gramolaListo) return pintarPreguntaGramola();
+    recordarReintento(abrirGramola);
+    mostrarCargando("Mirando la gramola... Espere un momento", "La Gramola");
+    gramolaRef.once('value').then(() => {
+        gramolaListo = true;
+        pintarPreguntaGramola();
+    }).catch(mostrarErrorRed);
+}
+
+function pintarPreguntaGramola() {
+    const on = gramolaEncendida;
+    document.getElementById('modalTitle').innerText = "El Gramófono";
+    ponerContenido(`
+        <div class="gramola-icono ${on ? 'sonando' : ''}">&#9835;</div>
+        <p class="msg-sutil">${on ? 'El gramófono está sonando.' : 'El gramófono está apagado.'}</p>
+        <p class="gramola-pregunta">¿Quieres ${on ? 'apagar' : 'encender'} el gramófono?</p>
+        <div class="fila-botones">
+            <button class="drawer-btn si" onclick="playClick(); cambiarGramola(${!on})">Sí</button>
+            <button class="drawer-btn no" onclick="playClick(); closeModal()">No</button>
+        </div>`);
+    document.getElementById('gameModal').style.display = 'flex';
+}
+
+// Enciende o apaga la gramola para TODOS los jugadores de la sala.
+function cambiarGramola(encender) {
+    if (bloquearSiMuerto()) return;
+    recordarReintento(() => cambiarGramola(encender));
+    mostrarCargando("Un momento...", "El Gramófono");
+    const dato = encender
+        ? { encendida: true, inicio: firebase.database.ServerValue.TIMESTAMP, por: jugadorActual }
+        : { encendida: false, por: jugadorActual };
+    gramolaRef.set(dato).then(() => {
+        mostrarMensaje(encender
+            ? "La aguja baja sobre el disco y la música llena el salón."
+            : "Levantas la aguja. El gramófono se apaga y el salón queda en silencio.", 'ok');
+    }).catch(mostrarErrorRed);
+}
+</script>
+
+<script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
+<script src="webcams.js"></script>   <!-- tu archivo de siempre: gestiona micro, cámara y #video-grid -->
+
+<!-- ==========================================================================
+     SONIDO AMBIENTE DE LA SALA (lo gestiona sonido_localizacion.js)
+     archivo → mp3 de ambiente · volumen → 0 a 100 · loop → true = en bucle
+     ========================================================================== -->
+<script>
+    const SONIDO_LOCALIZACION = { archivo: 'audio/amb_chimenea.mp3', volumen: 40, loop: true };
+</script>
+<script src="sonido_localizacion.js"></script>
+
+</body>
+</html>

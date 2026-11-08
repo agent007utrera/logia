@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventario · Máster</title>
+  <!--
+  ╔══════════════════════════════════════════════════════════════════════╗
+  ║  INVENTARIO.HTML — Tabla de objetos y capítulos de los 6 jugadores   ║
+  ╠══════════════════════════════════════════════════════════════════════╣
+  ║  Filas = objetos. Columnas = jugadores. Casilla marcada = lo tiene.  ║
+  ║  Todo va en tiempo real por Firebase (sin Google Apps Script):       ║
+  ║    inventarios/<jugador>/<objeto>  = true  (lo tiene)                ║
+  ║    capitulos/<jugador>/cap2|cap3|cap4 = true (capítulo desbloqueado) ║
+  ║  · Si marcas una casilla, el objeto aparece en el jugadorXXXX.html.  ║
+  ║  · Si un jugador consigue, entrega o gasta un objeto, aquí se ve     ║
+  ║    el cambio al instante.                                            ║
+  ║  · Las filas de capítulos desbloquean ese capítulo en su panel.      ║
+  ║  La lista de objetos sale de objetos.js (mismo catálogo que el       ║
+  ║  jugador). Los objetos que no estén ahí pero existan en Firebase     ║
+  ║  (armas, etc.) se añaden solos como filas extra.                     ║
+  ╚══════════════════════════════════════════════════════════════════════╝
+  -->
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cinzel+Decorative:wght@700&family=IM+Fell+English:ital@0;1&family=Special+Elite&display=swap');
+
+    :root {
+      --bg: #06100a; --panel: #0f2218; --accent: #3e9a6b; --glow: #9bf0c0;
+      --text: #d9d3b3; --muted: #8fa08a; --border: #1d4a33;
+      --danger: #ff6b6b; --ok: #6fdc9a;
+      --laton: #b49a55; --laton-osc: #6e5c2e;
+      --pergamino: #d9d3b3; --pergamino-osc: #a9a285;
+      --verdin: #5fb98a; --brillo: #9bf0c0;
+      --fuente-titulo: 'Cinzel Decorative', 'Cinzel', Georgia, serif;
+      --fuente-sub: 'Cinzel', Georgia, serif;
+      --fuente-cuerpo: 'IM Fell English', Georgia, 'Times New Roman', serif;
+      --fuente-maquina: 'Special Elite', 'Courier New', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--fuente-maquina);
+      background-color: #040806;
+      background-image: radial-gradient(circle at 50% 40%, #0f2318 0%, #050a07 75%);
+      color: var(--text); min-height: 100vh; padding: 22px;
+    }
+    body::before {
+      content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 9000;
+      background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.6) 100%);
+    }
+    body::after {
+      content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 9001; opacity: 0.08; mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    }
+    header {
+      display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap;
+      border-bottom: 3px double var(--laton-osc); box-shadow: 0 8px 25px -12px rgba(95,185,138,.35);
+      padding-bottom: 14px; margin-bottom: 22px;
+    }
+    h1 { font-family: var(--fuente-titulo); font-weight: 700; font-size: 1.8rem; letter-spacing: 4px; color: var(--brillo); text-shadow: 0 0 10px rgba(95,185,138,.55); }
+    .sub { font-family: var(--fuente-sub); color: var(--laton); letter-spacing: 4px; font-size: .75rem; }
+    #conn { margin-left: auto; font-family: var(--fuente-sub); font-size: .7rem; letter-spacing: 2px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+    #conn i { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); display: inline-block; }
+    #conn.on i { background: var(--ok); box-shadow: 0 0 9px var(--ok); }
+    #conn.off i { background: var(--danger); box-shadow: 0 0 9px var(--danger); }
+
+    /* Navegación entre secciones (como en master.html) */
+    html { scroll-behavior: smooth; }
+    .nav-secciones { display: flex; gap: 10px; flex-wrap: wrap; margin: -8px 0 8px 0; }
+    .btn-subir { font-size: .95rem; line-height: 1; padding: 5px 11px; flex-shrink: 0; }
+
+    .seccion-titulo {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px; scroll-margin-top: 12px;
+      font-family: var(--fuente-titulo); font-size: 1.3rem; letter-spacing: 3px; color: var(--laton);
+      margin: 30px 0 15px 0; border-bottom: 2px solid var(--laton-osc); padding-bottom: 5px; text-transform: uppercase;
+    }
+    .panel {
+      position: relative; background: linear-gradient(180deg, #0c1b13 0%, #07100b 100%);
+      border: 3px double var(--laton-osc); box-shadow: 0 0 22px rgba(47,125,87,.2); padding: 18px 18px 20px;
+    }
+    .panel::before, .panel::after { content: ''; position: absolute; width: 14px; height: 14px; border: 2px solid var(--laton); pointer-events: none; }
+    .panel::before { top: -3px; left: -3px; border-right: none; border-bottom: none; }
+    .panel::after  { bottom: -3px; right: -3px; border-left: none; border-top: none; }
+
+    .barra { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+    .btn {
+      font-family: var(--fuente-sub); letter-spacing: 2px; text-transform: uppercase;
+      background: linear-gradient(180deg, #14291d, #0b1710); color: var(--pergamino);
+      border: 1px solid var(--laton); border-radius: 2px; padding: 8px 14px; font-size: .72rem; cursor: pointer; transition: all .15s;
+    }
+    .btn:hover { background: var(--accent); color: #fff; box-shadow: 0 0 14px rgba(155,240,192,.5); }
+    .btn.small { padding: 4px 9px; font-size: .6rem; }
+    .input-texto {
+      font-family: var(--fuente-maquina); background: #050c08; color: var(--pergamino);
+      border: 1px solid var(--laton-osc); border-radius: 2px; padding: 7px 9px; font-size: .9rem; outline: none; min-width: 220px;
+    }
+    .input-texto:focus { border-color: var(--glow); box-shadow: 0 0 8px rgba(155,240,192,.35); }
+
+    .tabla-wrap { overflow-x: auto; overflow-y: visible; }
+    table.tabla { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 900px; }
+    .tabla th {
+      font-family: var(--fuente-sub); font-size: .7rem; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--laton); text-align: center; padding: 8px 6px; border-bottom: 1px solid var(--laton-osc);
+      background: #0b1710; position: sticky; top: 0; z-index: 2;
+    }
+    .tabla th .jn { display: block; font-family: var(--fuente-cuerpo); font-size: .95rem; letter-spacing: 1px; text-transform: none; color: var(--pergamino); }
+    .tabla th .jid { display: block; font-family: var(--fuente-maquina); font-size: .6rem; letter-spacing: 1px; color: var(--muted); text-transform: none; }
+    .tabla th .jcnt { display: block; font-size: .6rem; color: var(--verdin); margin-top: 2px; }
+    .tabla th:first-child, .tabla td:first-child { text-align: left; position: sticky; left: 0; background: #0b1710; z-index: 1; }
+    .tabla th:first-child { z-index: 3; }
+    .tabla td { padding: 7px 6px; text-align: center; border-bottom: 1px dashed var(--border); }
+    .tabla td:first-child { font-family: var(--fuente-cuerpo); font-size: 1.02rem; color: var(--pergamino); min-width: 230px; }
+    .tabla td:first-child small { display: block; font-family: var(--fuente-maquina); font-size: .62rem; color: var(--muted); letter-spacing: 1px; }
+    .tabla tr.alguien td:first-child { color: var(--brillo); }
+    .tabla td.on { background: rgba(62,154,107,.16); }
+    .tabla td.total { font-family: var(--fuente-sub); color: var(--laton); }
+    .tabla input[type=checkbox] { width: 20px; height: 20px; cursor: pointer; accent-color: #6fdc9a; }
+    .tabla td.acc { white-space: nowrap; }
+    .tabla td.acc .btn { margin: 0 2px; }
+    .vacio { font-family: var(--fuente-cuerpo); color: var(--muted); padding: 14px 0; font-style: italic; }
+    .hint { font-family: var(--fuente-cuerpo); font-style: italic; font-size: .9rem; color: var(--pergamino-osc); margin-top: 8px; }
+
+    #toast {
+      position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(30px);
+      background: linear-gradient(180deg, #14291d 0%, #0b1710 100%);
+      border: 2px solid var(--laton); color: var(--brillo); font-family: var(--fuente-sub); font-size: .85rem;
+      padding: 12px 22px; letter-spacing: 2px;
+      box-shadow: 0 0 0 3px #000, 0 0 0 4px var(--laton-osc), 0 0 24px rgba(95,185,138,.45);
+      opacity: 0; pointer-events: none; transition: all .3s; z-index: 10000; max-width: 90vw; text-align: center;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #toast.err { color: var(--danger); border-color: var(--danger); }
+
+    /* ---------- Pop-ups (sustituyen a alert/confirm del navegador) ---------- */
+    @keyframes pp-fade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes pp-rise { from { transform: translateY(18px) scale(.97); opacity: 0; } to { transform: none; opacity: 1; } }
+    @keyframes pp-pulse { 50% { opacity: .55; } }
+    #pp-overlay {
+      position: fixed; inset: 0; z-index: 10500; display: none; align-items: center; justify-content: center;
+      background: rgba(3,7,5,.88); backdrop-filter: blur(5px); padding: 16px;
+    }
+    #pp-overlay.pp-visible { display: flex; animation: pp-fade .25s ease-out; }
+    #pp-box {
+      position: relative; width: min(460px, 100%);
+      border: 2px solid var(--laton); border-radius: 2px;
+      box-shadow: 0 0 0 4px #000, 0 0 0 5px var(--laton-osc), 0 10px 40px rgba(0,0,0,.9), 0 0 40px rgba(62,154,107,.2);
+      background-image:
+        radial-gradient(ellipse at top, rgba(62,154,107,.16), transparent 60%),
+        linear-gradient(180deg, #14291d 0%, #0b1710 100%);
+      animation: pp-rise .3s ease-out;
+    }
+    #pp-box::before {
+      content: ''; position: absolute; top: 5px; left: 5px; right: 5px; bottom: 5px; pointer-events: none;
+      border: 1px solid var(--laton-osc);
+    }
+    #pp-head {
+      position: relative; display: flex; align-items: center; gap: 10px;
+      padding: 14px 22px 12px; border-bottom: 1px solid var(--laton-osc); background: rgba(62,154,107,.15);
+    }
+    #pp-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--glow); box-shadow: 0 0 10px var(--glow); flex: none; animation: pp-pulse 1.2s infinite; }
+    #pp-title {
+      font-family: var(--fuente-titulo); font-size: 1.05rem; letter-spacing: 2px; color: var(--glow);
+      text-shadow: 0 0 10px rgba(155,240,192,.6); line-height: 1.2; text-transform: uppercase;
+    }
+    #pp-body { position: relative; padding: 18px 22px 6px; font-family: var(--fuente-cuerpo); font-size: 1.05rem; line-height: 1.5; color: var(--pergamino); white-space: pre-line; }
+    #pp-foot { position: relative; display: flex; gap: 10px; justify-content: flex-end; padding: 14px 22px 18px; }
+    #pp-ok { background: var(--accent); color: #040806; border-color: var(--laton); box-shadow: 0 0 16px rgba(62,154,107,.4); }
+    #pp-ok:hover { background: var(--glow); color: #040806; box-shadow: 0 0 22px rgba(155,240,192,.7); }
+    #pp-box.pp-danger #pp-head { background: rgba(120,30,30,.2); }
+    #pp-box.pp-danger #pp-dot { background: var(--danger); box-shadow: 0 0 10px var(--danger); }
+    #pp-box.pp-danger #pp-title { color: var(--danger); text-shadow: 0 0 10px rgba(255,107,107,.6); }
+    #pp-box.pp-danger #pp-ok { background: var(--danger); box-shadow: 0 0 16px rgba(255,107,107,.4); }
+    #pp-box.pp-danger #pp-ok:hover { background: #ff9a9a; box-shadow: 0 0 22px rgba(255,107,107,.7); }
+    @media (max-width: 520px) { #pp-foot { flex-direction: column-reverse; } #pp-title { font-size: .9rem; } }
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+  <header>
+    <h1>INVENTARIO</h1>
+    <span class="sub">OBJETOS Y CAPÍTULOS DE LOS JUGADORES</span>
+    <span id="conn"><i></i><span id="conn-txt">CONECTANDO…</span></span>
+  </header>
+
+  <!-- NAVEGACIÓN RÁPIDA -->
+  <nav class="nav-secciones">
+    <button class="btn" type="button" onclick="irASeccion('seccionObjetos')">OBJETOS POR JUGADOR</button>
+    <button class="btn" type="button" onclick="irASeccion('seccionCapitulos')">CAPÍTULOS DESBLOQUEADOS</button>
+  </nav>
+
+  <!-- OBJETOS -->
+  <div class="seccion-titulo" id="seccionObjetos"><span>// OBJETOS POR JUGADOR</span><button class="btn btn-subir" type="button" title="Ir al principio" onclick="irArriba()">&#8593;</button></div>
+  <section class="panel">
+    <div class="barra">
+      <input type="text" id="filtro" class="input-texto" placeholder="Buscar objeto…" autocomplete="off">
+      <input type="text" id="nuevoObjeto" class="input-texto" placeholder="fila nueva (ej: pistola3)" maxlength="40" autocomplete="off" style="min-width:200px;">
+      <button class="btn small" id="btnAnadir" type="button">+ AÑADIR FILA</button>
+      <button class="btn small" id="btnDeseleccionar" type="button" title="Quita todos los objetos a todos los jugadores">DESELECCIONAR TODO</button>
+    </div>
+    <div class="tabla-wrap">
+      <table class="tabla">
+        <thead id="thead-obj"></thead>
+        <tbody id="tbody-obj"></tbody>
+      </table>
+    </div>
+    <div id="vacio" class="vacio" style="display:none;">No hay jugadores cargados todavía.</div>
+    <div class="hint">Casilla marcada = el jugador tiene ese objeto. Marcarla se lo da al instante; desmarcarla se lo quita. Los cambios que hacen los jugadores (conseguir, entregar, usar) aparecen aquí solos.</div>
+  </section>
+
+  <!-- CAPÍTULOS -->
+  <div class="seccion-titulo" id="seccionCapitulos"><span>// CAPÍTULOS DESBLOQUEADOS</span><button class="btn btn-subir" type="button" title="Ir al principio" onclick="irArriba()">&#8593;</button></div>
+  <section class="panel">
+    <div class="tabla-wrap" style="max-height:none;">
+      <table class="tabla">
+        <thead id="thead-cap"></thead>
+        <tbody id="tbody-cap"></tbody>
+      </table>
+    </div>
+    <div class="hint">Marcar un capítulo lo desbloquea en el panel del jugador (sin pedirle clave). Desmarcarlo lo vuelve a bloquear.</div>
+  </section>
+
+  <!-- POP-UP GENÉRICO (avisos y confirmaciones) -->
+  <div id="pp-overlay">
+    <div id="pp-box" role="alertdialog" aria-modal="true" aria-labelledby="pp-title">
+      <div id="pp-head"><span id="pp-dot"></span><span id="pp-title">AVISO</span></div>
+      <div id="pp-body"></div>
+      <div id="pp-foot">
+        <button class="btn" id="pp-cancel" type="button">CANCELAR</button>
+        <button class="btn" id="pp-ok" type="button">ACEPTAR</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+function irASeccion(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function irArriba() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+  </script>
+
+  <script src="objetos.js"></script>
+  <script>
+(function () {
+  // =====================================================================
+  // CONFIGURACIÓN
+  // =====================================================================
+  firebase.initializeApp({
+    apiKey: "AIzaSyDBMQU4fRGw-BjfAx8dv84GmcHzA-1ncoY",
+    authDomain: "logia-rol-vivo.firebaseapp.com",
+    databaseURL: "https://logia-rol-vivo-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "logia-rol-vivo",
+    storageBucket: "logia-rol-vivo.firebasestorage.app",
+    messagingSenderId: "432574172065",
+    appId: "1:432574172065:web:0e1d93921e84f51cb099e0"
+  });
+  const db = firebase.database();
+
+  // Capítulos que se pueden desbloquear desde aquí. La clave es la que lee jugadorXXXX.html
+  // (capitulos/<jugador>/<clave>). El número es el id del botón en el panel del jugador.
+  const CAPITULOS = [
+    { clave: 'cap2', nombre: 'Objetivos Acto I', detalle: 'Capítulo 2' },
+    { clave: 'cap3', nombre: '¿Qué hiciste?', detalle: 'Capítulo 3' },
+    { clave: 'cap4', nombre: 'Objetivos Acto II', detalle: 'Capítulo 4' }
+  ];
+
+  const $ = id => document.getElementById(id);
+  function esc(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  let toastTimer;
+  function toast(txt, error) {
+    const t = $('toast');
+    t.textContent = txt;
+    t.className = 'show' + (error ? ' err' : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.className = error ? 'err' : '', 2400);
+  }
+
+  // =====================================================================
+  // ESTADO (todo en tiempo real desde Firebase)
+  // =====================================================================
+  let jugadores = {};    // jugadores/
+  let inventarios = {};  // inventarios/<jugador>/<objeto> = true
+  let capitulos = {};    // capitulos/<jugador>/<clave> = true
+  let armas = {};        // armas/  (solo para listar sus identidades como filas)
+  const extras = new Set(); // filas añadidas a mano en esta sesión
+  let firmaEstructura = '';
+  let filtro = '';
+
+  function idsJugadores() {
+    return Object.keys(jugadores).sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
+  }
+  function nombreJugador(id) {
+    const f = jugadores[id] || {};
+    return String(f.nombre || '').trim() || id;
+  }
+  function nombreObjeto(id) {
+    return (typeof OBJETOS !== 'undefined' && OBJETOS[id] && OBJETOS[id].nombre) ? OBJETOS[id].nombre : id;
+  }
+  function tiene(j, o) { return !!(inventarios[j] && inventarios[j][o] === true); }
+  function tieneCap(j, clave) { return !!(capitulos[j] && capitulos[j][clave] === true); }
+
+  // Filas: primero el catálogo de objetos.js (en su orden), luego lo que exista solo en Firebase.
+  function idsObjetos() {
+    const base = (typeof OBJETOS_BASE !== 'undefined') ? OBJETOS_BASE.slice() : [];
+    const set = new Set(base);
+    Object.keys(armas).forEach(k => set.add(k));
+    Object.keys(inventarios).forEach(j => Object.keys(inventarios[j] || {}).forEach(k => set.add(k)));
+    extras.forEach(k => set.add(k));
+    const otros = Array.from(set).filter(k => base.indexOf(k) === -1).sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
+    return base.concat(otros);
+  }
+
+  // =====================================================================
+  // CONSTRUCCIÓN DE LAS TABLAS (solo cuando cambian jugadores o filas)
+  // =====================================================================
+  function construir(js, os) {
+    // ---- objetos ----
+    let h = '<tr><th>Objeto</th>';
+    js.forEach(j => {
+      h += '<th><span class="jn">' + esc(nombreJugador(j)) + '</span><span class="jid">' + esc(j) + '</span><span class="jcnt" data-cnt="' + esc(j) + '"></span></th>';
+    });
+    h += '<th>Total</th></tr>';
+    $('thead-obj').innerHTML = h;
+
+    let b = '';
+    os.forEach(o => {
+      b += '<tr data-obj="' + esc(o) + '"><td>' + esc(nombreObjeto(o)) + '<small>' + esc(o) + '</small></td>';
+      js.forEach(j => {
+        b += '<td data-celda="1"><input type="checkbox" data-j="' + esc(j) + '" data-o="' + esc(o) + '" title="' + esc(nombreJugador(j)) + ' · ' + esc(o) + '"></td>';
+      });
+      b += '<td class="total" data-total="1">0</td></tr>';
+    });
+    $('tbody-obj').innerHTML = b;
+
+    // ---- capítulos ----
+    let hc = '<tr><th>Capítulo</th>';
+    js.forEach(j => {
+      hc += '<th><span class="jn">' + esc(nombreJugador(j)) + '</span><span class="jid">' + esc(j) + '</span></th>';
+    });
+    hc += '<th>Todos</th></tr>';
+    $('thead-cap').innerHTML = hc;
+
+    let bc = '';
+    CAPITULOS.forEach(c => {
+      bc += '<tr data-cap="' + c.clave + '"><td>' + esc(c.nombre) + '<small>' + esc(c.detalle || c.clave) + '</small></td>';
+      js.forEach(j => {
+        bc += '<td data-celda="1"><input type="checkbox" data-j="' + esc(j) + '" data-c="' + c.clave + '" title="' + esc(nombreJugador(j)) + ' · ' + esc(c.nombre) + '"></td>';
+      });
+      bc += '<td class="acc"><button class="btn small" type="button" data-todos="' + c.clave + '">TODOS</button><button class="btn small" type="button" data-ninguno="' + c.clave + '">NINGUNO</button></td></tr>';
+    });
+    $('tbody-cap').innerHTML = bc;
+  }
+
+  // =====================================================================
+  // ACTUALIZAR CASILLAS (sin reconstruir: así no se pierde nada al editar)
+  // =====================================================================
+  function actualizar(js, os) {
+    // objetos
+    $('tbody-obj').querySelectorAll('tr').forEach(tr => {
+      const o = tr.dataset.obj;
+      let total = 0;
+      tr.querySelectorAll('input[type=checkbox]').forEach(chk => {
+        const v = tiene(chk.dataset.j, o);
+        if (chk.checked !== v) chk.checked = v;
+        chk.parentNode.classList.toggle('on', v);
+        if (v) total++;
+      });
+      tr.querySelector('[data-total]').textContent = total;
+      tr.classList.toggle('alguien', total > 0);
+    });
+
+    // contador de objetos por jugador (cabecera)
+    js.forEach(j => {
+      const el = $('thead-obj').querySelector('[data-cnt="' + j + '"]');
+      if (!el) return;
+      const n = os.filter(o => tiene(j, o)).length;
+      el.textContent = n + (n === 1 ? ' objeto' : ' objetos');
+    });
+
+    // capítulos
+    $('tbody-cap').querySelectorAll('tr').forEach(tr => {
+      tr.querySelectorAll('input[type=checkbox]').forEach(chk => {
+        const v = tieneCap(chk.dataset.j, chk.dataset.c);
+        if (chk.checked !== v) chk.checked = v;
+        chk.parentNode.classList.toggle('on', v);
+      });
+    });
+
+    aplicarFiltro();
+  }
+
+  function aplicarFiltro() {
+    const q = filtro.toLowerCase().trim();
+    $('tbody-obj').querySelectorAll('tr').forEach(tr => {
+      const o = tr.dataset.obj;
+      const visible = !q || o.toLowerCase().indexOf(q) !== -1 || nombreObjeto(o).toLowerCase().indexOf(q) !== -1;
+      tr.style.display = visible ? '' : 'none';
+    });
+  }
+
+  function render() {
+    const js = idsJugadores();
+    const os = idsObjetos();
+    $('vacio').style.display = js.length ? 'none' : 'block';
+    const firma = js.map(j => j + ':' + nombreJugador(j)).join(',') + '|' + os.join(',');
+    if (firma !== firmaEstructura) {
+      construir(js, os);
+      firmaEstructura = firma;
+    }
+    actualizar(js, os);
+  }
+
+  // =====================================================================
+  // ESCRITURA EN FIREBASE
+  // =====================================================================
+  // Casilla de objeto: marcada -> true ; desmarcada -> se borra el nodo
+  $('tbody-obj').addEventListener('change', e => {
+    const chk = e.target;
+    if (!chk || chk.type !== 'checkbox') return;
+    const j = chk.dataset.j, o = chk.dataset.o;
+    const marcar = chk.checked;
+    db.ref('inventarios/' + j + '/' + o).set(marcar ? true : null)
+      .then(() => toast(nombreJugador(j).toUpperCase() + ' · ' + nombreObjeto(o).toUpperCase() + ': ' + (marcar ? 'LO TIENE' : 'YA NO LO TIENE')))
+      .catch(() => { chk.checked = !marcar; toast('ERROR AL GUARDAR', true); });
+  });
+
+  // Casilla de capítulo: marcada -> true ; desmarcada -> se borra el nodo
+  $('tbody-cap').addEventListener('change', e => {
+    const chk = e.target;
+    if (!chk || chk.type !== 'checkbox') return;
+    const j = chk.dataset.j, c = chk.dataset.c;
+    const marcar = chk.checked;
+    const nom = (CAPITULOS.find(x => x.clave === c) || {}).nombre || c;
+    db.ref('capitulos/' + j + '/' + c).set(marcar ? true : null)
+      .then(() => toast(nombreJugador(j).toUpperCase() + ' · ' + nom.toUpperCase() + ': ' + (marcar ? 'DESBLOQUEADO' : 'BLOQUEADO')))
+      .catch(() => { chk.checked = !marcar; toast('ERROR AL GUARDAR', true); });
+  });
+
+  // Botones TODOS / NINGUNO de cada capítulo
+  $('tbody-cap').addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    const clave = b.dataset.todos || b.dataset.ninguno;
+    if (!clave) return;
+    const marcar = !!b.dataset.todos;
+    const upd = {};
+    idsJugadores().forEach(j => { upd['capitulos/' + j + '/' + clave] = marcar ? true : null; });
+    db.ref().update(upd)
+      .then(() => toast((CAPITULOS.find(x => x.clave === clave) || {}).nombre.toUpperCase() + ': ' + (marcar ? 'DESBLOQUEADO PARA TODOS' : 'BLOQUEADO PARA TODOS')))
+      .catch(() => toast('ERROR AL GUARDAR', true));
+  });
+
+  // Añadir una fila nueva (un objeto que no está en objetos.js)
+  function anadirFila() {
+    const input = $('nuevoObjeto');
+    const id = input.value.trim().toLowerCase();
+    if (!id) return;
+    if (!/^[a-z0-9_]+$/.test(id)) { toast('IDENTIDAD NO VÁLIDA (solo a-z, 0-9 y _)', true); return; }
+    extras.add(id);
+    input.value = '';
+    render();
+    toast('FILA "' + id.toUpperCase() + '" AÑADIDA');
+  }
+  // Pop-up bonito: popup({titulo, texto, ok, cancelar, peligro}) -> Promise<boolean>
+  (function () {
+    let resolver = null;
+    function cerrar(val) {
+      $('pp-overlay').classList.remove('pp-visible');
+      if (resolver) { const r = resolver; resolver = null; r(val); }
+    }
+    window.popup = function (o) {
+      o = o || {};
+      if (resolver) cerrar(false);
+      $('pp-title').textContent = o.titulo || 'AVISO';
+      $('pp-body').textContent = o.texto || '';
+      $('pp-ok').textContent = o.ok || 'ACEPTAR';
+      $('pp-cancel').textContent = o.cancelar || 'CANCELAR';
+      $('pp-cancel').style.display = o.cancelar === false ? 'none' : '';
+      $('pp-box').classList.toggle('pp-danger', !!o.peligro);
+      $('pp-overlay').classList.add('pp-visible');
+      setTimeout(() => $(o.cancelar === false ? 'pp-ok' : 'pp-cancel').focus(), 50);
+      return new Promise(res => { resolver = res; });
+    };
+    $('pp-ok').addEventListener('click', () => cerrar(true));
+    $('pp-cancel').addEventListener('click', () => cerrar(false));
+    $('pp-overlay').addEventListener('click', e => { if (e.target === $('pp-overlay')) cerrar(false); });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && $('pp-overlay').classList.contains('pp-visible')) cerrar(false);
+    });
+  })();
+
+  // DESELECCIONAR TODO: quita todos los objetos de todos los jugadores (los capítulos no se tocan)
+  async function deseleccionarTodo() {
+    const upd = {};
+    let n = 0;
+    Object.keys(inventarios).forEach(j => {
+      Object.keys(inventarios[j] || {}).forEach(o => { upd['inventarios/' + j + '/' + o] = null; n++; });
+    });
+    if (!n) { toast('NO HAY NINGÚN OBJETO MARCADO'); return; }
+    if (!await popup({
+      titulo: 'DESELECCIONAR TODO',
+      texto: '¿Quitar TODOS los objetos a TODOS los jugadores? (' + n + (n === 1 ? ' casilla marcada' : ' casillas marcadas') + ')\n\nLos capítulos no se tocan.',
+      ok: 'QUITAR TODO',
+      peligro: true
+    })) return;
+    db.ref().update(upd)
+      .then(() => toast('TODOS LOS OBJETOS DESMARCADOS'))
+      .catch(() => toast('ERROR AL GUARDAR', true));
+  }
+  $('btnDeseleccionar').addEventListener('click', deseleccionarTodo);
+  $('btnAnadir').addEventListener('click', anadirFila);
+  $('nuevoObjeto').addEventListener('keydown', e => { if (e.key === 'Enter') anadirFila(); });
+  $('filtro').addEventListener('input', () => { filtro = $('filtro').value; aplicarFiltro(); });
+
+  // =====================================================================
+  // ESCUCHA EN TIEMPO REAL
+  // =====================================================================
+  db.ref('jugadores').on('value', s => { jugadores = s.val() || {}; render(); });
+  db.ref('inventarios').on('value', s => { inventarios = s.val() || {}; render(); });
+  db.ref('capitulos').on('value', s => { capitulos = s.val() || {}; render(); });
+  db.ref('armas').on('value', s => { armas = s.val() || {}; render(); });
+  db.ref('.info/connected').on('value', s => {
+    const ok = s.val() === true;
+    $('conn').className = ok ? 'on' : 'off';
+    $('conn-txt').textContent = ok ? 'CONECTADO' : 'SIN CONEXIÓN';
+  });
+})();
+  </script>
+</body>
+</html>

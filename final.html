@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Veredicto final</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cinzel+Decorative:wght@700&family=IM+Fell+English:ital@0;1&family=Special+Elite&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<style>
+  :root {
+    --bg: #06100a; --panel: #0f2218; --accent: #3e9a6b; --glow: #9bf0c0;
+    --text: #d9d3b3; --muted: #8fa08a; --border: #1d4a33;
+    --danger: #ff6b6b; --ok: #6fdc9a;
+    --laton: #b49a55; --laton-osc: #6e5c2e; --verdin: #5fb98a;
+    --fuente-titulo: 'Cinzel Decorative', 'Cinzel', Georgia, serif;
+    --fuente-sub: 'Cinzel', Georgia, serif;
+    --fuente-cuerpo: 'IM Fell English', Georgia, 'Times New Roman', serif;
+    --fuente-maquina: 'Special Elite', 'Courier New', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--fuente-maquina); color: var(--text); min-height: 100vh;
+    background-color: #040806;
+    background-image: radial-gradient(circle at 50% 30%, #0f2318 0%, #050a07 75%);
+    padding: 28px 14px 60px;
+  }
+  .caja {
+    position: relative; max-width: 620px; margin: 0 auto; padding: 26px 26px 28px;
+    background: linear-gradient(180deg, #0c1b13 0%, #07100b 100%);
+    border: 3px double var(--laton-osc); box-shadow: 0 0 30px rgba(47,125,87,.25);
+  }
+  .caja::before, .caja::after { content: ''; position: absolute; width: 16px; height: 16px; border: 2px solid var(--laton); pointer-events: none; }
+  .caja::before { top: -3px; left: -3px; border-right: none; border-bottom: none; }
+  .caja::after  { bottom: -3px; right: -3px; border-left: none; border-top: none; }
+  h1 {
+    font-family: var(--fuente-titulo); font-weight: 700; text-align: center;
+    font-size: 1.7rem; letter-spacing: 4px; color: var(--glow);
+    text-shadow: 0 0 14px rgba(155,240,192,.45); text-transform: uppercase;
+  }
+  .sub {
+    font-family: var(--fuente-sub); color: var(--laton); letter-spacing: 4px; font-size: .72rem;
+    text-align: center; margin: 6px 0 22px; text-transform: uppercase;
+  }
+  .intro { font-family: var(--fuente-cuerpo); font-size: 1.05rem; color: var(--text); margin-bottom: 20px; text-align: center; }
+  label {
+    display: block; font-family: var(--fuente-sub); font-size: .72rem; letter-spacing: 2px;
+    color: var(--verdin); text-transform: uppercase; margin: 18px 0 6px;
+  }
+  input, select {
+    width: 100%; font-family: var(--fuente-maquina); font-size: 1rem; color: var(--text);
+    background: #050c08; border: 1px solid var(--border); border-radius: 2px; padding: 10px 12px;
+    outline: none; transition: border-color .15s, box-shadow .15s;
+  }
+  input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 10px rgba(155,240,192,.35); }
+  input[readonly] { color: var(--laton); border-style: dashed; cursor: default; }
+  select option { background: #0b1710; color: var(--text); }
+  .ayuda { font-size: .78rem; color: var(--muted); margin-top: 5px; }
+  #btn-enviar, #btn-ver-resultados, #res-cerrar-btn {
+    font-family: var(--fuente-sub); letter-spacing: 3px; text-transform: uppercase; font-size: .85rem;
+    background: linear-gradient(180deg, #14291d, #0b1710); color: var(--text);
+    border: 1px solid var(--laton); border-radius: 2px; padding: 12px 18px; cursor: pointer;
+    transition: all .15s; width: 100%; margin-top: 26px;
+  }
+  #btn-enviar:hover:enabled, #btn-ver-resultados:hover, #res-cerrar-btn:hover { background: var(--accent); color: #fff; box-shadow: 0 0 14px rgba(155,240,192,.5); }
+  #btn-enviar:disabled { opacity: .5; cursor: default; }
+  .aviso {
+    font-family: var(--fuente-cuerpo); font-size: 1.05rem; text-align: center; padding: 14px;
+    border: 1px solid var(--laton-osc); background: rgba(6,14,9,.8); margin-top: 8px;
+  }
+  .aviso.ok  { color: var(--ok); border-color: var(--accent); }
+  .aviso.err { color: var(--danger); border-color: #7a4a2a; }
+  /* Desplegable propio con foto en miniatura */
+  .desplegable { position: relative; }
+  .dd-boton {
+    display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; cursor: pointer;
+    font-family: var(--fuente-maquina); font-size: 1rem; color: var(--text);
+    background: #050c08; border: 1px solid var(--border); border-radius: 2px; padding: 7px 12px; min-height: 48px;
+    outline: none; transition: border-color .15s, box-shadow .15s;
+  }
+  .dd-boton:hover, .dd-boton:focus, .dd-boton.abierto { border-color: var(--accent); box-shadow: 0 0 10px rgba(155,240,192,.35); }
+  .dd-boton .txt { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dd-boton .txt.vacio { color: var(--muted); }
+  .dd-boton .caret { color: var(--laton); font-size: .8rem; }
+  .dd-lista {
+    position: absolute; left: 0; right: 0; top: 100%; z-index: 30; margin-top: 2px; padding: 4px 0;
+    list-style: none; max-height: 300px; overflow-y: auto;
+    background: #0b1710; border: 1px solid var(--laton-osc); box-shadow: 0 8px 24px rgba(0,0,0,.7);
+  }
+  .dd-lista li { display: flex; align-items: center; gap: 12px; padding: 8px 12px; cursor: pointer; }
+  .dd-lista li:hover, .dd-lista li.activo { background: rgba(62,154,107,.28); }
+  .dd-lista li.elegido { color: var(--glow); }
+  .mini {
+    width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; overflow: hidden;
+    border: 1px solid var(--laton); background: #050c08; display: inline-flex; align-items: center; justify-content: center;
+  }
+  .mini img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .mini.sin { font-family: var(--fuente-sub); color: var(--laton); font-size: .95rem; }
+  .sin-opciones { padding: 10px 12px; color: var(--muted); }
+  /* ---------- Pop-up de resultados ---------- */
+  #res-modal {
+    position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center;
+    padding: 16px; background: rgba(3,7,5,.9); backdrop-filter: blur(3px);
+  }
+  .res-caja {
+    position: relative; width: 760px; max-width: 100%; max-height: 92vh; overflow-y: auto;
+    padding: 30px 28px 24px; border: 2px solid var(--laton);
+    box-shadow: 0 0 0 4px #000, 0 0 0 5px var(--laton-osc), 0 10px 40px rgba(0,0,0,.9), 0 0 50px rgba(47,125,87,.3);
+    background-image: radial-gradient(ellipse at top, rgba(47,125,87,.18), transparent 60%), linear-gradient(180deg, #14291d 0%, #0b1710 100%);
+    animation: aparecerRes .45s ease-out;
+  }
+  .res-caja::before { content: ""; position: absolute; inset: 5px; border: 1px solid var(--laton-osc); pointer-events: none; }
+  @keyframes aparecerRes { from { opacity: 0; transform: translateY(14px) scale(.97); } to { opacity: 1; transform: none; } }
+  .res-cerrar { position: absolute; top: 10px; right: 16px; font-family: var(--fuente-sub); font-size: 1.5rem; font-weight: bold; color: var(--laton); cursor: pointer; z-index: 2; }
+  .res-cerrar:hover { color: var(--glow); text-shadow: 0 0 8px var(--glow); }
+  .res-titulo { font-family: var(--fuente-titulo); font-weight: 700; text-align: center; font-size: 1.6rem; letter-spacing: 4px; color: var(--glow); text-shadow: 0 0 14px rgba(155,240,192,.45); text-transform: uppercase; }
+  .res-sub { font-family: var(--fuente-sub); text-align: center; color: var(--laton); letter-spacing: 3px; font-size: .72rem; text-transform: uppercase; margin: 6px 0 20px; }
+  #res-premios { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-bottom: 22px; }
+  .res-premio { text-align: center; padding: 14px 10px 12px; border: 1px solid var(--laton-osc); background: rgba(4,8,6,.6); }
+  .res-premio-t { font-family: var(--fuente-sub); font-size: .68rem; letter-spacing: 3px; text-transform: uppercase; color: var(--laton); margin-bottom: 10px; }
+  .res-ganador { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 6px 0; font-size: 1.05rem; color: var(--glow); text-shadow: 0 0 8px rgba(155,240,192,.4); }
+  .res-premio-n { font-family: var(--fuente-sub); font-size: .72rem; letter-spacing: 2px; color: var(--muted); margin-top: 8px; }
+  .res-premio-vacio { color: var(--muted); padding: 10px 0; }
+  .res-tabla-wrap { overflow-x: auto; margin-bottom: 4px; }
+  #res-tabla { width: 100%; border-collapse: collapse; }
+  #res-tabla th, #res-tabla td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; font-size: .95rem; }
+  #res-tabla th { font-family: var(--fuente-sub); font-size: .66rem; letter-spacing: 2px; text-transform: uppercase; color: var(--laton); white-space: nowrap; }
+  #res-tabla .num { text-align: right; }
+  #res-tabla td.top { color: var(--glow); font-weight: bold; text-shadow: 0 0 8px rgba(155,240,192,.5); }
+  #res-tabla td.cero { color: var(--muted); }
+  #res-tabla .celda-pj { display: flex; align-items: center; gap: 10px; }
+  .oculto { display: none !important; }
+  @media (max-width: 480px) { .caja { padding: 20px 16px 24px; } h1 { font-size: 1.35rem; letter-spacing: 3px; } }
+</style>
+</head>
+<body>
+<div class="caja">
+  <h1>Veredicto final</h1>
+  <div class="sub">Logia del Crepúsculo de Plata</div>
+
+  <div id="estado" class="aviso">Conectando…</div>
+  <button type="button" id="btn-ver-resultados" class="oculto">Ver resultados</button>
+
+  <form id="formulario" class="oculto" onsubmit="return false;" autocomplete="off">
+    <p class="intro">Responde con calma. Podrás cambiar tus respuestas hasta que el máster cierre el formulario.</p>
+
+    <label for="f-nombre">Nombre del jugador</label>
+    <div class="desplegable" id="f-nombre"></div>
+    <div class="ayuda">Cámbialo solamente si no eres tú.</div>
+
+    <div id="resto" class="oculto">
+      <label for="f-asesino">¿Quién es el asesino?</label>
+      <div class="desplegable" id="f-asesino"></div>
+
+      <label for="f-actuacion">Mejor actuación</label>
+      <div class="desplegable" id="f-actuacion"></div>
+
+      <label for="f-disfraz">Mejor disfraz</label>
+      <div class="desplegable" id="f-disfraz"></div>
+
+      <label for="f-dinero">Dinero restante</label>
+      <input id="f-dinero" type="text" readonly value="—">
+
+      <button type="button" id="btn-enviar">Enviar respuestas</button>
+    </div>
+  </form>
+</div>
+
+<!-- Pop-up con los resultados que envía el máster -->
+<div id="res-modal" class="oculto" role="dialog" aria-modal="true" aria-label="Resultados finales">
+  <div class="res-caja">
+    <span class="res-cerrar" id="res-x" title="Cerrar">X</span>
+    <div class="res-titulo">Resultados finales</div>
+    <div class="res-sub" id="res-sub"></div>
+    <div id="res-premios"></div>
+    <div class="res-tabla-wrap"><table id="res-tabla"></table></div>
+    <button type="button" id="res-cerrar-btn">Cerrar</button>
+  </div>
+</div>
+
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyDBMQU4fRGw-BjfAx8dv84GmcHzA-1ncoY",
+  authDomain: "logia-rol-vivo.firebaseapp.com",
+  databaseURL: "https://logia-rol-vivo-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "logia-rol-vivo",
+  storageBucket: "logia-rol-vivo.firebasestorage.app",
+  messagingSenderId: "432574172065",
+  appId: "1:432574172065:web:0e1d93921e84f51cb099e0"
+});
+const db = firebase.database();
+const $ = id => document.getElementById(id);
+
+let jugadorId = (new URLSearchParams(location.search).get('jugador') || localStorage.getItem('jugador_activo_global') || '').trim();
+let jugadores = {};          // jugadores/<id> con nombre y dinero
+let abierto = false;
+let cargado = false;         // ya llegó la lista de jugadores
+let firmaLista = '';         // para no reconstruir los desplegables si nada cambió
+let mostrandoCerrado = false;
+let resultados = null;       // final/resultados (lo publica final_master.html)
+let yaEnviado = false;       // este jugador ya tiene respuesta guardada
+const MSG_YA = 'Ya enviaste tus respuestas. Puedes modificarlas y volver a enviarlas.';
+
+function nombreDe(id) { return (jugadores[id] && jugadores[id].nombre) || id; }
+function idsJugadores() { return Object.keys(jugadores).filter(id => jugadores[id] && jugadores[id].nombre).sort((a, b) => nombreDe(a).localeCompare(nombreDe(b), 'es')); }
+function dineroDe(id) { const d = jugadores[id] && jugadores[id].dinero; return (d !== undefined && d !== null && isFinite(Number(d))) ? Number(d) : null; }
+
+function fotoDe(id) { return (jugadores[id] && jugadores[id].foto) ? String(jugadores[id].foto).trim() : ''; }
+function opcionesSin(excluirId) {
+  return idsJugadores().filter(id => id !== excluirId).map(id => ({ id: id, nombre: nombreDe(id), foto: fotoDe(id) }));
+}
+
+// Círculo con la foto del personaje (o su inicial si no hay foto o no carga)
+function miniatura(j) {
+  const d = document.createElement('span'); d.className = 'mini';
+  const inicial = String(j.nombre || '?').trim().charAt(0).toUpperCase();
+  if (j.foto) {
+    const img = document.createElement('img'); img.alt = ''; img.src = j.foto;
+    img.onerror = function () { img.remove(); d.classList.add('sin'); d.textContent = inicial; };
+    d.appendChild(img);
+  } else { d.classList.add('sin'); d.textContent = inicial; }
+  return d;
+}
+
+// Desplegable propio (un <select> normal no puede mostrar imágenes)
+function crearDesplegable(el, textoVacio, alCambiar) {
+  const boton = document.createElement('button'); boton.type = 'button'; boton.className = 'dd-boton';
+  const lista = document.createElement('ul'); lista.className = 'dd-lista oculto'; lista.setAttribute('role', 'listbox');
+  el.appendChild(boton); el.appendChild(lista);
+  let opciones = [], valor = '', activo = -1;
+
+  function pintarBoton() {
+    boton.innerHTML = '';
+    const j = opciones.find(o => o.id === valor);
+    const t = document.createElement('span'); t.className = 'txt';
+    if (j) { boton.appendChild(miniatura(j)); t.textContent = j.nombre; }
+    else { t.classList.add('vacio'); t.textContent = textoVacio; }
+    boton.appendChild(t);
+    const c = document.createElement('span'); c.className = 'caret'; c.textContent = '▼'; boton.appendChild(c);
+  }
+  function pintarLista() {
+    lista.innerHTML = '';
+    if (!opciones.length) { const v = document.createElement('li'); v.className = 'sin-opciones'; v.textContent = 'No hay jugadores.'; lista.appendChild(v); return; }
+    opciones.forEach((o, i) => {
+      const li = document.createElement('li'); li.setAttribute('role', 'option');
+      if (o.id === valor) li.classList.add('elegido');
+      if (i === activo) li.classList.add('activo');
+      li.appendChild(miniatura(o));
+      const t = document.createElement('span'); t.textContent = o.nombre; li.appendChild(t);
+      li.addEventListener('mousedown', e => { e.preventDefault(); elegir(o.id); });
+      lista.appendChild(li);
+    });
+  }
+  function abrir() { activo = Math.max(0, opciones.findIndex(o => o.id === valor)); pintarLista(); lista.classList.remove('oculto'); boton.classList.add('abierto'); const a = lista.querySelector('.activo'); if (a) a.scrollIntoView({ block: 'nearest' }); }
+  function cerrar() { lista.classList.add('oculto'); boton.classList.remove('abierto'); }
+  function abierta() { return !lista.classList.contains('oculto'); }
+  function elegir(id) { const cambio = id !== valor; valor = id; pintarBoton(); cerrar(); if (cambio && alCambiar) alCambiar(valor); }
+
+  boton.addEventListener('click', () => { abierta() ? cerrar() : abrir(); });
+  boton.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { cerrar(); return; }
+    if (!['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(e.key)) return;
+    e.preventDefault();
+    if (!abierta()) { abrir(); return; }
+    if (e.key === 'ArrowDown') activo = Math.min(opciones.length - 1, activo + 1);
+    else if (e.key === 'ArrowUp') activo = Math.max(0, activo - 1);
+    else { if (opciones[activo]) elegir(opciones[activo].id); return; }
+    pintarLista(); const a = lista.querySelector('.activo'); if (a) a.scrollIntoView({ block: 'nearest' });
+  });
+  document.addEventListener('click', e => { if (!el.contains(e.target)) cerrar(); });
+  boton.addEventListener('blur', () => setTimeout(() => { if (!el.contains(document.activeElement)) cerrar(); }, 120));
+  pintarBoton();
+
+  return {
+    // Cambia las opciones; conserva el valor si sigue siendo válido
+    poner: function (ops, v) { opciones = ops; valor = (v !== undefined ? v : valor); if (!opciones.some(o => o.id === valor)) valor = ''; pintarBoton(); if (abierta()) pintarLista(); },
+    get valor() { return valor; },
+    fijar: function (v) { valor = opciones.some(o => o.id === v) ? v : ''; pintarBoton(); }
+  };
+}
+
+const ddNombre    = crearDesplegable($('f-nombre'),    'Elige tu personaje…', function (id) {
+  jugadorId = id;
+  try { localStorage.setItem('jugador_activo_global', jugadorId); } catch (_) {}
+  cargarPrevio();
+  pintar();
+});
+const ddAsesino   = crearDesplegable($('f-asesino'),   'Elige un jugador…');
+const ddActuacion = crearDesplegable($('f-actuacion'), 'Elige un jugador…');
+const ddDisfraz   = crearDesplegable($('f-disfraz'),   'Elige un jugador…');
+
+// Rellena los cuatro desplegables (nombre: todos; asesino, actuación y disfraz: todos menos uno mismo)
+function refrescarListas(conservar) {
+  const todos = opcionesSin(null), otros = opcionesSin(jugadorId);
+  ddNombre.poner(todos, jugadorId);
+  ddAsesino.poner(otros, conservar ? undefined : '');
+  ddActuacion.poner(otros, conservar ? undefined : '');
+  ddDisfraz.poner(otros, conservar ? undefined : '');
+}
+
+function estado(txt, cls) {
+  const e = $('estado'); e.textContent = txt; e.className = 'aviso' + (cls ? ' ' + cls : '');
+  e.classList.toggle('oculto', !txt);
+  mostrandoCerrado = false;
+}
+
+function pintarDinero() {
+  const d = dineroDe(jugadorId);
+  $('f-dinero').value = d === null ? '—' : d;
+}
+
+function pintar() {
+  if (!cargado) { estado('Conectando…'); return; }
+  if (!abierto) {
+    $('formulario').classList.add('oculto');
+    estado(resultados ? 'La votación ha terminado. Pulsa «Ver resultados» para consultarlos.' : 'El formulario todavía no está abierto. Espera la señal del máster.');
+    mostrandoCerrado = true;
+    return;
+  }
+  if (mostrandoCerrado) estado(yaEnviado ? MSG_YA : '', yaEnviado ? 'ok' : '');
+  $('formulario').classList.remove('oculto');
+
+  // Desplegables: solo se reconstruyen si cambia la lista de jugadores
+  const firma = idsJugadores().map(id => id + ':' + nombreDe(id) + ':' + fotoDe(id)).join('|');
+  if (firma !== firmaLista) { firmaLista = firma; refrescarListas(true); }
+  const conocido = jugadorId && jugadores[jugadorId] && jugadores[jugadorId].nombre;
+  ddNombre.fijar(conocido ? jugadorId : '');
+  $('resto').classList.toggle('oculto', !conocido);
+  pintarDinero();
+}
+
+// Carga lo que este jugador ya hubiera enviado (para poder corregirlo)
+function cargarPrevio() {
+  refrescarListas(false);
+  yaEnviado = false;
+  if (abierto) estado('');
+  if (!jugadorId) return;
+  const id = jugadorId;
+  db.ref('final/respuestas/' + id).once('value').then(snap => {
+    if (id !== jugadorId) return;           // cambió de jugador mientras cargaba
+    const r = snap.val();
+    if (!r) return;
+    let idAsesino = r.asesino_id || '';
+    if (!idAsesino) {   // respuestas antiguas guardadas como texto: se busca por nombre
+      idAsesino = idsJugadores().find(x => nombreDe(x).toLowerCase() === String(r.asesino || '').trim().toLowerCase()) || '';
+    }
+    if (idAsesino === id) idAsesino = '';   // ya no se permite elegirse a uno mismo
+    ddAsesino.fijar(idAsesino);
+    ddActuacion.fijar(r.mejor_actuacion);
+    ddDisfraz.fijar(r.mejor_disfraz);
+    yaEnviado = true;
+    if (abierto) estado(MSG_YA, 'ok');
+  });
+}
+
+$('btn-enviar').addEventListener('click', () => {
+  const asesinoId = ddAsesino.valor;
+  const actuacion = ddActuacion.valor;
+  const disfraz = ddDisfraz.valor;
+  if (!jugadorId) { estado('Elige tu personaje.', 'err'); return; }
+  if (!asesinoId) { estado('Elige quién es el asesino.', 'err'); return; }
+  if (asesinoId === jugadorId) { estado('No puedes elegirte a ti mismo como asesino.', 'err'); return; }
+  if (!actuacion) { estado('Elige la mejor actuación.', 'err'); return; }
+  if (!disfraz) { estado('Elige el mejor disfraz.', 'err'); return; }
+
+  const id = jugadorId;
+  const btn = $('btn-enviar'); btn.disabled = true; btn.textContent = 'Enviando…';
+  // El dinero se lee de Firebase en el momento de enviar: nunca del campo de la pantalla
+  Promise.all([
+    db.ref('final/abierto').once('value'),
+    db.ref('jugadores/' + id + '/dinero').once('value')
+  ]).then(([sAbierto, sDinero]) => {
+    if (sAbierto.val() !== true) throw new Error('cerrado');
+    const d = Number(sDinero.val());
+    return db.ref('final/respuestas/' + id).set({
+      jugador_id: id,
+      jugador: nombreDe(id),
+      asesino: nombreDe(asesinoId),
+      asesino_id: asesinoId,
+      mejor_actuacion: actuacion,
+      mejor_disfraz: disfraz,
+      dinero: isFinite(d) ? d : 0,
+      ts: firebase.database.ServerValue.TIMESTAMP
+    });
+  }).then(() => {
+    yaEnviado = true;
+    estado('Respuestas enviadas. Puedes modificarlas mientras el formulario siga abierto.', 'ok');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }).catch(err => {
+    estado(err && err.message === 'cerrado' ? 'El máster ha cerrado el formulario.' : 'No se pudo enviar. Comprueba la conexión e inténtalo de nuevo.', 'err');
+  }).finally(() => { btn.disabled = false; btn.textContent = 'Enviar respuestas'; });
+});
+
+let primeraCarga = true;
+db.ref('jugadores').on('value', snap => {
+  jugadores = snap.val() || {};
+  cargado = true;
+  pintar();
+  if (primeraCarga) { primeraCarga = false; if (jugadorId) cargarPrevio(); }
+});
+db.ref('final/abierto').on('value', snap => { abierto = snap.val() === true; pintar(); });
+
+// ---------- Pop-up de resultados ----------
+function el(tag, cls, txt) { const e = document.createElement(tag); if (cls) e.className = cls; if (txt !== undefined) e.textContent = txt; return e; }
+
+function pintarResultados() {
+  const r = resultados; if (!r) return;
+  const filas = (Array.isArray(r.filas) ? r.filas : Object.values(r.filas || {})).filter(Boolean);
+  $('res-sub').textContent = (r.respondieron != null && r.total != null) ? r.respondieron + ' de ' + r.total + ' jugadores han respondido' : '';
+
+  const maxDe = campo => { const v = filas.map(f => Number(f[campo])).filter(x => isFinite(x)); return v.length ? Math.max.apply(null, v) : 0; };
+  const maximos = { asesino: maxDe('asesino'), actuacion: maxDe('actuacion'), disfraz: maxDe('disfraz'), dinero: maxDe('dinero') };
+  const fotoFila = f => f.extra ? '' : fotoDe(f.id);
+  const nombreMini = f => f.extra ? '?' : f.nombre;
+
+  // Tarjetas de premios
+  const cont = $('res-premios'); cont.innerHTML = '';
+  [['Asesino señalado', 'asesino'], ['Mejor actuación', 'actuacion'], ['Mejor disfraz', 'disfraz'], ['El más rico', 'dinero']].forEach(function (p) {
+    const campo = p[1], max = maximos[campo];
+    const gan = max > 0 ? filas.filter(f => Number(f[campo]) === max) : [];
+    const card = el('div', 'res-premio'); card.appendChild(el('div', 'res-premio-t', p[0]));
+    if (!gan.length) card.appendChild(el('div', 'res-premio-vacio', campo === 'dinero' ? '—' : 'Sin votos'));
+    gan.forEach(f => {
+      const fila = el('div', 'res-ganador');
+      fila.appendChild(miniatura({ nombre: nombreMini(f), foto: fotoFila(f) }));
+      fila.appendChild(el('span', '', f.nombre));
+      card.appendChild(fila);
+    });
+    if (gan.length) card.appendChild(el('div', 'res-premio-n', campo === 'dinero' ? '$' + max : max + (max === 1 ? ' voto' : ' votos')));
+    cont.appendChild(card);
+  });
+
+  // Tabla completa
+  const t = $('res-tabla'); t.innerHTML = '';
+  const trh = el('tr');
+  ['Personaje', 'Asesino', 'Actuación', 'Disfraz', 'Dinero'].forEach((h, i) => trh.appendChild(el('th', i ? 'num' : '', h)));
+  const thead = el('thead'); thead.appendChild(trh); t.appendChild(thead);
+  const tbody = el('tbody');
+  filas.slice().sort((a, b) => (Number(b.asesino) || 0) - (Number(a.asesino) || 0) || String(a.nombre).localeCompare(String(b.nombre), 'es')).forEach(f => {
+    const tr = el('tr');
+    const td0 = el('td'); const pj = el('div', 'celda-pj');
+    pj.appendChild(miniatura({ nombre: nombreMini(f), foto: fotoFila(f) })); pj.appendChild(el('span', '', f.nombre));
+    td0.appendChild(pj); tr.appendChild(td0);
+    ['asesino', 'actuacion', 'disfraz'].forEach(c => {
+      const v = Number(f[c]) || 0;
+      tr.appendChild(el('td', 'num ' + (v === 0 ? 'cero' : (v === maximos[c] ? 'top' : '')), f.extra && c !== 'asesino' ? '—' : String(v)));
+    });
+    const d = Number(f.dinero);
+    tr.appendChild(el('td', 'num ' + (isFinite(d) && f.dinero !== undefined && d === maximos.dinero && d > 0 ? 'top' : ''), (f.dinero === undefined || !isFinite(d)) ? '—' : String(d)));
+    tbody.appendChild(tr);
+  });
+  t.appendChild(tbody);
+}
+
+function abrirResultados() {
+  if (!resultados) return;
+  pintarResultados();
+  $('res-modal').classList.remove('oculto');
+  try { localStorage.setItem('final_resultados_visto', String(resultados.ts || '')); } catch (_) {}
+}
+function cerrarResultados() { $('res-modal').classList.add('oculto'); }
+
+$('btn-ver-resultados').addEventListener('click', abrirResultados);
+$('res-x').addEventListener('click', cerrarResultados);
+$('res-cerrar-btn').addEventListener('click', cerrarResultados);
+$('res-modal').addEventListener('click', e => { if (e.target === $('res-modal')) cerrarResultados(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarResultados(); });
+
+db.ref('final/resultados').on('value', snap => {
+  resultados = snap.val();
+  $('btn-ver-resultados').classList.toggle('oculto', !resultados);
+  if (!resultados) { cerrarResultados(); pintar(); return; }
+  let visto = ''; try { visto = localStorage.getItem('final_resultados_visto') || ''; } catch (_) {}
+  if (String(resultados.ts || '') !== visto) abrirResultados();                   // resultados nuevos: se abre solo
+  else if (!$('res-modal').classList.contains('oculto')) pintarResultados();     // ya abierto: se refresca
+  pintar();
+});
+
+</script>
+</body>
+</html>

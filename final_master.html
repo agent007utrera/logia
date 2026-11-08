@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resultados finales · Máster</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cinzel+Decorative:wght@700&family=IM+Fell+English:ital@0;1&family=Special+Elite&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<style>
+  :root {
+    --bg: #06100a; --panel: #0f2218; --accent: #3e9a6b; --glow: #9bf0c0;
+    --text: #d9d3b3; --muted: #8fa08a; --border: #1d4a33;
+    --danger: #ff6b6b; --ok: #6fdc9a;
+    --laton: #b49a55; --laton-osc: #6e5c2e; --verdin: #5fb98a;
+    --fuente-titulo: 'Cinzel Decorative', 'Cinzel', Georgia, serif;
+    --fuente-sub: 'Cinzel', Georgia, serif;
+    --fuente-maquina: 'Special Elite', 'Courier New', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--fuente-maquina); color: var(--text); min-height: 100vh;
+    background-color: #040806;
+    background-image: radial-gradient(circle at 50% 30%, #0f2318 0%, #050a07 75%);
+    padding: 24px 16px 60px;
+  }
+  .contenedor { max-width: 1100px; margin: 0 auto; }
+  h1 {
+    font-family: var(--fuente-titulo); font-weight: 700; text-align: center;
+    font-size: 1.8rem; letter-spacing: 4px; color: var(--glow);
+    text-shadow: 0 0 14px rgba(155,240,192,.45); text-transform: uppercase;
+  }
+  .sub { font-family: var(--fuente-sub); color: var(--laton); letter-spacing: 4px; font-size: .72rem; text-align: center; margin: 6px 0 22px; text-transform: uppercase; }
+  .panel {
+    position: relative; padding: 18px 18px 20px; margin-bottom: 22px;
+    background: linear-gradient(180deg, #0c1b13 0%, #07100b 100%);
+    border: 3px double var(--laton-osc); box-shadow: 0 0 22px rgba(47,125,87,.2);
+  }
+  .panel::before, .panel::after { content: ''; position: absolute; width: 14px; height: 14px; border: 2px solid var(--laton); pointer-events: none; }
+  .panel::before { top: -3px; left: -3px; border-right: none; border-bottom: none; }
+  .panel::after  { bottom: -3px; right: -3px; border-left: none; border-top: none; }
+  h2 {
+    font-family: var(--fuente-sub); font-weight: 700; font-size: 1.05rem; letter-spacing: 3px; color: var(--verdin);
+    text-transform: uppercase; border-bottom: 1px solid var(--laton-osc); padding-bottom: 8px; margin-bottom: 14px;
+  }
+  .barra { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 4px; }
+  .btn {
+    font-family: var(--fuente-sub); letter-spacing: 2px; text-transform: uppercase;
+    background: linear-gradient(180deg, #14291d, #0b1710); color: var(--text);
+    border: 1px solid var(--laton); border-radius: 2px; padding: 7px 12px; font-size: .68rem; cursor: pointer; transition: all .15s;
+  }
+  .btn:hover { background: var(--accent); color: #fff; box-shadow: 0 0 14px rgba(155,240,192,.5); }
+  .btn.danger { border-color: #7a4a2a; color: var(--danger); }
+  .btn.danger:hover { background: #7a2a2a; color: #fff; }
+  .badge {
+    font-family: var(--fuente-sub); font-size: .65rem; letter-spacing: 2px; padding: 4px 8px; border-radius: 2px;
+    border: 1px solid var(--laton-osc); color: var(--muted); display: inline-block;
+  }
+  .badge.true  { color: var(--ok); border-color: var(--accent); background: rgba(111,220,154,.08); }
+  .badge.false { color: var(--danger); border-color: #7a4a2a; background: rgba(255,107,107,.08); }
+  .tabla-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 6px; }
+  th, td { padding: 9px 10px; border-bottom: 1px solid var(--border); text-align: left; font-size: .98rem; }
+  th {
+    font-family: var(--fuente-sub); font-size: .68rem; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--laton); cursor: pointer; user-select: none; white-space: nowrap; background: rgba(6,14,9,.6);
+  }
+  th:hover { color: var(--glow); }
+  th .flecha { display: inline-block; width: 1em; color: var(--glow); }
+  td.num, th.num { text-align: right; }
+  tbody tr:hover td { background: rgba(155,240,192,.05); }
+  td.maximo { color: var(--glow); font-weight: bold; text-shadow: 0 0 8px rgba(155,240,192,.5); }
+  td.cero { color: var(--muted); }
+  .nota { font-size: .8rem; color: var(--muted); margin: 6px 0 0; }
+  #toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); padding: 10px 18px; z-index: 50;
+    font-family: var(--fuente-sub); letter-spacing: 2px; font-size: .75rem; text-transform: uppercase;
+    background: #0b1710; border: 1px solid var(--accent); color: var(--glow); opacity: 0; transition: opacity .25s; pointer-events: none;
+  }
+  #toast.visible { opacity: 1; }
+  #toast.error { border-color: #7a4a2a; color: var(--danger); }
+</style>
+</head>
+<body>
+<div class="contenedor">
+  <h1>Resultados finales</h1>
+  <div class="sub">Panel del máster · Logia del Crepúsculo de Plata</div>
+
+  <section class="panel">
+    <h2>Formulario final</h2>
+    <div class="barra">
+      <span id="badge-estado" class="badge">CARGANDO…</span>
+      <button class="btn" type="button" id="btn-abrir">…</button>
+      <button class="btn danger" type="button" id="btn-borrar">BORRAR RESPUESTAS</button>
+      <button class="btn" type="button" id="btn-ver-formulario">VER FORMULARIO (final.html)</button>
+      <span id="participacion" class="badge"></span>
+    </div>
+    <div class="barra" style="margin-top:12px;">
+      <button class="btn" type="button" id="btn-enviar-resultados">ENVIAR RESULTADOS</button>
+      <button class="btn danger" type="button" id="btn-retirar-resultados">RETIRAR RESULTADOS</button>
+      <span id="badge-resultados" class="badge">CARGANDO…</span>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Recuento por personaje</h2>
+    <div class="tabla-wrap"><table id="tabla-recuento"></table></div>
+    <div class="nota">// Pincha en una cabecera para ordenar; un segundo clic invierte el orden. El asesino se escribe a mano: se reconoce por nombre o apellido; lo que no coincida con ningún jugador sale como fila aparte.</div>
+  </section>
+
+  <section class="panel">
+    <h2>Respuestas recibidas</h2>
+    <div class="tabla-wrap"><table id="tabla-respuestas"></table></div>
+  </section>
+</div>
+<div id="toast"></div>
+
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyDBMQU4fRGw-BjfAx8dv84GmcHzA-1ncoY",
+  authDomain: "logia-rol-vivo.firebaseapp.com",
+  databaseURL: "https://logia-rol-vivo-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "logia-rol-vivo",
+  storageBucket: "logia-rol-vivo.firebasestorage.app",
+  messagingSenderId: "432574172065",
+  appId: "1:432574172065:web:0e1d93921e84f51cb099e0"
+});
+const db = firebase.database();
+const $ = id => document.getElementById(id);
+
+let jugadoresFB = {};      // jugadores/<id>: { nombre, dinero, ... }
+let respuestas = {};       // final/respuestas/<id> (lo escribe final.html)
+let abierto = false;
+
+const orden = {
+  recuento:   { col: 'asesino', dir: -1 },
+  respuestas: { col: 'ts',      dir: -1 }
+};
+
+function toast(txt, error) {
+  const t = $('toast'); t.textContent = txt; t.className = 'visible' + (error ? ' error' : '');
+  clearTimeout(toast.t); toast.t = setTimeout(() => { t.className = ''; }, 2400);
+}
+
+const norm = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+const nombreDe = id => (jugadoresFB[id] && jugadoresFB[id].nombre) || id;
+const idsJugadores = () => Object.keys(jugadoresFB).filter(id => jugadoresFB[id] && jugadoresFB[id].nombre);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+// ¿A qué jugador se refiere el texto escrito? Devuelve el id, o null si ninguno o ambiguo
+function reconocerJugador(texto) {
+  const t = norm(texto);
+  if (!t) return null;
+  const candidatos = idsJugadores().filter(id => {
+    const n = norm(nombreDe(id));
+    if (!n) return false;
+    if (t === n || t.includes(n)) return true;
+    const tokens = n.split(' ').filter(x => x.length >= 3);
+    const apellido = tokens[tokens.length - 1];
+    const nombre = tokens[0];
+    if (apellido && t.split(' ').includes(apellido)) return true;
+    if (nombre && t === nombre) return true;
+    return false;
+  });
+  return candidatos.length === 1 ? candidatos[0] : null;
+}
+
+function comparar(a, b, col, dir) {
+  const x = a[col], y = b[col];
+  let r;
+  if (typeof x === 'number' && typeof y === 'number') r = x - y;
+  else r = String(x == null ? '' : x).localeCompare(String(y == null ? '' : y), 'es');
+  if (r === 0) r = String(a.nombre || '').localeCompare(String(b.nombre || ''), 'es');
+  return r * dir;
+}
+
+function cabecera(tabla, columnas) {
+  const o = orden[tabla];
+  return '<thead><tr>' + columnas.map(c => {
+    const flecha = o.col === c.k ? (o.dir === 1 ? '▲' : '▼') : '';
+    return `<th class="${c.num ? 'num' : ''}" data-tabla="${tabla}" data-col="${c.k}" title="Ordenar">${c.t} <span class="flecha">${flecha}</span></th>`;
+  }).join('') + '</tr></thead>';
+}
+
+const fecha = ts => ts ? new Date(ts).toLocaleTimeString('es-ES') : '—';
+
+// Recuento por personaje: devuelve una fila por jugador (más una por cada asesino escrito que no sea jugador)
+function calcularRecuento(lista, ids) {
+  const filas = {};
+  ids.forEach(id => { filas[id] = { id: id, nombre: nombreDe(id), asesino: 0, actuacion: 0, disfraz: 0, dinero: null, respondio: 0 }; });
+  const extras = {};   // asesinos escritos que no coinciden con ningún jugador
+  lista.forEach(r => {
+    if (filas[r._id]) { filas[r._id].respondio = 1; if (isFinite(Number(r.dinero))) filas[r._id].dinero = Number(r.dinero); }
+    if (filas[r.mejor_actuacion]) filas[r.mejor_actuacion].actuacion++;
+    if (filas[r.mejor_disfraz]) filas[r.mejor_disfraz].disfraz++;
+    const id = (r.asesino_id && filas[r.asesino_id]) ? r.asesino_id : reconocerJugador(r.asesino);
+    if (id && filas[id]) filas[id].asesino++;
+    else if (norm(r.asesino)) {
+      const k = norm(r.asesino);
+      if (!extras[k]) extras[k] = { nombre: '¿ ' + String(r.asesino).trim() + ' ?', asesino: 0, actuacion: 0, disfraz: 0, dinero: null, respondio: null, extra: true };
+      extras[k].asesino++;
+    }
+  });
+  return Object.values(filas).concat(Object.values(extras));
+}
+
+const listaRespuestas = () => Object.keys(respuestas).map(id => Object.assign({ _id: id }, respuestas[id]));
+
+function pintar() {
+  const ids = idsJugadores();
+  const lista = Object.keys(respuestas).map(id => Object.assign({ _id: id }, respuestas[id]));
+
+  // ---------- Recuento por personaje ----------
+  const todas = calcularRecuento(lista, ids);
+  const maxA = Math.max(0, ...todas.map(f => f.asesino));
+  const maxP = Math.max(0, ...todas.map(f => f.actuacion));
+  const maxD = Math.max(0, ...todas.map(f => f.disfraz));
+  const o1 = orden.recuento;
+  todas.sort((a, b) => comparar(a, b, o1.col, o1.dir));
+
+  const colsR = [
+    { k: 'nombre', t: 'Personaje' }, { k: 'asesino', t: 'Votos asesino', num: true },
+    { k: 'actuacion', t: 'Mejor actuación', num: true }, { k: 'disfraz', t: 'Mejor disfraz', num: true },
+    { k: 'dinero', t: 'Dinero restante', num: true }, { k: 'respondio', t: 'Ha respondido', num: true }
+  ];
+  const celda = (v, max) => `<td class="num ${v === 0 ? 'cero' : (v === max && max > 0 ? 'maximo' : '')}">${v}</td>`;
+  $('tabla-recuento').innerHTML = cabecera('recuento', colsR) + '<tbody>' + todas.map(f => `
+    <tr>
+      <td>${esc(f.nombre)}</td>
+      ${celda(f.asesino, maxA)}${f.extra ? '<td class="num cero">—</td><td class="num cero">—</td>' : celda(f.actuacion, maxP) + celda(f.disfraz, maxD)}
+      <td class="num">${f.dinero === null ? '—' : f.dinero}</td>
+      <td class="num">${f.respondio === null ? '—' : (f.respondio ? '✓' : '—')}</td>
+    </tr>`).join('') + '</tbody>';
+
+  // ---------- Respuestas recibidas ----------
+  const filasResp = lista.map(r => ({
+    nombre: nombreDe(r._id), asesino: r.asesino || '',
+    actuacion: nombreDe(r.mejor_actuacion), disfraz: nombreDe(r.mejor_disfraz),
+    dinero: isFinite(Number(r.dinero)) ? Number(r.dinero) : null, ts: r.ts || 0
+  }));
+  const o2 = orden.respuestas;
+  filasResp.sort((a, b) => comparar(a, b, o2.col, o2.dir));
+  const colsP = [
+    { k: 'nombre', t: 'Jugador' }, { k: 'asesino', t: 'Asesino señalado' },
+    { k: 'actuacion', t: 'Mejor actuación' }, { k: 'disfraz', t: 'Mejor disfraz' },
+    { k: 'dinero', t: 'Dinero restante', num: true }, { k: 'ts', t: 'Hora', num: true }
+  ];
+  $('tabla-respuestas').innerHTML = cabecera('respuestas', colsP) + '<tbody>' + (filasResp.length ? filasResp.map(f => `
+    <tr><td>${esc(f.nombre)}</td><td>${esc(f.asesino)}</td><td>${esc(f.actuacion)}</td><td>${esc(f.disfraz)}</td>
+    <td class="num">${f.dinero === null ? '—' : f.dinero}</td><td class="num">${fecha(f.ts)}</td></tr>`).join('')
+    : '<tr><td colspan="6" class="cero">Todavía no hay respuestas.</td></tr>') + '</tbody>';
+
+  // ---------- Estado del formulario ----------
+  $('participacion').textContent = `${lista.length} / ${ids.length} HAN RESPONDIDO`;
+  const badge = $('badge-estado'), btn = $('btn-abrir');
+  badge.textContent = abierto ? 'FORMULARIO ABIERTO' : 'FORMULARIO CERRADO';
+  badge.className = 'badge ' + (abierto ? 'true' : 'false');
+  btn.textContent = abierto ? 'CERRAR FORMULARIO' : 'ABRIR FORMULARIO';
+  btn.className = abierto ? 'btn danger' : 'btn';
+}
+
+// Clic en cabecera = ordenar (segundo clic = invertir)
+document.addEventListener('click', e => {
+  const th = e.target.closest('th[data-tabla]');
+  if (!th) return;
+  const tabla = th.dataset.tabla, col = th.dataset.col, o = orden[tabla];
+  if (o.col === col) o.dir = -o.dir;
+  else {
+    const textual = col === 'nombre' || (tabla === 'respuestas' && ['asesino', 'actuacion', 'disfraz'].includes(col));
+    o.col = col; o.dir = textual ? 1 : -1;
+  }
+  pintar();
+});
+
+$('btn-abrir').addEventListener('click', () => {
+  const nuevo = !abierto;
+  db.ref('final/abierto').set(nuevo)
+    .then(() => toast(nuevo ? 'Formulario abierto' : 'Formulario cerrado'))
+    .catch(() => toast('Error al cambiar el formulario', true));
+});
+$('btn-ver-formulario').addEventListener('click', () => {
+  if (!window.open('final.html', '_blank')) toast('El navegador ha bloqueado la pestaña: permite las ventanas emergentes', true);
+});
+$('btn-enviar-resultados').addEventListener('click', () => {
+  const lista = listaRespuestas(), ids = idsJugadores();
+  if (!lista.length) { toast('Todavía no hay respuestas que enviar', true); return; }
+  if (!confirm(`Se enviarán los resultados actuales (${lista.length} de ${ids.length} han respondido) y se CERRARÁ el formulario. A los jugadores que tengan final.html abierto les saldrá un pop-up con los resultados. ¿Continuar?`)) return;
+
+  const filas = calcularRecuento(lista, ids).map(f => {
+    const o = { id: f.id || '', nombre: f.nombre, asesino: f.asesino, actuacion: f.actuacion, disfraz: f.disfraz };
+    if (f.dinero !== null) o.dinero = f.dinero;
+    if (f.extra) o.extra = true;
+    return o;
+  });
+  db.ref('final').update({
+    resultados: { ts: firebase.database.ServerValue.TIMESTAMP, respondieron: lista.length, total: ids.length, filas: filas },
+    abierto: false
+  })
+    .then(() => toast('Resultados enviados · formulario cerrado'))
+    .catch(() => toast('Error al enviar los resultados', true));
+});
+$('btn-retirar-resultados').addEventListener('click', () => {
+  db.ref('final/resultados').remove()
+    .then(() => toast('Resultados retirados'))
+    .catch(() => toast('Error al retirar los resultados', true));
+});
+$('btn-borrar').addEventListener('click', () => {
+  if (!confirm('¿Borrar TODAS las respuestas del formulario final (y los resultados ya enviados)? No se puede deshacer.')) return;
+  db.ref('final').update({ respuestas: null, resultados: null })
+    .then(() => toast('Respuestas borradas'))
+    .catch(() => toast('Error al borrar', true));
+});
+
+db.ref('jugadores').on('value', s => { jugadoresFB = s.val() || {}; pintar(); });
+db.ref('final/abierto').on('value', s => { abierto = s.val() === true; pintar(); });
+db.ref('final/respuestas').on('value', s => { respuestas = s.val() || {}; pintar(); });
+db.ref('final/resultados').on('value', s => {
+  const r = s.val(), b = $('badge-resultados');
+  b.textContent = r ? 'RESULTADOS ENVIADOS' + (r.ts ? ' · ' + new Date(r.ts).toLocaleTimeString('es-ES') : '') : 'RESULTADOS SIN ENVIAR';
+  b.className = 'badge' + (r ? ' true' : '');
+});
+pintar();
+</script>
+</body>
+</html>

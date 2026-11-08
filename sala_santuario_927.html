@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Santuario</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cinzel+Decorative:wght@700&family=IM+Fell+English:ital@0;1&family=Special+Elite&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --negro:        #040806;
+    --bosque:       #0a1510;
+    --musgo:        #12261b;
+    --esmeralda:    #2f7d57;
+    --verdin:       #5fb98a;
+    --brillo:       #9bf0c0;
+    --laton:        #b49a55;
+    --laton-osc:    #6e5c2e;
+    --pergamino:    #d9d3b3;
+    --pergamino-osc:#a9a285;
+    --sangre:       #a8423a;
+    --fuente-titulo: 'Cinzel Decorative', 'Cinzel', Georgia, serif;
+    --fuente-sub:    'Cinzel', Georgia, serif;
+    --fuente-cuerpo: 'IM Fell English', Georgia, 'Times New Roman', serif;
+    --fuente-maquina:'Special Elite', 'Courier New', monospace;
+
+    --ratio-w: 16;
+    --ratio-h: 9;
+}
+
+body, html {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background-color: var(--negro);
+    background-image: radial-gradient(circle at 50% 40%, #0f2318 0%, #050a07 75%);
+    font-family: var(--fuente-cuerpo);
+    color: var(--pergamino);
+}
+* { box-sizing: border-box; }
+
+body::before {
+    content: "";
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 4999;
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.65) 100%);
+}
+body::after {
+    content: "";
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 5000;
+    opacity: 0.09;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+.layout-container {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 8px;
+    padding: 8px;
+    width: 100%;
+    height: 100%;
+}
+
+.room-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    background-color: #000;
+    border: 2px solid var(--laton-osc);
+    box-shadow: inset 0 0 0 3px #000, inset 0 0 0 4px var(--laton-osc), 0 0 30px rgba(47,125,87,0.18);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.game-container {
+    position: relative;
+    width: min(100%, calc((100vh - 28px) * var(--ratio-w) / var(--ratio-h)));
+    aspect-ratio: var(--ratio-w) / var(--ratio-h);
+    background: linear-gradient(135deg, #0c1a13 0%, #07110c 60%, #0c1a13 100%);
+}
+.game-image {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+.hotspot {
+    position: absolute;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+.hotspot:hover {
+    background-color: rgba(95, 185, 138, 0.38);
+    box-shadow: inset 0 0 22px rgba(155, 240, 192, 0.85);
+}
+
+#hsAltar { top: 47.9%; left: 46.8%; width: 30.4%; height: 30.6%; clip-path: polygon(1.2% 0.0%, 100.0% 0.0%, 99.5% 47.8%, 92.1% 95.7%, 3.7% 100.0%, 0.0% 60.9%); }
+#hsPiramide { top: 30.9%; left: 57.1%; width: 10.2%; height: 14.6%; clip-path: polygon(0.0% 96.4%, 48.9% 0.0%, 100.0% 93.6%, 48.9% 100.0%); }
+#hsDaga { top: 44.1%; left: 55.0%; width: 14.6%; height: 3.7%; clip-path: polygon(0.0% 64.3%, 59.0% 0.0%, 100.0% 10.7%, 99.0% 64.3%, 64.1% 92.9%, 12.8% 100.0%); }
+#hsVelaIzq { top: 29.3%; left: 50.6%; width: 2.4%; height: 18.4%; clip-path: polygon(6.2% 0.0%, 93.7% 0.0%, 100.0% 100.0%, 0.0% 100.0%); }
+#hsVelaDer { top: 29.0%; left: 71.5%; width: 2.7%; height: 18.6%; clip-path: polygon(5.6% 0.0%, 94.4% 0.0%, 100.0% 100.0%, 0.0% 100.0%); }
+#hsEscudo { top: 5.3%; left: 58.4%; width: 7.6%; height: 18.0%; clip-path: polygon(0.0% 22.2%, 49.0% 0.0%, 100.0% 22.2%, 98.0% 66.7%, 49.0% 100.0%, 4.9% 66.7%); }
+#hsRelieve { top: 13.3%; left: 0.6%; width: 10.2%; height: 31.3%; clip-path: polygon(0.0% 0.0%, 96.4% 0.0%, 100.0% 97.9%, 0.0% 100.0%); }
+#hsRunas { top: 16.0%; left: 11.6%; width: 16.7%; height: 49.2%; clip-path: polygon(0.0% 0.0%, 69.5% 2.7%, 100.0% 48.6%, 98.7% 94.6%, 74.0% 100.0%, 2.2% 94.6%); }
+#hsEstandarteOjo { top: 13.0%; left: 41.9%; width: 4.6%; height: 29.3%; clip-path: polygon(0.0% 0.0%, 100.0% 0.0%, 96.8% 60.0%, 51.6% 100.0%, 3.2% 60.0%); }
+#hsEstandarteLuna { top: 11.3%; left: 78.4%; width: 5.4%; height: 31.2%; clip-path: polygon(0.0% 1.3%, 100.0% 0.0%, 97.2% 59.6%, 51.4% 100.0%, 2.8% 59.6%); }
+#hsCuerpo { top: 65.2%; left: 7.5%; width: 34.3%; height: 12.6%; clip-path: polygon(0.0% 75.8%, 17.5% 23.2%, 45.9% 0.0%, 83.0% 0.0%, 100.0% 36.8%, 100.0% 82.1%, 87.3% 94.7%, 39.3% 94.7%, 15.3% 100.0%); }
+#hsCharco { top: 76.1%; left: 11.6%; width: 28.2%; height: 17.0%; clip-path: polygon(0.0% 100.0%, 14.6% 41.4%, 43.8% 20.3%, 91.5% 0.0%, 100.0% 14.1%, 96.8% 60.9%, 80.9% 78.1%, 33.2% 92.2%); }
+
+.player-hud {
+    position: fixed; top: 15px; right: 20px;
+    background: rgba(5, 12, 8, 0.94);
+    border: 1px solid var(--laton);
+    outline: 1px solid var(--laton-osc); outline-offset: 2px;
+    color: var(--verdin); padding: 8px 16px;
+    font-family: var(--fuente-maquina); font-size: 0.9rem;
+    letter-spacing: 2px; z-index: 1500;
+    box-shadow: 0 0 14px rgba(47, 125, 87, 0.45); text-align: center;
+}
+
+#timerContainer {
+    position: fixed; top: 15px; left: 15px;
+    background: linear-gradient(135deg, #0a1510 0%, #12261b 100%);
+    color: var(--brillo); border: 1px solid var(--laton);
+    outline: 1px solid var(--laton-osc); outline-offset: 2px;
+    box-shadow: inset 0 0 10px rgba(95,185,138,0.2), 0 0 12px rgba(47,125,87,0.35);
+    padding: 8px 14px; font-family: var(--fuente-maquina);
+    font-size: 0.95rem; letter-spacing: 2px; z-index: 1500;
+}
+
+.back-btn {
+    display: none; position: fixed; top: 15px; left: 15px;
+    background: var(--musgo); color: var(--brillo);
+    border: 1px solid var(--laton); outline: 1px solid var(--laton-osc); outline-offset: 2px;
+    padding: 8px 14px; font-family: var(--fuente-sub); font-size: 0.8rem;
+    letter-spacing: 2px; text-decoration: none; z-index: 1500;
+}
+
+.video-sidebar {
+    background: rgba(4, 9, 6, 0.96);
+    border: 2px solid var(--laton-osc);
+    box-shadow: inset 0 0 0 3px #000, inset 0 0 0 4px var(--laton-osc), 0 0 15px rgba(0,0,0,0.8);
+    display: flex; flex-direction: column; overflow: hidden;
+    font-family: var(--fuente-maquina); border-radius: 3px;
+}
+.video-header {
+    padding: 12px 10px; background: linear-gradient(180deg, #0f2318, #08120d);
+    border-bottom: 1px solid var(--laton-osc); color: var(--laton);
+    font-family: var(--fuente-sub); font-size: 0.85rem; text-align: center; letter-spacing: 3px;
+}
+
+#video-grid {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Crea exactamente 2 columnas iguales */
+    gap: 8px;                              /* Espacio de separación entre las webcams */
+    align-content: start;                  /* Alinea las filas hacia arriba ordenadamente */
+}
+
+.video-card {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3; /* Mantiene la proporción clásica de cámara */
+    background: #000;
+    border: 1px solid #1a3a5c;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.video-card video { width: 100%; height: 100%; object-fit: cover; }
+.video-name {
+    position: absolute;
+    left: 5px; bottom: 5px;
+    max-width: calc(100% - 10px);
+    padding: 2px 7px;
+    background: rgba(4, 9, 6, 0.88);
+    color: var(--brillo);
+    font-size: 0.68rem;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    border: 1px solid rgba(180, 154, 85, 0.5);
+}
+.aforo-aviso {
+    color: var(--laton); font-family: var(--fuente-sub); font-size: 0.72rem; letter-spacing: 3px;
+    text-align: center; margin: 0; padding: 6px; border-top: 1px solid var(--laton-osc);
+    background: #060d09; display: flex; align-items: center; justify-content: space-between;
+}
+.aforo-aviso button { background: var(--musgo); border: 1px solid var(--laton-osc); color: var(--brillo); padding: 2px 8px; cursor: pointer; }
+.aforo-aviso button { position: relative; overflow: hidden; }
+.aforo-aviso button.off { background: #2a0e0b; border-color: var(--sangre); color: var(--sangre); }
+.aforo-aviso button.off::after {   /* tachón diagonal cuando está apagado */
+    content: ""; position: absolute; top: 50%; left: -20%;
+    width: 140%; height: 2px; background: var(--sangre);
+    transform: translateY(-50%) rotate(-45deg); pointer-events: none;
+}
+
+.modal {
+    display: none; position: fixed; inset: 0;
+    background: radial-gradient(circle at center, rgba(6,16,10,0.82), rgba(0,0,0,0.92));
+    backdrop-filter: blur(2px); z-index: 1000; justify-content: center; align-items: center;
+}
+.modal-content {
+    position: relative; width: 90%; max-width: 470px; max-height: 82vh; overflow-y: auto;
+    padding: 30px; background: linear-gradient(180deg, #14291d 0%, #0b1710 100%);
+    border: 2px solid var(--laton); box-shadow: 0 0 0 4px #000, 0 0 0 5px var(--laton-osc), 0 10px 40px rgba(0,0,0,0.9);
+}
+.modal-content h3 { margin: 0; font-family: var(--fuente-titulo); font-size: 1.3rem; text-align: center; color: var(--verdin); }
+.modal-content p { line-height: 1.65; color: var(--pergamino); text-align: center; }
+.close-btn { position: absolute; top: 12px; right: 18px; font-size: 1.7rem; color: var(--laton); background: none; border: none; cursor: pointer; }
+
+.drawer-img { display: block; margin: 14px auto 6px; width: 70%; max-height: 180px; object-fit: contain; border: 1px solid var(--laton); cursor: zoom-in; }
+.fila-botones { display: flex; gap: 12px; justify-content: center; margin-top: 18px; }
+.drawer-btn { background: #1c3d2b; color: var(--brillo); border: 1px solid var(--laton); padding: 9px 20px; font-family: var(--fuente-sub); cursor: pointer; }
+.drawer-btn.no { background: #3a1613; border-color: var(--sangre); color: #e9a29b; }
+.cost-box { margin: 14px 0 4px; padding: 9px; border: 1px dashed var(--laton-osc); background: rgba(47,125,87,0.1); text-align: center; color: var(--brillo); font-family: var(--fuente-maquina); }
+
+#fullscreenViewer { display: none; position: fixed; inset: 0; background-color: rgba(0,0,0,0.96); z-index: 3000; justify-content: center; align-items: center; }
+#fullscreenViewer img { max-width: 92%; max-height: 92%; object-fit: contain; border: 1px solid var(--laton-osc); }
+</style>
+</head>
+
+<body>
+
+<div class="player-hud" id="playerHud">
+    <div id="identidadTexto">IDENTIDAD: CARGANDO...</div>
+    <div id="video-status-hud" style="font-size:0.7rem;color:var(--pergamino-osc);margin-top:4px;letter-spacing:1px;">Conectando...</div>
+</div>
+
+<div id="timerContainer">PUERTA CERRADA: <span id="countdown">00:10</span></div>
+<a href="#" id="backBtn" class="back-btn" onclick="playClick(); volverAlMapa(event)">IR AL PASILLO</a>
+
+<div class="layout-container">
+    <div class="room-section">
+    <div class="game-container" id="gameContainer">
+        <video src="images/sala_santuario.mp4" class="game-image" autoplay muted loop playsinline preload="auto" aria-label="Santuario de la Logia"></video>
+
+        <!-- HOTSPOTS (los marcados como OBJETO RECOGIBLE dan un objeto; el resto solo describen) -->
+        <!-- Altar -->
+        <div class="hotspot" id="hsAltar" data-etiqueta="Altar" onclick="playClick(); abrirInfo('El altar', 'Un altar de piedra negra, macizo, de proporciones que no se ajustan a la escala humana: la plataforma es demasiado alta para sentarse y demasiado baja para tenderse, como si hubiese sido construida para un oficiante de otra estatura, o de otra especie. El paño negro que lo cubre oculta unos grabados que, a través de la tela, se perciben como relieves en movimiento. Tocarlo produce un cosquilleo en las yemas, como una corriente dormida.')"></div>
+
+        <!-- Pirámide de cristal -->
+        <div class="hotspot" id="hsPiramide" data-etiqueta="Pirámide de cristal" onclick="playClick(); abrirInfo('La pirámide de cristal', 'Una pequeña pirámide de cristal ahumado reposa sobre el altar. En su interior late una luz ambarina, tenue, que no procede de las velas: es ella la que ilumina las velas. Al mirarla fijamente, las facetas parecen multiplicarse, y en la más honda creéis ver un paisaje de torres negras bajo un cielo de soles muertos. Un zumbido casi inaudible os recorre los dientes, y cuando apartáis la vista, durante un instante, la pirámide es más grande.')"></div>
+
+        <!-- Daga ritual -->
+        <div class="hotspot" id="hsDaga" data-etiqueta="Daga ritual" onclick="playClick(); abrirInfo('La daga ritual', 'Una daga de hoja ondulada, con empuñadura de hueso o de algo que lo imita, descansa sobre el paño negro, junto a la pirámide. La hoja refleja las llamas como si ardiera por dentro, y a lo largo de ella corre una inscripción en caracteres que se retuercen como gusanos. Al acercar la mano, el acero parece enfriarse; al retirarla, os queda en la palma la marca de un frío circular.')"></div>
+
+        <!-- Vela izquierda -->
+        <div class="hotspot" id="hsVelaIzq" data-etiqueta="Vela izquierda" onclick="playClick(); abrirInfo('La vela de la izquierda', 'Una vela de cera amarillenta, gruesa como un brazo, arde con una llama alta y absolutamente recta. La cera, al derretirse, ha formado escurrimientos que, vistos de cerca, recuerdan dedos o raíces; y en la base se acumulan pequeños fragmentos blanquecinos que podrían ser cera endurecida, o dientes.')"></div>
+
+        <!-- Vela derecha -->
+        <div class="hotspot" id="hsVelaDer" data-etiqueta="Vela derecha" onclick="playClick(); abrirInfo('La vela de la derecha', 'La vela de la derecha se inclina hacia el fondo de la sala, con una llama oblicua e inmóvil, como si señalara. Pero lo más raro es el sonido: un chasquido seco y regular que sale de la mecha y que, escuchado con atención, tiene la cadencia de un rezo. Cuando contenéis la respiración, el chasquido continúa unos segundos más, y luego calla, esperando.')"></div>
+
+        <!-- Escudo de piedra -->
+        <div class="hotspot" id="hsEscudo" data-etiqueta="Escudo de piedra" onclick="playClick(); abrirInfo('El escudo de piedra', 'Sobre el arco central, un escudo de piedra tallado con un emblema de trazos entrelazados: líneas que ascienden como astas, una media luna invertida, un signo que se bifurca como las antenas de un insecto o las raíces de un árbol al revés. Parece el sello de la Logia, pero las líneas han sido rehechas por otra mano sobre un trazo anterior que se adivina debajo y que no tiene nada de humano.')"></div>
+
+        <!-- Bajorrelieve -->
+        <div class="hotspot" id="hsRelieve" data-etiqueta="Bajorrelieve" onclick="playClick(); abrirInfo('El bajorrelieve', 'Un bajorrelieve monumental ocupa el muro: una criatura de cabeza de pulpo, con alas membranosas plegadas a la espalda y garras de dragón, encorvada sobre un pedestal minúsculo. Quien la talló no pudo hacerlo de memoria: cada detalle es demasiado exacto, cada ventosa, cada escama, cada pliegue de las alas. Los ojos, hondos y sin pupila, siguen vuestros movimientos con una atención paciente. Y desde el instante en que los miráis, un ritmo sordo, como de olas lejanas, empieza a resonar en vuestros oídos.')"></div>
+
+        <!-- Runas en la piedra -->
+        <div class="hotspot" id="hsRunas" data-etiqueta="Runas en la piedra" onclick="playClick(); abrirInfo('Las runas', 'Las paredes están cubiertas de signos: círculos, triángulos truncados, ideogramas que se encadenan en columnas y trepan por los pilares hasta el techo. Intentáis descifrar un grupo y la mente se resiste, como la mano a cerrarse sobre el fuego. Algunos signos están excavados más hondo que los demás, y en su interior hay un residuo oscuro y resinoso. Al pasar la yema por ellos, un vértigo breve os asalta.')"></div>
+
+        <!-- Estandarte del ojo -->
+        <div class="hotspot" id="hsEstandarteOjo" data-etiqueta="Estandarte del ojo" onclick="playClick(); abrirInfo('El estandarte del ojo', 'Un estandarte negro, rematado en pico, ostenta un ojo bordado con hilo pálido: un ojo abierto, sin párpado, de iris casi blanco. La tela cuelga completamente inmóvil, pero el ojo parece haber cambiado de posición desde que entrasteis: ahora mira un poco más a la izquierda, un poco más cerca de vosotros.')"></div>
+
+        <!-- Estandarte de la luna -->
+        <div class="hotspot" id="hsEstandarteLuna" data-etiqueta="Estandarte de la luna" onclick="playClick(); abrirInfo('El estandarte de la luna', 'En el estandarte de la derecha, una luna en cuarto creciente bordada con hilo de plata, ennegrecida por la humedad. Os asalta la certeza de que no es la luna que sale sobre Arkham, sino otra, que alguien ha cuidado de mantener oculta. Algunos filamentos del hilo se han soltado y ondulan, sin viento, hacia el centro de la sala.')"></div>
+
+        <!-- Figura caída · OBJETO RECOGIBLE: Reloj de bolsillo -->
+        <div class="hotspot" id="hsCuerpo" data-etiqueta="Figura caída" onclick="playClick(); accionRecoger('prueba_a_reloj')"></div>
+
+        <!-- Charco de sangre · OBJETO RECOGIBLE: Informe preliminar del Dr. Brewer -->
+        <div class="hotspot" id="hsCharco" data-etiqueta="Charco de sangre" onclick="playClick(); accionRecoger('prueba_b_informe')"></div>
+    </div>
+    </div>
+
+    <aside class="video-sidebar">
+        <div class="video-header"><span id="video-status">Conectando...</span></div>
+        <div id="video-grid"></div>
+        <p class="aforo-aviso">
+            <button id="btnMic" onclick="toggleMicrofono()">🎤</button>
+            SANTUARIO
+            <button id="btnCam" onclick="toggleCamara()">📷</button>
+        </p>
+    </aside>
+</div>
+
+<div id="gameModal" class="modal">
+    <div class="modal-content" id="modalContent">
+        <button class="close-btn" onclick="playClick(); closeModal()">&times;</button>
+        <h3 id="modalTitle">Título</h3>
+        <div id="modalBody"><p id="modalText">Texto...</p></div>
+    </div>
+</div>
+
+<div id="fullscreenViewer" onclick="playClick(); closeFullscreen()">
+    <img id="fullscreenImg" src="" alt="Pantalla completa" style="display:none;">
+</div>
+
+<script>
+// Nombre de ESTA sala dentro de "localizaciones" en Firebase.
+// Tiene que coincidir con el que pongas en MAPA_SALA_OBJETOS de master_objetos.html.
+const SALA_ID = "sala_santuario";
+
+const NOMBRES_JUGADORES = {
+    jugador1278: "WETHERBY",
+    jugador2935: "BREWER",
+    jugador3194: "CRANE",
+    jugador4781: "NICHOLS",
+    jugador5261: "PICKMAN",
+    jugador6193: "RICE"
+};
+
+const OBJETOS = {
+    prueba_a_reloj: {
+        item: "prueba_a_reloj",
+        titulo: "Reloj de bolsillo",
+        nombre: "Reloj de bolsillo",
+        imagen: "images/prueba_a_reloj.jpg",
+        descripcion: "En el bolsillo de la túnica de la figura caída asoma una cadena fina: un reloj de bolsillo roto, con las agujas detenidas a las 23:05.",
+        // Puntos de Acción que paga CADA jugador ("denegado" = no puede cogerlo)
+        costes: {
+            jugador1278: "denegado",           // WETHERBY
+            jugador2935: "denegado",           // BREWER
+            jugador3194: "denegado",           // CRANE
+            jugador4781: 1,           // NICHOLS
+            jugador5261: "denegado",           // PICKMAN
+            jugador6193: "denegado"            // RICE
+        },
+        // Descripción original del hotspot: se ve si ya se han llevado el objeto o si el jugador está denegado
+        info: {
+            titulo: "La figura caída",
+            texto: "Una figura envuelta en una túnica negra yace boca abajo sobre las losas, con el rostro oculto bajo la capucha y una mano extendida, crispada, hacia el altar, como si hubiera intentado arrastrarse hasta él. Al acercaros, el aire se vuelve más pesado y frío. Ninguno de vosotros se atreve a darle la vuelta, y ese silencio colectivo es quizá lo más elocuente de la escena."
+        },
+        textoExito: "Has cogido el reloj de bolsillo y lo guardas en tu inventario."
+    },
+
+    prueba_b_informe: {
+        item: "prueba_b_informe",
+        titulo: "Informe preliminar del Dr. Brewer",
+        nombre: "Informe preliminar del Dr. Brewer",
+        imagen: "images/prueba_b_informe.jpg",
+        descripcion: "Junto al charco, sujeto bajo una losa suelta, hay un informe preliminar del Dr. Brewer: herida penetrante con arma de filo larga y restos de hidrato de cloral.",
+        // Puntos de Acción que paga CADA jugador ("denegado" = no puede cogerlo)
+        costes: {
+            jugador1278: "denegado",           // WETHERBY
+            jugador2935: 1,           // BREWER
+            jugador3194: "denegado",           // CRANE
+            jugador4781: "denegado",           // NICHOLS
+            jugador5261: "denegado",           // PICKMAN
+            jugador6193: "denegado"            // RICE
+        },
+        // Descripción original del hotspot: se ve si ya se han llevado el objeto o si el jugador está denegado
+        info: {
+            titulo: "La sangre",
+            texto: "La sangre se extiende por las juntas de las losas con una geometría que no es la del azar: sigue los surcos grabados en la piedra como si hubieran sido tallados para recibirla. Brilla, húmeda, y aunque el suelo no tiene pendiente alguna, un reguero fino avanza muy despacio hacia el altar, contra toda lógica."
+        },
+        textoExito: "Has cogido el informe del Dr. Brewer y lo guardas en tu inventario."
+    }
+};
+
+const AUDIO_CLICK = "audio/click.mp3";
+const AUDIO_CLING = "audio/cling.mp3";
+const AUDIO_NOPE = "audio/nope.mp3";
+const AUDIO_PICKUP = "audio/pickup.mp3";
+const AUDIO_PUERTA = "audio/opendoor.mp3";
+
+let jugadorActual = "JUGADOR";
+
+function nombreVisible(id) { return NOMBRES_JUGADORES[id] || id.toUpperCase(); }
+
+function actualizarIdentidadJugador() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const jugadorUrl = urlParams.get('jugador');
+    if (jugadorUrl) {
+        jugadorActual = jugadorUrl.trim();
+        localStorage.setItem('jugador_activo_global', jugadorActual);
+    } else {
+        jugadorActual = localStorage.getItem('jugador_activo_global') || "JUGADOR";
+    }
+    document.getElementById('identidadTexto').innerText = `IDENTIDAD: ${nombreVisible(jugadorActual)}`;
+    localStorage.setItem('jugador_nombre_real', nombreVisible(jugadorActual));
+    registrarUbicacion('santuario');
+}
+
+let ubicacionActual = '';
+function registrarUbicacion(sala) {
+    if (jugadorActual === "JUGADOR") return;
+    ubicacionActual = sala;
+    escribirUbicacionFirebase();
+}
+function escribirUbicacionFirebase() {
+    if (!ubicacionActual || jugadorActual === "JUGADOR") return;
+    if (typeof firebase === 'undefined' || !firebase.apps.length) return; // aún no está listo
+    const fichaRef = firebase.database().ref('jugadores/' + jugadorActual);
+    fichaRef.once('value').then(snap => {
+        if (snap.exists()) return fichaRef.child('ubicacion').set(ubicacionActual);
+    }).catch(err => console.error('Error al guardar la ubicación en Firebase:', err));
+}
+
+function sonar(archivo) {
+    if (!archivo) return;
+    new Audio(archivo).play().catch(e => {});
+}
+function playClick() { sonar(AUDIO_CLICK); }
+function sonarNope() { sonar(AUDIO_NOPE); }
+
+// =====================================================================
+// JUGADOR MUERTO (vida 0 en Firebase: jugadores/<id>/vida)
+// Un jugador muerto no puede coger objetos ni hacer nada con ellos. Solo puede mirar.
+// =====================================================================
+let vidaJugador = null;   // se mantiene al día en tiempo real (ver listener tras initializeApp)
+function estoyMuerto() {
+    if (vidaJugador === null || vidaJugador === undefined || vidaJugador === '') return false;
+    const n = Number(vidaJugador);
+    return isFinite(n) && n <= 0;
+}
+// Devuelve true (y avisa) si el jugador está muerto: la acción debe cancelarse.
+function bloquearSiMuerto() {
+    if (!estoyMuerto()) return false;
+    sonar('audio/muerto.mp3');
+    openModal("Has muerto", `<p style="color:var(--sangre)">Lo siento. Estás muerto. No puedes hacer nada.</p>${btnCerrar()}`);
+    return true;
+}
+
+
+
+
+
+// =====================================================================
+// CUENTA ATRÁS DE LA PUERTA AL ENTRAR EN LA SALA
+// ---------------------------------------------------------------------
+// USAR_CUENTA_ATRAS = true  -> cuenta atrás normal: 10 s con el cartel
+//                              "PUERTA CERRADA", suena cling.mp3 al final
+//                              y entonces aparece VOLVER AL PASILLO.
+// USAR_CUENTA_ATRAS = false -> SIN cuenta atrás: el botón VOLVER AL PASILLO
+//                              aparece al instante, sin sonido de cling.
+// Para volver a activarla en el futuro, cambia false por true.
+// =====================================================================
+const USAR_CUENTA_ATRAS = false;
+
+// Segundos que dura la cuenta atrás (solo se usa si USAR_CUENTA_ATRAS = true).
+let timeLeft = 10;
+
+const countdownEl = document.getElementById('countdown');
+const timerContainerEl = document.getElementById('timerContainer');
+const backBtnEl = document.getElementById('backBtn');
+
+if (USAR_CUENTA_ATRAS) {
+    // ---- MODO CON CUENTA ATRÁS (el comportamiento original) ----
+    const timerInterval = setInterval(() => {
+        timeLeft--;
+        if (timeLeft >= 0) countdownEl.innerText = "00:" + (timeLeft < 10 ? "0" : "") + timeLeft;
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            sonar(AUDIO_CLING);                       // mp3 del final de la cuenta atrás
+            timerContainerEl.style.display = 'none';  // oculta el cartel "PUERTA CERRADA"
+            backBtnEl.style.display = 'block';        // muestra VOLVER AL PASILLO
+        }
+    }, 1000);
+} else {
+    // ---- MODO SIN CUENTA ATRÁS ----
+    // No hay intervalo ni sonido de cling: se oculta el cartel y
+    // se muestra directamente el botón VOLVER AL PASILLO.
+    timerContainerEl.style.display = 'none';
+    backBtnEl.style.display = 'block';
+}
+
+
+
+
+
+function volverAlMapa(event) {
+    event.preventDefault();
+    if (typeof salirDeLaLlamada === 'function') salirDeLaLlamada(false);
+    sonar(AUDIO_PUERTA);
+    setTimeout(() => { window.location.href = `mapa_582.html?jugador=${encodeURIComponent(jugadorActual)}`; }, 1600);
+}
+
+function openModal(titulo, html) {
+    document.getElementById('modalTitle').innerText = titulo;
+    document.getElementById('modalBody').innerHTML = html;
+    document.getElementById('gameModal').style.display = 'flex';
+}
+let audioInfo = null;
+function pararAudioInfo() {
+    if (audioInfo) { audioInfo.pause(); audioInfo = null; }
+}
+function closeModal() {
+    pararAudioInfo();
+    document.getElementById('gameModal').style.display = 'none';
+}
+function btnCerrar(t) { return `<div class="fila-botones"><button class="drawer-btn" onclick="playClick(); closeModal()">${t || 'Cerrar'}</button></div>`; }
+function abrirInfo(t, txt, audio) {
+    pararAudioInfo();   // por si había otro sonando
+    openModal(t, `<p>${txt}</p>${btnCerrar()}`);
+    if (audio) { audioInfo = new Audio(audio); audioInfo.play().catch(e => {}); }
+}
+
+function showFullscreenImage(src) {
+    const viewer = document.getElementById('fullscreenViewer');
+    const img = document.getElementById('fullscreenImg');
+    img.style.display = 'block';
+    img.src = src;
+    viewer.style.display = 'flex';
+}
+function closeFullscreen() { document.getElementById('fullscreenViewer').style.display = 'none'; }
+
+// =====================================================================
+// COSTE DE PA POR JUGADOR  +  "DENEGADO"
+// ---------------------------------------------------------------------
+// Cada objeto tiene una tabla "costes" con lo que paga CADA jugador:
+//   · un número  → Puntos de Acción que le cuesta cogerlo a ESE jugador
+//   · "denegado" → ese jugador no puede cogerlo
+//   · jugador que no aparezca en la tabla → también denegado
+// Si el objeto ya se lo llevaron, o el jugador está denegado, NO se avisa de nada:
+// se muestra la descripción normal del hotspot (cfg.info), igual que si no hubiese objeto.
+// =====================================================================
+function costeDe(tabla) {
+    const c = tabla ? tabla[jugadorActual] : undefined;
+    if (c === undefined || c === "denegado") return null;
+    const n = Number(c);
+    return (isFinite(n) && n >= 0) ? n : null;
+}
+
+// Descripción normal del hotspot (la de siempre): se usa cuando no hay objeto que coger.
+function mostrarDescripcion(cfg) {
+    abrirInfo(cfg.info.titulo, cfg.info.texto);
+}
+
+let recogidaActual = null;
+
+function accionRecoger(clave) {
+    if (bloquearSiMuerto()) return;
+    const cfg = OBJETOS[clave];
+
+    // Jugador denegado: ve solo la descripción del hotspot, sin pistas de que hay un objeto.
+    if (costeDe(cfg.costes) === null) { mostrarDescripcion(cfg); return; }
+
+    openModal(cfg.info.titulo, `<p style="color:var(--verdin)">Examinando...</p>`);
+
+    // Consulta en la base de datos correcta (logia-rol-vivo)
+    firebase.database().ref('localizaciones/' + SALA_ID + '/' + cfg.item).once('value')
+        .then(snapshot => {
+            const datos = snapshot.val();
+            if (datos && datos.disponible === false) {   // ya se lo han llevado
+                mostrarDescripcion(cfg);
+                return;
+            }
+
+            const coste = costeDe(cfg.costes);
+            recogidaActual = cfg;
+            openModal(cfg.titulo, `
+                <p>${cfg.descripcion}</p>
+                <img src="${cfg.imagen}" alt="${cfg.nombre}" class="drawer-img" onclick="playClick(); showFullscreenImage('${cfg.imagen}')">
+                <div class="cost-box">¿Deseas coger «${cfg.nombre}»?<br>Coste: ${coste} Punto de Acción</div>
+                <div class="fila-botones">
+                    <button class="drawer-btn" onclick="playClick(); procesarRecogidaFirebase('${cfg.item}')">Sí, coger</button>
+                    <button class="drawer-btn no" onclick="playClick(); closeModal()">No, dejar</button>
+                </div>
+            `);
+        })
+        .catch(err => {
+            console.error("Error leyendo Firebase:", err);
+            openModal("Error", `<p style="color:var(--sangre)">No se pudo conectar con Firebase.</p>${btnCerrar()}`);
+        });
+}
+
+function procesarRecogidaFirebase(itemKey) {
+    if (bloquearSiMuerto()) return;
+    const cfg = OBJETOS[itemKey];
+    const coste = costeDe(cfg.costes);
+    if (coste === null) { mostrarDescripcion(cfg); return; }   // por seguridad (denegado)
+    openModal(cfg.titulo, `<p style="color:var(--verdin)">Guardando objeto en tu inventario...</p>`);
+
+    // Los Puntos de Acción se cobran en Firebase (jugadores/<jugador>/puntos_accion).
+    const refPA = firebase.database().ref('jugadores/' + jugadorActual + '/puntos_accion');
+    const devolverPA = () => refPA.transaction(a => (Number(a) || 0) + coste);
+
+    refPA.once('value')
+        .then(snap => {
+            const pa = Number(snap.val()) || 0;
+            if (pa < coste) return { sinPA: true };
+            return refPA.transaction(actual => {
+                if (actual === null) return pa - coste;       // primera pasada (sin caché): el servidor la corrige
+                const saldo = Number(actual) || 0;
+                if (saldo < coste) return;                    // sin PA suficientes: se cancela
+                return saldo - coste;
+            }).then(res => ({ sinPA: !res.committed }));
+        })
+        .then(cobro => {
+            if (cobro.sinPA) {
+                sonarNope();
+                openModal(cfg.titulo, `<p style="color:var(--sangre)">No tienes suficientes Puntos de Acción.</p>${btnCerrar()}`);
+                return;
+            }
+
+            // PA ya cobrados en Firebase: en una sola escritura atómica el objeto pasa al inventario
+            // del jugador (inventarios/<jugador>/<objeto> = true, lo que ve inventario.html) y queda
+            // marcado como cogido en la sala (localizaciones/<SALA_ID>/<objeto>/disponible = false).
+            const actualizacion = {};
+            actualizacion['inventarios/' + jugadorActual + '/' + cfg.item] = true;
+            actualizacion['localizaciones/' + SALA_ID + '/' + cfg.item + '/disponible'] = false;
+
+            return firebase.database().ref().update(actualizacion)
+                .then(() => {
+                    sonar(AUDIO_PICKUP);
+                    openModal(cfg.titulo, `<p style="color:var(--brillo)">${cfg.textoExito}</p>${btnCerrar('Continuar')}`);
+                })
+                .catch(err => { devolverPA(); throw err; }); // si no se guarda, se devuelven los PA
+        })
+        .catch(err => {
+            console.error("Error de red:", err);
+            openModal("Error", `<p style="color:var(--sangre)">Error de conexión con el servidor.</p>${btnCerrar()}`);
+        });
+}
+
+actualizarIdentidadJugador();
+</script>
+
+<script>
+    const VIDEO_ROOM = "logia_sala_santuario";
+</script>
+
+<!-- CREDENCIALES DE FIREBASE CORREGIDAS (IGUALES A LAS DEL PANEL) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script>
+    firebase.initializeApp({
+        apiKey: "AIzaSyDBMQU4fRGw-BjfAx8dv84GmcHzA-1ncoY",
+        authDomain: "logia-rol-vivo.firebaseapp.com",
+        databaseURL: "https://logia-rol-vivo-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "logia-rol-vivo",
+        storageBucket: "logia-rol-vivo.firebasestorage.app",
+        messagingSenderId: "432574172065",
+        appId: "1:432574172065:web:0e1d93921e84f51cb099e0"
+    });
+    escribirUbicacionFirebase();
+
+    // Vida del jugador en tiempo real: si llega a 0 queda muerto; si la recupera, vuelve a poder actuar.
+    if (jugadorActual && jugadorActual !== "JUGADOR") {
+        firebase.database().ref('jugadores/' + jugadorActual + '/vida').on('value', snap => { vidaJugador = snap.val(); });
+    }
+</script>
+
+<script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
+<script src="webcams.js"></script>
+
+<script>
+    const SONIDO_LOCALIZACION = { archivo: 'audio/amb_santuario.mp3', volumen: 40, loop: true };
+</script>
+<script src="sonido_localizacion.js"></script>
+
+</body>
+</html>

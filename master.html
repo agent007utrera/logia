@@ -1,0 +1,2500 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Máster</title>
+  <style>
+    /* ======================================================================
+       ESTÉTICA LOGIA DEL CREPÚSCULO DE PLATA
+       ====================================================================== */
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cinzel+Decorative:wght@700&family=IM+Fell+English:ital@0;1&family=Special+Elite&display=swap');
+
+    :root {
+      --bg: #06100a;
+      --panel: #0f2218;
+      --accent: #3e9a6b;
+      --glow: #9bf0c0;
+      --text: #d9d3b3;
+      --muted: #8fa08a;
+      --border: #1d4a33;
+      --amber: #ffc76b;
+      --danger: #ff6b6b;
+      --ok: #6fdc9a;
+
+      --laton:         #b49a55;
+      --laton-osc:     #6e5c2e;
+      --pergamino:     #d9d3b3;
+      --pergamino-osc: #a9a285;
+      --verdin:        #5fb98a;
+      --brillo:        #9bf0c0;
+      --fuente-titulo: 'Cinzel Decorative', 'Cinzel', Georgia, serif;
+      --fuente-sub:    'Cinzel', Georgia, serif;
+      --fuente-cuerpo: 'IM Fell English', Georgia, 'Times New Roman', serif;
+      --fuente-maquina:'Special Elite', 'Courier New', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--fuente-maquina);
+      background-color: #040806;
+      background-image: radial-gradient(circle at 50% 40%, #0f2318 0%, #050a07 75%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 22px;
+    }
+
+    /* Viñeta oscura en los bordes */
+    body::before {
+      content: "";
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: 9000;
+      background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.6) 100%);
+    }
+
+    /* Grano de película antigua */
+    body::after {
+      content: "";
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: 9001;
+      opacity: 0.08;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    }
+
+    header {
+      display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap;
+      border-bottom: 3px double var(--laton-osc);
+      box-shadow: 0 8px 25px -12px rgba(95,185,138,.35);
+      padding-bottom: 14px; margin-bottom: 22px;
+    }
+
+    h1 {
+      font-family: var(--fuente-titulo); font-weight: 700;
+      font-size: 1.8rem; letter-spacing: 4px; color: var(--brillo);
+      text-shadow: 0 0 10px rgba(95,185,138,.55);
+    }
+
+    .sub { font-family: var(--fuente-sub); color: var(--laton); letter-spacing: 4px; font-size: .75rem; }
+
+    .seccion-titulo {
+      font-family: var(--fuente-titulo);
+      font-size: 1.3rem;
+      letter-spacing: 3px;
+      color: var(--laton);
+      margin: 30px 0 15px 0;
+      border-bottom: 2px solid var(--laton-osc);
+      padding-bottom: 5px;
+      text-transform: uppercase;
+    }
+
+    /* GRID DE SALAS Y ACTIVACIONES */
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 22px;
+      align-items: start;
+    }
+
+    .panel {
+      position: relative;
+      background: linear-gradient(180deg, #0c1b13 0%, #07100b 100%);
+      border: 3px double var(--laton-osc);
+      box-shadow: 0 0 22px rgba(47,125,87,.2);
+      padding: 18px 18px 20px;
+    }
+
+    /* Esquinas de latón envejecido */
+    .panel::before, .panel::after {
+      content: ''; position: absolute; width: 14px; height: 14px; border: 2px solid var(--laton); pointer-events: none;
+    }
+    .panel::before { top: -3px; left: -3px; border-right: none; border-bottom: none; }
+    .panel::after  { bottom: -3px; right: -3px; border-left: none; border-top: none; }
+
+    h2 {
+      font-family: var(--fuente-sub); font-weight: 700;
+      font-size: 1.1rem; letter-spacing: 3px; color: var(--verdin);
+      text-transform: uppercase;
+      text-shadow: 0 0 8px rgba(95,185,138,.4);
+      border-bottom: 1px solid var(--laton-osc); padding-bottom: 8px;
+      margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+
+    /* BOTONES */
+    .btn {
+      font-family: var(--fuente-sub); letter-spacing: 2px; text-transform: uppercase;
+      background: linear-gradient(180deg, #14291d, #0b1710); color: var(--pergamino);
+      border: 1px solid var(--laton); border-radius: 2px;
+      padding: 8px 14px; font-size: .72rem; cursor: pointer;
+      transition: all .15s;
+    }
+    .btn:hover { background: var(--accent); color: #fff; box-shadow: 0 0 14px rgba(155,240,192,.5); }
+    .btn.small { padding: 4px 9px; font-size: .6rem; }
+    .btn.danger { color: var(--danger); border-color: #7a4a2a; }
+    .btn.danger:hover { background: rgba(255,107,107,.14); color: var(--danger); box-shadow: 0 0 14px rgba(255,107,107,.4); }
+
+    /* FILA DE CADA ELEMENTO */
+    .fila-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 0; border-bottom: 1px dashed var(--border);
+    }
+    .fila-item:last-child { border-bottom: none; }
+
+    .nombre-item {
+      font-family: var(--fuente-cuerpo); font-size: 1.05rem; color: var(--pergamino);
+    }
+
+    /* ETIQUETAS DE ESTADO */
+    .badge {
+      font-family: var(--fuente-sub); font-size: .65rem; letter-spacing: 2px; padding: 3px 7px; border-radius: 2px;
+      border: 1px solid var(--laton-osc); color: var(--muted); margin-right: 8px; display: inline-block;
+    }
+    .badge.true { color: var(--ok); border-color: var(--accent); background: rgba(111,220,154,.08); }
+    .badge.false { color: var(--danger); border-color: #7a4a2a; background: rgba(255,107,107,.08); }
+
+    /* ======================================================================
+       NAVEGACIÓN ENTRE SECCIONES
+       ====================================================================== */
+    html { scroll-behavior: smooth; }
+    .nav-secciones { display: flex; gap: 10px; flex-wrap: wrap; margin: -8px 0 8px 0; }
+    .seccion-titulo { display: flex; align-items: center; justify-content: space-between; gap: 10px; scroll-margin-top: 12px; }
+    .btn-subir { font-size: .95rem; line-height: 1; padding: 5px 11px; flex-shrink: 0; }
+    .foto-jugador {
+      width: 38px; height: 38px; object-fit: cover; border-radius: 50%;
+      border: 1px solid var(--laton-osc); background: #050c08; vertical-align: middle;
+    }
+    .tabla-jugadores th.col-foto, .tabla-jugadores td.col-foto { text-align: left; }
+    .celda-foto { display: flex; align-items: center; gap: 8px; }
+    .tabla-jugadores input.input-ident { width: 100%; min-width: 120px; padding: 6px 8px; font-size: .85rem; }
+    .tabla-jugadores td.col-foto input.input-ident { min-width: 80px; }
+    .tabla-jugadores input.input-ident.guardado { border-color: var(--ok); box-shadow: 0 0 10px rgba(111,220,154,.55); }
+    .tabla-jugadores input.input-ident.error { border-color: var(--danger); box-shadow: 0 0 10px rgba(255,107,107,.55); }
+
+    /* ======================================================================
+       JUGADORES
+       ====================================================================== */
+    .barra-jugadores {
+      display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 16px;
+    }
+
+    .input-texto, .input-num {
+      font-family: var(--fuente-maquina);
+      background: #050c08; color: var(--pergamino);
+      border: 1px solid var(--laton-osc); border-radius: 2px;
+      padding: 7px 9px; font-size: .9rem; outline: none;
+    }
+    .input-texto:focus, .input-num:focus { border-color: var(--glow); box-shadow: 0 0 8px rgba(155,240,192,.35); }
+    .input-num { width: 72px; text-align: center; }
+    .input-num.dinero { width: 96px; }
+    /* Valor a 0 (o menos): resalta en rojo */
+    .input-num.cero { color: var(--danger); border-color: var(--danger); background: rgba(255,107,107,.14); font-weight: bold; }
+    .input-num.guardado { border-color: var(--ok); box-shadow: 0 0 10px rgba(111,220,154,.55); }
+    .input-num.error { border-color: var(--danger); box-shadow: 0 0 10px rgba(255,107,107,.55); }
+
+    .tabla-wrap { overflow-x: auto; }
+
+    table.tabla-jugadores { width: 100%; border-collapse: collapse; min-width: 1150px; }
+    .tabla-jugadores th {
+      font-family: var(--fuente-sub); font-size: .7rem; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--laton); text-align: center; padding: 8px 6px;
+      border-bottom: 1px solid var(--laton-osc);
+    }
+    .tabla-jugadores th:first-child { text-align: left; }
+    .tabla-jugadores td {
+      padding: 8px 6px; text-align: center; border-bottom: 1px dashed var(--border);
+    }
+    .tabla-jugadores td:first-child {
+      text-align: left; font-family: var(--fuente-cuerpo); font-size: 1.05rem; color: var(--pergamino);
+    }
+    .tabla-jugadores th.col-nombre, .tabla-jugadores td.col-nombre { text-align: left; }
+    .tabla-jugadores td.col-nombre { font-family: var(--fuente-cuerpo); font-size: 1.05rem; color: var(--laton); }
+    .tabla-jugadores th.col-ubicacion, .tabla-jugadores td.col-ubicacion { text-align: left; }
+    /* Columna de avisos (campana): tick cuando el jugador ha avisado de que está preparado */
+    .btn-campana-th {
+      background: none; border: 1px solid transparent; border-radius: 2px; cursor: pointer;
+      padding: 3px 6px; line-height: 0; transition: all .15s;
+    }
+    .btn-campana-th:hover { border-color: var(--laton); background: rgba(95,185,138,.15); box-shadow: 0 0 10px rgba(155,240,192,.35); }
+    .btn-campana-th img { height: 1.5em; vertical-align: middle; }
+    .tabla-jugadores td.col-listo, .tabla-jugadores td.col-cura, .tabla-jugadores td.col-registro { font-size: 1.4rem; font-weight: bold; color: var(--ok); text-shadow: 0 0 10px rgba(111,220,154,.6); }
+    .tabla-jugadores td.col-ubicacion { font-family: var(--fuente-sub); font-size: .8rem; letter-spacing: 2px; text-transform: uppercase; color: var(--verdin); }
+    .tabla-jugadores td.col-ubicacion.sin-dato { color: var(--muted); }
+
+    .celda-num { display: inline-flex; align-items: center; gap: 4px; }
+    .btn-mini {
+      font-family: var(--fuente-sub); font-size: .8rem; line-height: 1;
+      width: 24px; height: 28px; cursor: pointer;
+      background: linear-gradient(180deg, #14291d, #0b1710); color: var(--pergamino);
+      border: 1px solid var(--laton-osc); border-radius: 2px; transition: all .15s;
+    }
+    .btn-mini:hover { background: var(--accent); color: #fff; }
+
+    .vacio { font-family: var(--fuente-cuerpo); color: var(--muted); padding: 14px 0; font-style: italic; }
+
+    /* NOTIFICACIÓN EN PANTALLA (TOAST) */
+    #toast {
+      position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(30px);
+      background: linear-gradient(180deg, #14291d 0%, #0b1710 100%);
+      border: 2px solid var(--laton); color: var(--brillo);
+      font-family: var(--fuente-sub); font-size: .85rem;
+      padding: 12px 22px; letter-spacing: 2px;
+      box-shadow: 0 0 0 3px #000, 0 0 0 4px var(--laton-osc), 0 0 24px rgba(95,185,138,.45);
+      opacity: 0; pointer-events: none; transition: all .3s; z-index: 10000; max-width: 90vw; text-align: center;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #toast.err { color: var(--danger); border-color: var(--danger); box-shadow: 0 0 0 3px #000, 0 0 0 4px #7a2a2a, 0 0 24px rgba(255,107,107,.4); }
+
+    /* ======================================================================
+       PÁGINA ÚNICA: CONTROL (arriba) + TRANSMISIÓN (abajo)
+       Lo que sigue es el CSS de master_transmision.html, sin lo que ya
+       estaba en master_control.html (mismo estilo de base).
+       ====================================================================== */
+    #conn { margin-left: auto; }
+    .nav-secciones { margin: -8px 0 8px 0; }
+
+    /* Rejilla de dos columnas de la parte de transmisión (antes era <main>) */
+    .grid-transmision {
+      display: grid;
+      grid-template-columns: minmax(280px, 380px) 1fr;
+      gap: 22px;
+      align-items: start;
+    }
+    @media (max-width: 880px) { .grid-transmision { grid-template-columns: 1fr; } }
+
+    /* Las etiquetas de la parte de transmisión conservan su tamaño original */
+    .zona-transmision .badge { font-size: .6rem; margin-right: 0; flex: none; }
+
+    #conn { margin-left: auto; font-family: var(--fuente-sub); font-size: .7rem; letter-spacing: 2px; color: var(--muted); display:flex; align-items:center; gap:8px; }
+    #conn i { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); display:inline-block; }
+    #conn.on i { background: var(--ok); box-shadow: 0 0 9px var(--ok); }
+    #conn.off i { background: var(--danger); box-shadow: 0 0 9px var(--danger); }
+    h2 .tools { margin-left: auto; display: flex; gap: 6px; }
+    #msgs, #ambiente { scroll-margin-top: 12px; }
+    .btn-subir { margin-left: auto; font-size: .95rem; line-height: 1; padding: 5px 11px; flex-shrink: 0; }
+    label.lbl {
+          display: block; font-family: var(--fuente-sub); font-size: .68rem; letter-spacing: 3px; color: var(--laton);
+          text-transform: uppercase; margin: 16px 0 6px;
+        }
+    label.lbl::before { content: '// '; color: var(--accent); }
+    label.lbl:first-of-type { margin-top: 0; }
+    select, input[type=text], textarea {
+          width: 100%;
+          background: #040806; color: var(--pergamino);
+          border: 1px solid var(--laton-osc); border-radius: 2px;
+          font-family: var(--fuente-maquina); font-size: 1rem;
+          padding: 10px 12px; outline: none;
+          transition: border-color .15s, box-shadow .15s;
+        }
+    select:focus, input[type=text]:focus, textarea:focus {
+          border-color: var(--laton); box-shadow: 0 0 12px rgba(95,185,138,.6);
+        }
+    input::placeholder, textarea::placeholder { color: #4b6b58; }
+    textarea { min-height: 110px; resize: vertical; line-height: 1.45; }
+    .count { text-align: right; font-family: var(--fuente-sub); font-size: .65rem; letter-spacing: 2px; color: var(--pergamino-osc); margin-top: 4px; }
+    #btn-mostrar {
+          width: 100%; margin-top: 22px; padding: 16px;
+          font-family: var(--fuente-titulo); font-size: 1.4rem; letter-spacing: 8px;
+          color: #040806; background: var(--accent); border-color: var(--laton);
+          box-shadow: 0 0 22px rgba(95,185,138,.45);
+        }
+    #btn-mostrar:hover { background: var(--brillo); color: #040806; box-shadow: 0 0 34px rgba(155,240,192,.7); }
+    #btn-mostrar:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+    .row2 { display: flex; gap: 10px; margin-top: 10px; }
+    .row2 .btn { flex: 1; }
+    #players { display: flex; flex-direction: column; gap: 8px; }
+    .player {
+          display: flex; align-items: center; gap: 12px;
+          padding: 8px 10px; cursor: pointer;
+          background: rgba(6,14,9,.8); border: 2px solid var(--border); border-radius: 2px;
+          transition: all .15s; user-select: none;
+        }
+    .player:hover { border-color: var(--laton-osc); }
+    .player.sel { border-color: var(--laton); background: rgba(47,125,87,.18); box-shadow: 0 0 14px rgba(95,185,138,.3); }
+    .player input { display: none; }
+    .chk {
+          width: 22px; height: 22px; flex: none; border: 2px solid var(--laton); border-radius: 2px;
+          display: flex; align-items: center; justify-content: center; color: transparent;
+          font-size: 1.1rem; line-height: 1; transition: all .15s;
+        }
+    .player.sel .chk { background: var(--brillo); border-color: var(--brillo); color: #040806; }
+    .ph {
+          width: 38px; height: 46px; flex: none; object-fit: cover;
+          border: 2px solid var(--laton); border-radius: 2px; background: #000;
+          /* Foto a su color natural. Para el tono verdoso de la Logia añade:
+             filter: sepia(0.45) hue-rotate(60deg) saturate(0.85) contrast(1.05); */
+        }
+    .ph.empty { display: none; }
+    .pinfo { min-width: 0; flex: 1; }
+    .pname { font-size: 1rem; color: var(--pergamino); line-height: 1.25; }
+    .pid { font-size: .7rem; color: var(--muted); letter-spacing: 1px; }
+    .badge.open { color: var(--amber); border-color: #7a5a1f; background: rgba(255,199,107,.08); animation: pulse 1.6s infinite; }
+    @keyframes pulse { 50% { opacity: .55; } }
+    #sel-count { font-family: var(--fuente-sub); font-size: .7rem; color: var(--pergamino-osc); margin-top: 12px; letter-spacing: 2px; }
+    .hint { font-family: var(--fuente-cuerpo); font-style: italic; font-size: .9rem; color: var(--pergamino-osc); margin-top: 5px; }
+    #log { margin-top: 22px; }
+    #log-list {
+          max-height: 190px; overflow-y: auto; font-size: .82rem; line-height: 1.6;
+          background: #040806; border: 1px solid var(--laton-osc); padding: 10px 12px; border-radius: 2px;
+        }
+    #log-list:empty::before { content: 'Aún no has enviado nada.'; color: var(--muted); }
+    .log-ok { color: var(--ok); }
+    .log-err { color: var(--danger); }
+    .log-t { color: var(--muted); }
+    #ambiente { margin-top: 22px; }
+    .amb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+    @media (max-width: 880px) { .amb-grid { grid-template-columns: 1fr; } }
+    .amb-canal { border: 1px solid var(--laton-osc); background: rgba(4,8,6,.55); padding: 14px 16px 16px; }
+    .amb-canal h3 { font-family: var(--fuente-sub); font-size: .95rem; letter-spacing: 3px; color: var(--laton); margin-bottom: 4px; text-transform: uppercase; }
+    .amb-vol { display: flex; align-items: center; gap: 12px; }
+    .amb-vol input[type=range] { flex: 1; accent-color: var(--accent); }
+    .amb-vol b { font-family: var(--fuente-sub); color: var(--brillo); min-width: 3ch; text-align: right; }
+    .amb-estado { margin-top: 12px; font-size: .8rem; letter-spacing: 1px; color: var(--muted); }
+    .amb-estado.on { color: var(--ok); }
+    #msgs { margin-top: 22px; }
+    #msgs-list {
+          max-height: 340px; overflow-y: auto;
+          background: #040806; border: 1px solid var(--laton-osc); border-radius: 2px;
+          padding: 6px 12px;
+        }
+    #msgs-list:empty::before { content: 'Aún no has recibido mensajes.'; color: var(--muted); font-size: .85rem; display: block; padding: 6px 0; }
+    .msg-item { padding: 9px 0; border-bottom: 1px dashed var(--border); }
+    .msg-item:last-child { border-bottom: none; }
+    .msg-head { font-size: .78rem; letter-spacing: 1px; color: var(--muted); }
+    .msg-head b { font-family: var(--fuente-sub); color: var(--brillo); font-weight: 700; font-size: .85rem; letter-spacing: 2px; }
+    .msg-txt { margin-top: 3px; font-family: var(--fuente-cuerpo); font-size: 1.05rem; color: var(--pergamino); white-space: pre-wrap; word-wrap: break-word; line-height: 1.5; }
+    .msg-item.nuevo { animation: msgflash 2.5s ease-out; }
+    @keyframes msgflash { from { background: rgba(155,240,192,.22); } to { background: transparent; } }
+    .msg-item { cursor: pointer; transition: background .15s; }
+    .msg-item:hover { background: rgba(62,154,107,.14); }
+    .msg-hint { float: right; font-family: var(--fuente-sub); font-size: .6rem; letter-spacing: 2px; color: var(--laton); opacity: 0; transition: opacity .15s; }
+    .msg-item:hover .msg-hint { opacity: 1; }
+    .msg-resp { margin: 7px 0 0 28px; padding: 6px 10px; border-left: 3px solid var(--laton); background: rgba(180,154,85,.08); }
+    .msg-resp b { font-family: var(--fuente-sub); color: var(--laton); font-weight: 700; letter-spacing: 1px; font-size: .75rem; }
+    .msg-resp span { font-family: var(--fuente-cuerpo); font-size: 1.02rem; color: var(--pergamino); white-space: pre-wrap; word-wrap: break-word; line-height: 1.45; }
+    #rp-overlay {
+          position: fixed; inset: 0; z-index: 200; display: none; align-items: center; justify-content: center;
+          background: rgba(3,7,5,.88); backdrop-filter: blur(5px); padding: 16px;
+        }
+    #rp-overlay.rp-visible { display: flex; animation: rp-fade .25s ease-out; }
+    @keyframes rp-fade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes rp-rise { from { transform: translateY(18px) scale(.97); opacity: 0; } to { transform: none; opacity: 1; } }
+    #rp-box {
+          position: relative; width: min(580px, 100%); max-height: 92vh; overflow-y: auto;
+          border: 2px solid var(--laton); border-radius: 2px;
+          box-shadow: 0 0 0 4px #000, 0 0 0 5px var(--laton-osc), 0 10px 40px rgba(0,0,0,.9), 0 0 40px rgba(47,125,87,.25);
+          background-image:
+            radial-gradient(ellipse at top, rgba(47,125,87,.16), transparent 60%),
+            linear-gradient(180deg, #14291d 0%, #0b1710 100%);
+          animation: rp-rise .3s ease-out;
+        }
+    #rp-box::before {
+          content: ''; position: absolute; top: 5px; left: 5px; right: 5px; bottom: 5px; pointer-events: none;
+          border: 1px solid var(--laton-osc);
+        }
+    #rp-head {
+          position: relative; display: flex; align-items: center; gap: 10px;
+          padding: 14px 56px 12px 22px; border-bottom: 1px solid var(--laton-osc); background: rgba(110,92,46,.14);
+        }
+    #rp-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--brillo); box-shadow: 0 0 10px var(--brillo); flex: none; }
+    #rp-title {
+          font-family: var(--fuente-titulo); font-size: 1.05rem; letter-spacing: 2px; color: var(--verdin);
+          text-shadow: 0 0 10px rgba(95,185,138,.5); line-height: 1.2; text-transform: uppercase;
+        }
+    #rp-close {
+          position: absolute; top: 8px; right: 8px; width: 38px; height: 38px; padding: 0;
+          display: flex; align-items: center; justify-content: center;
+          background: linear-gradient(180deg, #14291d, #0b1710); color: var(--laton); border: 1px solid var(--laton); border-radius: 2px;
+          font-family: var(--fuente-sub); font-size: 1.2rem; line-height: 1; cursor: pointer; transition: all .15s;
+        }
+    #rp-close:hover { color: var(--brillo); border-color: var(--brillo); box-shadow: 0 0 14px rgba(155,240,192,.5); }
+    #rp-body { position: relative; padding: 18px 22px 6px; }
+    #rp-orig {
+          white-space: pre-wrap; word-wrap: break-word; line-height: 1.5; color: var(--pergamino);
+          font-family: var(--fuente-cuerpo); font-size: 1.05rem;
+          padding: 12px 14px; background: rgba(4,8,6,.7); border-left: 3px solid var(--laton); border-radius: 2px;
+          max-height: 22vh; overflow-y: auto;
+        }
+    #rp-orig-meta { font-family: var(--fuente-maquina); font-size: .72rem; letter-spacing: 1px; color: var(--muted); margin-bottom: 5px; }
+    #rp-text { margin-top: 0; min-height: 130px; }
+    #rp-status { min-height: 1.1em; margin-top: 6px; font-family: var(--fuente-cuerpo); font-style: italic; font-size: .95rem; letter-spacing: 1px; color: var(--muted); }
+    #rp-status.ok { color: var(--ok); }
+    #rp-status.err { color: var(--danger); }
+    #rp-foot { position: relative; display: flex; gap: 10px; justify-content: flex-end; padding: 10px 22px 18px; }
+    #rp-send { background: var(--accent); color: #040806; border-color: var(--laton); box-shadow: 0 0 16px rgba(95,185,138,.4); }
+    #rp-send:hover { background: var(--brillo); color: #040806; }
+    #rp-send:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+    @media (max-width: 520px) { #rp-foot { flex-direction: column-reverse; } #rp-title { font-size: .9rem; } }
+    #cf-overlay {
+          position: fixed; inset: 0; z-index: 300; display: none; align-items: center; justify-content: center;
+          background: rgba(3,7,5,.88); backdrop-filter: blur(5px); padding: 16px;
+        }
+    #cf-overlay.cf-visible { display: flex; animation: rp-fade .25s ease-out; }
+    #cf-box {
+          position: relative; width: min(460px, 100%);
+          border: 2px solid var(--laton); border-radius: 2px;
+          box-shadow: 0 0 0 4px #000, 0 0 0 5px var(--laton-osc), 0 10px 40px rgba(0,0,0,.9), 0 0 40px rgba(120,30,30,.25);
+          background-image:
+            radial-gradient(ellipse at top, rgba(120,30,30,.16), transparent 60%),
+            linear-gradient(180deg, #14291d 0%, #0b1710 100%);
+          animation: rp-rise .3s ease-out;
+        }
+    #cf-box::before {
+          content: ''; position: absolute; top: 5px; left: 5px; right: 5px; bottom: 5px; pointer-events: none;
+          border: 1px solid var(--laton-osc);
+        }
+    #cf-head {
+          position: relative; display: flex; align-items: center; gap: 10px;
+          padding: 14px 22px 12px; border-bottom: 1px solid var(--laton-osc); background: rgba(120,30,30,.2);
+        }
+    #cf-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--danger); box-shadow: 0 0 10px var(--danger); flex: none; animation: pulse 1.2s infinite; }
+    #cf-title {
+          font-family: var(--fuente-titulo); font-size: 1.05rem; letter-spacing: 2px; color: var(--danger);
+          text-shadow: 0 0 10px rgba(255,107,107,.6); line-height: 1.2; text-transform: uppercase;
+        }
+    #cf-body { position: relative; padding: 18px 22px 6px; font-family: var(--fuente-cuerpo); font-size: 1.05rem; line-height: 1.5; color: var(--pergamino); }
+    #cf-body small { display: block; margin-top: 8px; font-family: var(--fuente-maquina); color: var(--muted); font-size: .75rem; letter-spacing: 1px; }
+    #cf-foot { position: relative; display: flex; gap: 10px; justify-content: flex-end; padding: 14px 22px 18px; }
+    #cf-ok { background: var(--danger); color: #040806; border-color: var(--laton); box-shadow: 0 0 16px rgba(255,107,107,.4); }
+    #cf-ok:hover { background: #ff9a9a; color: #040806; box-shadow: 0 0 22px rgba(255,107,107,.7); }
+    @media (max-width: 520px) { #cf-foot { flex-direction: column-reverse; } #cf-title { font-size: .9rem; } }
+
+    /* ---------- Pop-ups genéricos (sustituyen a alert/confirm del navegador) ---------- */
+    #pp-overlay {
+          position: fixed; inset: 0; z-index: 400; display: none; align-items: center; justify-content: center;
+          background: rgba(3,7,5,.88); backdrop-filter: blur(5px); padding: 16px;
+        }
+    #pp-overlay.pp-visible { display: flex; animation: rp-fade .25s ease-out; }
+    #pp-box {
+          position: relative; width: min(460px, 100%);
+          border: 2px solid var(--laton); border-radius: 2px;
+          box-shadow: 0 0 0 4px #000, 0 0 0 5px var(--laton-osc), 0 10px 40px rgba(0,0,0,.9), 0 0 40px rgba(62,154,107,.2);
+          background-image:
+            radial-gradient(ellipse at top, rgba(62,154,107,.16), transparent 60%),
+            linear-gradient(180deg, #14291d 0%, #0b1710 100%);
+          animation: rp-rise .3s ease-out;
+        }
+    #pp-box::before {
+          content: ''; position: absolute; top: 5px; left: 5px; right: 5px; bottom: 5px; pointer-events: none;
+          border: 1px solid var(--laton-osc);
+        }
+    #pp-head {
+          position: relative; display: flex; align-items: center; gap: 10px;
+          padding: 14px 22px 12px; border-bottom: 1px solid var(--laton-osc); background: rgba(62,154,107,.15);
+        }
+    #pp-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--glow); box-shadow: 0 0 10px var(--glow); flex: none; animation: pulse 1.2s infinite; }
+    #pp-title {
+          font-family: var(--fuente-titulo); font-size: 1.05rem; letter-spacing: 2px; color: var(--glow);
+          text-shadow: 0 0 10px rgba(155,240,192,.6); line-height: 1.2; text-transform: uppercase;
+        }
+    #pp-body { position: relative; padding: 18px 22px 6px; font-family: var(--fuente-cuerpo); font-size: 1.05rem; line-height: 1.5; color: var(--pergamino); white-space: pre-line; }
+    #pp-foot { position: relative; display: flex; gap: 10px; justify-content: flex-end; padding: 14px 22px 18px; }
+    #pp-ok { background: var(--accent); color: #040806; border-color: var(--laton); box-shadow: 0 0 16px rgba(62,154,107,.4); }
+    #pp-ok:hover { background: var(--glow); color: #040806; box-shadow: 0 0 22px rgba(155,240,192,.7); }
+    #pp-box.pp-danger #pp-head { background: rgba(120,30,30,.2); }
+    #pp-box.pp-danger #pp-dot { background: var(--danger); box-shadow: 0 0 10px var(--danger); }
+    #pp-box.pp-danger #pp-title { color: var(--danger); text-shadow: 0 0 10px rgba(255,107,107,.6); }
+    #pp-box.pp-danger #pp-ok { background: var(--danger); box-shadow: 0 0 16px rgba(255,107,107,.4); }
+    #pp-box.pp-danger #pp-ok:hover { background: #ff9a9a; box-shadow: 0 0 22px rgba(255,107,107,.7); }
+    @media (max-width: 520px) { #pp-foot { flex-direction: column-reverse; } #pp-title { font-size: .9rem; } }
+  
+    /* ======================================================================
+       ARMAS
+       ====================================================================== */
+    table.tabla-armas { min-width: 980px; }
+    .tabla-armas td:first-child { font-size: .9rem; }
+    .tabla-armas input.input-ident { min-width: 110px; }
+    .tabla-armas td.col-dado input.input-ident { min-width: 90px; width: 100px; text-align: center; }
+    .tabla-armas th.col-acciones, .tabla-armas td.col-acciones { text-align: right; white-space: nowrap; }
+    .tabla-armas td.col-acciones .btn { margin-left: 4px; }
+    .tabla-armas input.sin-municion { opacity: .35; }
+  </style>
+
+  <!-- LIBRERÍAS DE FIREBASE (Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+  <header>
+    <h1>PANEL DEL DIRECTOR</h1>
+    <span class="sub">CONTROL Y TRANSMISIONES A JUGADORES</span>
+    <span id="conn"><i></i><span id="conn-txt">CONECTANDO…</span></span>
+  </header>
+
+  <!-- NAVEGACIÓN RÁPIDA (control arriba · transmisión abajo) -->
+  <nav class="nav-secciones">
+    <button class="btn" type="button" onclick="irASeccion('seccionJugadores')">JUGADORES</button>
+    <button class="btn" type="button" onclick="irASeccion('seccionObjetos')">OBJETOS</button>
+    <button class="btn" type="button" onclick="irASeccion('seccionArmas')">ARMAS</button>
+    <button class="btn" type="button" onclick="irASeccion('seccionActivaciones')">ACTIVACIONES</button>
+    <button class="btn" type="button" onclick="irASeccion('seccionPuertas')">PUERTAS</button>
+    <button class="btn" type="button" onclick="irASeccion('seccionTransmision')">TRANSMISIÓN</button>
+    <button class="btn" type="button" onclick="irASeccion('msgs')">MENSAJES DE JUGADORES</button>
+    <button class="btn" type="button" onclick="irASeccion('ambiente')">SONIDO AMBIENTE</button>
+    <button class="btn" type="button" onclick="abrirFinal()">FINAL</button>
+  </nav>
+
+  <!-- SECCIÓN 3: DATOS DE LOS JUGADORES -->
+  <div class="seccion-titulo" id="seccionJugadores"><span>// DATOS DE LOS JUGADORES</span><button class="btn btn-subir" title="Ir al principio" onclick="irArriba()">&#8593;</button></div>
+  <section class="panel" id="panelJugadores">
+    <h2>
+      Fichas
+      <button class="btn small danger" id="btnRestaurarJugadores">RESTAURAR VALORES INICIALES</button>
+    </h2>
+
+      <div class="barra-jugadores">
+  <!--      <input type="text" id="nuevoJugadorId" class="input-texto" placeholder="jugador_id nuevo (ej: jugador1280)" maxlength="40">
+      <button class="btn small" id="btnAnadirJugador">+ AÑADIR JUGADOR</button> -->
+    </div>
+
+    <div class="tabla-wrap">
+      <table class="tabla-jugadores">
+        <thead>
+          <tr>
+            <th>jugador_id</th>
+            <th class="col-nombre">Nombre</th>
+            <th class="col-nombre">Profesión</th>
+            <th class="col-foto">Foto</th>
+            <th>Puntos de acción</th>
+            <th>Vida</th>
+            <th>Cordura</th>
+            <th>Dinero</th>
+            <th>Tirador</th>
+            <th class="col-listo"><button type="button" class="btn-campana-th" id="btnReiniciarAvisos" title="Reiniciar avisos"><img src="images/bell.png" alt="Reiniciar avisos"></button></th>
+            <th class="col-cura"><button type="button" class="btn-campana-th" id="btnReiniciarCuras" title="Reiniciar curaciones"><svg width="26" height="22" viewBox="0 0 26 22" style="vertical-align:middle" aria-hidden="true"><path d="M8 5V3a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v2" fill="none" stroke="#e8e0c8" stroke-width="2"/><rect x="1" y="5" width="24" height="16" rx="2" fill="#e8e0c8"/><rect x="11" y="8" width="4" height="10" fill="#c0392b"/><rect x="8" y="11" width="10" height="4" fill="#c0392b"/></svg></button></th>
+            <th class="col-registro"><button type="button" class="btn-campana-th" id="btnReiniciarRegistros" title="Reiniciar registros"><svg width="24" height="22" viewBox="0 0 24 22" style="vertical-align:middle" aria-hidden="true"><circle cx="10" cy="9" r="6" fill="none" stroke="#e8e0c8" stroke-width="2.5"/><line x1="14.5" y1="13.5" x2="21" y2="20" stroke="#e8e0c8" stroke-width="3" stroke-linecap="round"/></svg></button></th>
+            <th class="col-ubicacion">Ubicación</th>
+          </tr>
+        </thead>
+        <tbody id="cuerpoJugadores"></tbody>
+      </table>
+    </div>
+    <div id="vacioJugadores" class="vacio" style="display:none;">No hay jugadores cargados todavía.</div>
+  </section>
+
+  <!-- SECCIÓN 1: SALAS Y OBJETOS -->
+  <div class="seccion-titulo" id="seccionObjetos"><span>// OBJETOS EN SALAS</span><button class="btn btn-subir" title="Ir al principio" onclick="irArriba()">&#8593;</button></div>
+  <main id="contenedorSalas" class="grid-container"></main>
+
+  <!-- SECCIÓN: ARMAS (Firebase: armas/<idArma>) -->
+  <div class="seccion-titulo" id="seccionArmas"><span>// ARMAS</span><button class="btn btn-subir" title="Ir al principio" onclick="irArriba()">&#8593;</button></div>
+  <section class="panel" id="panelArmas">
+    <h2>
+      Armas
+      <span class="tools">
+        <button class="btn small" id="btnArmasDefecto" type="button">COMPLETAR VALORES POR DEFECTO</button>
+        <button class="btn small danger" id="btnRestaurarArmas" type="button">RESTAURAR VALORES INICIALES</button>
+      </span>
+    </h2>
+
+    <div class="barra-jugadores">
+      <input type="text" id="nuevaArmaId" class="input-texto" placeholder="identidad nueva (ej: pistola3)" maxlength="40" autocomplete="off">
+      <button class="btn small" id="btnAnadirArma" type="button">+ AÑADIR ARMA</button>
+    </div>
+
+    <div class="tabla-wrap">
+      <table class="tabla-jugadores tabla-armas">
+        <thead>
+          <tr>
+            <th>Identidad</th>
+            <th class="col-nombre">Nombre visible</th>
+            <th>Daño</th>
+            <th>Cargador máx.</th>
+            <th>Balas actuales</th>
+            <th>Coste PA</th>
+            <th class="col-acciones">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="cuerpoArmas"></tbody>
+      </table>
+    </div>
+    <div id="vacioArmas" class="vacio" style="display:none;">Todavía no hay armas en Firebase. Añade una con su identidad (pistola1, revolver1…) o espera a que un jugador reciba una.</div>
+    <div class="hint">La identidad debe coincidir con el nombre del objeto en el inventario (columna de la hoja). Daño en formato NdC+B (1d8+2, 3d6, 2d4-1). Un campo vacío usa el valor por defecto del html del jugador. Sin cargador máx. el arma es cuerpo a cuerpo (sin munición).</div>
+  </section>
+
+  <!-- SECCIÓN 2: ACTIVACIONES (SISTEMAS / MAQUINARIA) -->
+  <div class="seccion-titulo" id="seccionActivaciones"><span>// ACTIVACIONES DE SISTEMAS</span><button class="btn btn-subir" title="Ir al principio" onclick="irArriba()">&#8593;</button></div>
+  <main id="contenedorActivaciones" class="grid-container"></main>
+
+
+  <!-- SECCIÓN: PUERTAS CON CLAVE (desbloqueo remoto) -->
+  <div class="seccion-titulo" id="seccionPuertas"><span>// PUERTAS CON CLAVE</span><button class="btn btn-subir" title="Ir al principio" onclick="irArriba()">&#8593;</button></div>
+  <main id="contenedorPuertas" class="grid-container"></main>
+
+  <!-- ================= PARTE 2: TRANSMISIÓN A JUGADORES ================= -->
+  <div class="seccion-titulo" id="seccionTransmision"><span>// TRANSMISIÓN A JUGADORES</span><button class="btn btn-subir" type="button" title="Ir al principio" onclick="irArriba()">&#8593;</button></div>
+  <div class="zona-transmision">
+  <main class="grid-transmision">
+    <!-- ================= JUGADORES ================= -->
+    <section class="panel">
+      <h2>JUGADORES
+        <span class="tools">
+          <button class="btn small" type="button" id="btn-todos">TODOS</button>
+          <button class="btn small" type="button" id="btn-ninguno">NINGUNO</button>
+        </span>
+      </h2>
+      <div id="players"><div class="hint">Cargando jugadores…</div></div>
+      <div id="sel-count">0 seleccionados</div>
+    </section>
+
+    <!-- ================= TRANSMISIÓN ================= -->
+    <section class="panel">
+      <h2>TRANSMISIÓN</h2>
+
+      <label class="lbl" for="in-imagen">Imagen (jpg)</label>
+      <input type="text" id="in-imagen" list="dl-imagen" placeholder="images/image01.jpg" autocomplete="off">
+      <datalist id="dl-imagen"></datalist>
+
+      <label class="lbl" for="in-audio">Audio (mp3)</label>
+      <input type="text" id="in-audio" list="dl-audio" placeholder="audio/audio1.mp3" autocomplete="off">
+      <datalist id="dl-audio"></datalist>
+
+      <label class="lbl" for="in-video">Vídeo (mp4)</label>
+      <input type="text" id="in-video" list="dl-video" placeholder="videos/video1.mp4" autocomplete="off">
+      <datalist id="dl-video"></datalist>
+      <div class="hint">Las rutas son relativas a la carpeta de los html de los jugadores.</div>
+
+      <label class="lbl" for="in-texto">Texto</label>
+      <textarea id="in-texto" maxlength="500" placeholder="Escribe aquí el mensaje que verán los jugadores…"></textarea>
+      <div class="count"><span id="cnt">0</span> / 500</div>
+
+      <button class="btn" id="btn-mostrar" type="button" disabled>ENVIAR</button>
+      <div class="row2">
+        <button class="btn danger" id="btn-quitar" type="button">QUITAR POP-UP A SELECCIONADOS</button>
+        <button class="btn" id="btn-limpiar" type="button">LIMPIAR FORMULARIO</button>
+      </div>
+
+      <div id="log">
+        <h2 style="font-size:1.3rem;margin:0 0 8px;">REGISTRO</h2>
+        <div id="log-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ================= MENSAJES DE JUGADORES ================= -->
+  <section class="panel" id="msgs">
+    <h2>MENSAJES DE JUGADORES<button class="btn btn-subir" type="button" title="Ir al principio" onclick="irArriba()">&#8593;</button></h2>
+    <div id="msgs-list"></div>
+    <div class="row2">
+      <button class="btn danger" id="btn-borrar-msgs" type="button">BORRAR MENSAJES DEL HISTORIAL</button>
+    </div>
+  </section>
+
+  <!-- ================= SONIDO AMBIENTE ================= -->
+  <section class="panel" id="ambiente">
+    <h2>SONIDO AMBIENTE<button class="btn btn-subir" type="button" title="Ir al principio" onclick="irArriba()">&#8593;</button></h2>
+    <div class="row2" style="margin-top:0;margin-bottom:14px">
+      <button class="btn" type="button" id="amb-toggle-canal3">MOSTRAR CANAL 3</button>
+      <button class="btn" type="button" id="amb-toggle-canal4">MOSTRAR CANAL 4</button>
+    </div>
+    <div class="amb-grid">
+      <div class="amb-canal">
+        <h3>Canal 1 · Principal</h3>
+        <label class="lbl" for="amb-canal1-archivo">Archivo (mp3)</label>
+        <input type="text" id="amb-canal1-archivo" list="dl-amb" placeholder="ambiente.mp3" autocomplete="off">
+        <label class="lbl" for="amb-canal1-vol">Volumen</label>
+        <div class="amb-vol"><input type="range" id="amb-canal1-vol" min="0" max="100" value="50"><b id="amb-canal1-vol-txt">50</b></div>
+        <label class="lbl" for="amb-canal1-loop">Loop</label>
+        <select id="amb-canal1-loop"><option value="si">Sí (en bucle)</option><option value="no">No (suena una vez)</option></select>
+        <div class="row2">
+          <button class="btn" type="button" id="amb-canal1-aplicar">APLICAR</button>
+          <button class="btn danger" type="button" id="amb-canal1-parar">PARAR</button>
+        </div>
+        <div class="amb-estado" id="amb-canal1-estado"></div>
+      </div>
+      <div class="amb-canal">
+        <h3>Canal 2 · Segundo plano</h3>
+        <label class="lbl" for="amb-canal2-archivo">Archivo (mp3)</label>
+        <input type="text" id="amb-canal2-archivo" list="dl-amb" placeholder="ir_salon.mp3" autocomplete="off">
+        <label class="lbl" for="amb-canal2-vol">Volumen</label>
+        <div class="amb-vol"><input type="range" id="amb-canal2-vol" min="0" max="100" value="50"><b id="amb-canal2-vol-txt">50</b></div>
+        <label class="lbl" for="amb-canal2-loop">Loop</label>
+        <select id="amb-canal2-loop"><option value="si">Sí (en bucle)</option><option value="no">No (suena una vez)</option></select>
+        <div class="row2">
+          <button class="btn" type="button" id="amb-canal2-aplicar">APLICAR</button>
+          <button class="btn danger" type="button" id="amb-canal2-parar">PARAR</button>
+        </div>
+        <div class="amb-estado" id="amb-canal2-estado"></div>
+      </div>
+      <div class="amb-canal" id="amb-card-canal3" style="display:none">
+        <h3>Canal 3 · Tercer plano</h3>
+        <label class="lbl" for="amb-canal3-archivo">Archivo (mp3)</label>
+        <input type="text" id="amb-canal3-archivo" list="dl-amb" placeholder="ir_santuario.mp3" autocomplete="off">
+        <label class="lbl" for="amb-canal3-vol">Volumen</label>
+        <div class="amb-vol"><input type="range" id="amb-canal3-vol" min="0" max="100" value="50"><b id="amb-canal3-vol-txt">50</b></div>
+        <label class="lbl" for="amb-canal3-loop">Loop</label>
+        <select id="amb-canal3-loop"><option value="si">Sí (en bucle)</option><option value="no">No (suena una vez)</option></select>
+        <div class="row2">
+          <button class="btn" type="button" id="amb-canal3-aplicar">APLICAR</button>
+          <button class="btn danger" type="button" id="amb-canal3-parar">PARAR</button>
+        </div>
+        <div class="amb-estado" id="amb-canal3-estado"></div>
+      </div>
+      <div class="amb-canal" id="amb-card-canal4" style="display:none">
+        <h3>Canal 4 · Cuarto plano</h3>
+        <label class="lbl" for="amb-canal4-archivo">Archivo (mp3)</label>
+        <input type="text" id="amb-canal4-archivo" list="dl-amb" placeholder="ambiente.mp3" autocomplete="off">
+        <label class="lbl" for="amb-canal4-vol">Volumen</label>
+        <div class="amb-vol"><input type="range" id="amb-canal4-vol" min="0" max="100" value="50"><b id="amb-canal4-vol-txt">50</b></div>
+        <label class="lbl" for="amb-canal4-loop">Loop</label>
+        <select id="amb-canal4-loop"><option value="si">Sí (en bucle)</option><option value="no">No (suena una vez)</option></select>
+        <div class="row2">
+          <button class="btn" type="button" id="amb-canal4-aplicar">APLICAR</button>
+          <button class="btn danger" type="button" id="amb-canal4-parar">PARAR</button>
+        </div>
+        <div class="amb-estado" id="amb-canal4-estado"></div>
+      </div>
+    </div>
+    <datalist id="dl-amb"></datalist>
+    <div class="hint">Los archivos se buscan en la carpeta audio/ de los html de los jugadores. APLICAR (re)inicia el sonido; mover el volumen o el loop lo cambia al instante sin reiniciar.</div>
+  </section>
+
+  <!-- ================= RESPONDER A UN JUGADOR ================= -->
+  <div id="rp-overlay">
+    <div id="rp-box" role="dialog" aria-modal="true" aria-label="Responder al jugador">
+      <button id="rp-close" type="button" aria-label="Cerrar" title="Cerrar">&#10005;</button>
+      <div id="rp-head"><span id="rp-dot"></span><span id="rp-title">RESPONDER</span></div>
+      <div id="rp-body">
+        <label class="lbl">Su mensaje</label>
+        <div id="rp-orig"></div>
+        <label class="lbl" for="rp-text" style="margin-top:18px;">Tu respuesta</label>
+        <textarea id="rp-text" maxlength="500" placeholder="Escribe aquí tu respuesta…"></textarea>
+        <div class="count"><span id="rp-cnt">0</span> / 500</div>
+        <div id="rp-status"></div>
+      </div>
+      <div id="rp-foot">
+        <button class="btn" id="rp-cancel" type="button">CANCELAR</button>
+        <button class="btn" id="rp-send" type="button" disabled>ENVIAR RESPUESTA</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= CONFIRMAR BORRADO DEL HISTORIAL ================= -->
+  <div id="cf-overlay">
+    <div id="cf-box" role="alertdialog" aria-modal="true" aria-label="Confirmar borrado">
+      <div id="cf-head"><span id="cf-dot"></span><span id="cf-title">BORRAR HISTORIAL</span></div>
+      <div id="cf-body">
+        ¿Seguro que quieres borrar todos los mensajes del historial?
+        <small>// Solo se vacía esta lista en pantalla.</small>
+      </div>
+      <div id="cf-foot">
+        <button class="btn" id="cf-cancel" type="button">CANCELAR</button>
+        <button class="btn" id="cf-ok" type="button">BORRAR</button>
+      </div>
+    </div>
+  </div>
+
+  </div>
+
+  <!-- ================= POP-UP GENÉRICO (avisos y confirmaciones) ================= -->
+  <div id="pp-overlay">
+    <div id="pp-box" role="alertdialog" aria-modal="true" aria-labelledby="pp-title">
+      <div id="pp-head"><span id="pp-dot"></span><span id="pp-title">AVISO</span></div>
+      <div id="pp-body"></div>
+      <div id="pp-foot">
+        <button class="btn" id="pp-cancel" type="button">CANCELAR</button>
+        <button class="btn" id="pp-ok" type="button">ACEPTAR</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+// Pop-ups bonitos: popup({titulo, texto, ok, cancelar, peligro}) -> Promise<boolean>
+(function () {
+  let resolver = null;
+  const $ = id => document.getElementById(id);
+  function cerrar(val) {
+    $('pp-overlay').classList.remove('pp-visible');
+    if (resolver) { const r = resolver; resolver = null; r(val); }
+  }
+  window.popup = function (o) {
+    o = o || {};
+    if (resolver) cerrar(false);
+    $('pp-title').textContent = o.titulo || 'AVISO';
+    $('pp-body').textContent = o.texto || '';
+    $('pp-ok').textContent = o.ok || 'ACEPTAR';
+    $('pp-cancel').textContent = o.cancelar || 'CANCELAR';
+    $('pp-cancel').style.display = o.cancelar === false ? 'none' : '';
+    $('pp-box').classList.toggle('pp-danger', !!o.peligro);
+    $('pp-overlay').classList.add('pp-visible');
+    setTimeout(() => $(o.cancelar === false ? 'pp-ok' : 'pp-cancel').focus(), 50);
+    return new Promise(res => { resolver = res; });
+  };
+  document.addEventListener('DOMContentLoaded', () => {
+    $('pp-ok').addEventListener('click', () => cerrar(true));
+    $('pp-cancel').addEventListener('click', () => cerrar(false));
+    $('pp-overlay').addEventListener('click', e => { if (e.target === $('pp-overlay')) cerrar(false); });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && $('pp-overlay').classList.contains('pp-visible')) cerrar(false);
+    });
+  });
+})();
+  </script>
+
+  <script>
+function irASeccion(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function irArriba() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+  </script>
+
+  <!-- ================= PARTE 1: CONTROL (objetos, activaciones, jugadores) ================= -->
+  <script>
+(function () {
+    // =====================================================================
+    // 1. CONFIGURACIÓN DE FIREBASE
+    // =====================================================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyDBMQU4fRGw-BjfAx8dv84GmcHzA-1ncoY",
+      authDomain: "logia-rol-vivo.firebaseapp.com",
+      databaseURL: "https://logia-rol-vivo-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "logia-rol-vivo",
+      storageBucket: "logia-rol-vivo.firebasestorage.app",
+      messagingSenderId: "432574172065",
+      appId: "1:432574172065:web:0e1d93921e84f51cb099e0"
+    };
+
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // =====================================================================
+    // 2. CONFIGURACIÓN DE SALAS Y OBJETOS (RECOGER/DISPONIBILIDAD)
+    // =====================================================================
+    const MAPA_SALA_OBJETOS = {
+      "sala_biblioteca": {
+        nombreVisible: "Biblioteca",
+        objetos: [
+          { id: "te", nombre: "Taza de té" },
+          { id: "bourbon", nombre: "Vaso de bourbon" }
+        ]
+      },
+
+      "sala_celdas": {
+        nombreVisible: "Celdas",
+        objetos: [
+          { id: "sopa", nombre: "Tazón de sopa" },
+          { id: "cargador_pistola1", nombre: "Cargador para pistola" },
+	{ id: "pala", nombre: '<span style="color:#e04b4b">Pala</span>' }
+        ]
+      },
+
+      "sala_comedor": {
+        nombreVisible: "Comedor",
+        objetos: [
+          { id: "brandy", nombre: "Copa de brandy" },
+          { id: "galletas", nombre: "Bandeja de galletas" },
+	{ id: "prueba_c_copa", nombre: '<span style="color:#e04b4b">Prueba C: Copa con polvo</span>' }
+        ]
+      },
+
+"sala_jardin": {
+  nombreVisible: "Jardín",
+  objetos: [
+	  { id: "lata_conservas", nombre: "Lata de conservas" },
+	  { id: "cartuchos_escopeta1", nombre: "Cartuchos para escopeta" },
+	  { id: "llave_cajon", nombre: "Llave cajón" },
+	{ id: "prueba_f_pisadas", nombre: '<span style="color:#e04b4b">Prueba F: Pisadas</span>' },
+	{ id: "prueba_g_bayoneta", nombre: '<span style="color:#e04b4b">Prueba G: Bayoneta</span>' }
+  ]
+},
+
+      "sala_observatorio": {
+        nombreVisible: "Observatorio",
+        objetos: [
+          { id: "cafe", nombre: "Taza de café" },
+          { id: "pitillera", nombre: "Pitillera" },
+	{ id: "prueba_e_pagina", nombre: '<span style="color:#e04b4b">Prueba E: Página</span>' }
+        ]
+      },
+
+      "sala_santuario": {
+        nombreVisible: "Santuario",
+        objetos: [
+	{ id: "prueba_a_reloj", nombre: '<span style="color:#e04b4b">Prueba A: Reloj</span>' },
+	{ id: "prueba_b_informe", nombre: '<span style="color:#e04b4b">Prueba B: Informe</span>' }
+        ]
+      },
+
+      "sala_vestibulo": {
+        nombreVisible: "Vestíbulo",
+        objetos: [
+          { id: "kola", nombre: "Frasco de Kola" },
+          { id: "municion_revolver1", nombre: "Munición para revólver" },
+          { id: "revolver1", nombre: "Revólver" },
+	{ id: "prueba_d_nota", nombre: '<span style="color:#e04b4b">Prueba D: Nota anónima</span>' }
+        ]
+      }
+
+    };
+
+
+
+    // =====================================================================
+    // 3. CONFIGURACIÓN DE ACTIVACIONES (MECANISMOS / MAQUINARIA)
+    // Agrupa sistemas como generadores, paneles eléctricos, etc.
+    // =====================================================================
+    const MAPA_ACTIVACIONES = {
+      "generadores_base": {
+        nombreVisible: "Sistemas Eléctricos",
+        activaciones: [
+          { id: "generador", nombre: "Generador Principal de Energía" },
+          { id: "luces_emergencia", nombre: "Luces de Emergencia Pasillo" }
+        ]
+      },
+      "sistemas_seguridad": {
+        nombreVisible: "Mecanismos y Cierres",
+        activaciones: [
+          { id: "puerta_blindada", nombre: "Bloqueo de Puerta Principal" }
+        ]
+      }
+    };
+
+    // =====================================================================
+    // 3 bis. CONFIGURACIÓN DE JUGADORES
+    // Estructura en Firebase:  jugadores/<jugador_id>/{jugador_id, nombre, profesion, foto, puntos_accion, vida, cordura, dinero}
+    //
+    // >>> EDITA AQUÍ la lista de jugadores y sus valores iniciales. <<<
+    // Al abrir este HTML, los jugadores que NO existan aún en Firebase se
+    // crean automáticamente con estos valores. Los que ya existen NO se tocan
+    // (así no se pisan los datos de una partida en curso); solo se rellenan
+    // nombre, profesión y foto si todavía faltan en Firebase.
+    // =====================================================================
+    const CAMPOS_JUGADOR = [
+      { id: "puntos_accion", etiqueta: "Puntos de acción" },
+      { id: "vida",          etiqueta: "Vida" },
+      { id: "cordura",       etiqueta: "Cordura" },
+      { id: "dinero",        etiqueta: "Dinero" }
+    ];
+
+    // Nombre, profesión y foto de cada jugador se guardan en Firebase
+    // (jugadores/<id>/nombre, profesion, foto). Se escriben a mano en
+    // JUGADORES_INICIALES (más abajo) y se pueden cambiar desde la tabla.
+    const FOTO_VACIA = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%239bf0c0'><path d='M12 2C9.8 2 8 3.8 8 6s1.8 4 4 4 4-1.8 4-4-1.8-4-4-4zm0 10c-3.3 0-8 1.7-8 5v3h16v-3c0-3.3-4.7-5-8-5z'/></svg>";
+
+    function ponerFoto(img, url) {
+      const nueva = url || '';
+      if (img.dataset.url === nueva && img.getAttribute('src')) return;
+      img.dataset.url = nueva;
+      img.onerror = function() { img.onerror = null; img.src = FOTO_VACIA; };
+      img.src = nueva || FOTO_VACIA;
+    }
+
+    // Nombres bonitos de las ubicaciones (lo que guarda mapa.html en jugadores/<id>/ubicacion)
+    const NOMBRES_UBICACION = {
+      pasillo: "Pasillo", observatorio: "Observatorio", salon: "Salón", comedor: "Comedor",
+      biblioteca: "Biblioteca", vestibulo: "Vestíbulo", jardin: "Jardín",
+      santuario: "Santuario", celdas: "Celdas"
+    };
+
+    // Resalta en rojo los valores que llegan a 0 (o menos)
+    function marcarCero(input) {
+      const txt = String(input.value).trim();
+      const n = parseFloat(txt);
+      input.classList.toggle('cero', txt !== '' && isFinite(n) && n <= 0);
+    }
+
+    const VALORES_POR_DEFECTO = { puntos_accion: 20, vida: 12, cordura: 5, dinero: 500 };
+
+    // >>> EDITA AQUÍ nombre, profesión y foto de cada jugador (y sus valores iniciales). <<<
+    const JUGADORES_INICIALES = [
+      { jugador_id: "jugador1278", nombre: "Silas WETHERBY",   profesion: "Gran Maestre", foto: "images/f_wetherby.jpg", puntos_accion: 20, vida: 12, cordura: 12, dinero: 500 },
+      { jugador_id: "jugador2935", nombre: "Abel BREWER",      profesion: "Doctor",       foto: "images/f_brewer.jpg",   puntos_accion: 20, vida: 12, cordura: 12, dinero: 500 },
+      { jugador_id: "jugador3194", nombre: "Barnabas CRANE",   profesion: "Anticuario",   foto: "images/f_crane.jpg",    puntos_accion: 20, vida: 12, cordura: 12, dinero: 500 },
+      { jugador_id: "jugador4781", nombre: "Jeremiah NICHOLS", profesion: "Inspector",    foto: "images/f_nichols.jpg",  puntos_accion: 20, vida: 12, cordura: 12, dinero: 500 },
+      { jugador_id: "jugador5261", nombre: "Robert PICKMAN",   profesion: "Pintor",       foto: "images/f_pickman.jpg",  puntos_accion: 20, vida: 12, cordura: 12, dinero: 500 },
+      { jugador_id: "jugador6193", nombre: "Edmund RICE",      profesion: "Profesor",     foto: "images/f_rice.jpg",     puntos_accion: 20, vida: 12, cordura: 12, dinero: 500 }
+    ];
+
+    // =====================================================================
+    // 4. UTILIDADES
+    // =====================================================================
+    let toastTimer;
+    function toast(txt, error) {
+      const t = document.getElementById('toast');
+      t.textContent = txt;
+      t.className = 'show' + (error ? ' err' : '');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.className = error ? 'err' : '', 2800);
+    }
+
+    // =====================================================================
+    // 5. RENDERIZADO DE OBJETOS EN SALAS
+    // =====================================================================
+    function construirInterfazSalas() {
+      const contenedor = document.getElementById('contenedorSalas');
+      contenedor.innerHTML = '';
+
+      for (const [idSala, datosSala] of Object.entries(MAPA_SALA_OBJETOS)) {
+        const tarjeta = document.createElement('section');
+        tarjeta.className = 'panel';
+
+        tarjeta.innerHTML = `
+          <h2>
+            ${datosSala.nombreVisible}
+            <button class="btn small" onclick="reiniciarTodaLaSala('${idSala}')">RESTAURAR SALA</button>
+          </h2>
+          <div id="lista-objetos-${idSala}"></div>
+        `;
+
+        contenedor.appendChild(tarjeta);
+        const contenedorLista = tarjeta.querySelector(`#lista-objetos-${idSala}`);
+
+        datosSala.objetos.forEach(obj => {
+          const filaObj = document.createElement('div');
+          filaObj.className = 'fila-item';
+          filaObj.innerHTML = `
+            <span class="nombre-item">${obj.nombre}</span>
+            <div>
+              <span id="badge-obj-${idSala}-${obj.id}" class="badge">CARGANDO…</span>
+              <button id="btn-obj-${idSala}-${obj.id}" class="btn small" onclick="cambiarEstadoObjeto('${idSala}', '${obj.id}')">
+                …
+              </button>
+            </div>
+          `;
+          contenedorLista.appendChild(filaObj);
+
+          escucharObjetoEnTiempoReal(idSala, obj.id);
+        });
+      }
+    }
+
+    function escucharObjetoEnTiempoReal(idSala, idObjeto) {
+      const objRef = db.ref(`localizaciones/${idSala}/${idObjeto}/disponible`);
+
+      objRef.on('value', (snapshot) => {
+        const disponible = snapshot.val();
+        const badge = document.getElementById(`badge-obj-${idSala}-${idObjeto}`);
+        const boton = document.getElementById(`btn-obj-${idSala}-${idObjeto}`);
+
+        if (badge && boton) {
+          if (disponible === true) {
+            badge.textContent = "DISPONIBLE";
+            badge.className = "badge true";
+            boton.textContent = "AGOTAR";
+            boton.className = "btn small danger";
+            boton.setAttribute('data-estado', "true");
+          } else if (disponible === false) {
+            badge.textContent = "COGIDO";
+            badge.className = "badge false";
+            boton.textContent = "RESTAURAR";
+            boton.className = "btn small";
+            boton.setAttribute('data-estado', "false");
+          } else {
+            objRef.set(true); // Inicializa si no existe
+          }
+        }
+      });
+    }
+
+    function cambiarEstadoObjeto(idSala, idObjeto) {
+      const boton = document.getElementById(`btn-obj-${idSala}-${idObjeto}`);
+      const nuevoEstado = !(boton.getAttribute('data-estado') === "true");
+
+      db.ref(`localizaciones/${idSala}/${idObjeto}/disponible`).set(nuevoEstado)
+        .then(() => toast(`OBJETO '${idObjeto.toUpperCase()}': ${nuevoEstado ? 'DISPONIBLE' : 'COGIDO'}`))
+        .catch(() => toast("ERROR AL CAMBIAR ESTADO", true));
+    }
+
+    function reiniciarTodaLaSala(idSala) {
+      const datosNuevos = {};
+      MAPA_SALA_OBJETOS[idSala].objetos.forEach(obj => {
+        datosNuevos[`${obj.id}/disponible`] = true;
+      });
+
+      db.ref(`localizaciones/${idSala}`).update(datosNuevos)
+        .then(() => toast(`SALA ${MAPA_SALA_OBJETOS[idSala].nombreVisible.toUpperCase()} RESTAURADA`))
+        .catch(() => toast("ERROR AL RESTAURAR SALA", true));
+    }
+
+    // =====================================================================
+    // 6. RENDERIZADO DE ACTIVACIONES (MECANISMOS)
+    // =====================================================================
+    function construirInterfazActivaciones() {
+      const contenedor = document.getElementById('contenedorActivaciones');
+      contenedor.innerHTML = '';
+
+      for (const [idGrupo, datosGrupo] of Object.entries(MAPA_ACTIVACIONES)) {
+        const tarjeta = document.createElement('section');
+        tarjeta.className = 'panel';
+
+        tarjeta.innerHTML = `
+          <h2>${datosGrupo.nombreVisible}</h2>
+          <div id="lista-act-${idGrupo}"></div>
+        `;
+
+        contenedor.appendChild(tarjeta);
+        const contenedorLista = tarjeta.querySelector(`#lista-act-${idGrupo}`);
+
+        datosGrupo.activaciones.forEach(act => {
+          const filaAct = document.createElement('div');
+          filaAct.className = 'fila-item';
+          filaAct.innerHTML = `
+            <span class="nombre-item">${act.nombre}</span>
+            <div>
+              <span id="badge-act-${act.id}" class="badge">CARGANDO…</span>
+              <button id="btn-act-${act.id}" class="btn small" onclick="cambiarEstadoActivacion('${act.id}')">
+                …
+              </button>
+            </div>
+          `;
+          contenedorLista.appendChild(filaAct);
+
+          escucharActivacionEnTiempoReal(act.id);
+        });
+      }
+    }
+
+    function escucharActivacionEnTiempoReal(idActivacion) {
+      // Guarda en el nodo '/activaciones/SISTEMA/activado'
+      const actRef = db.ref(`activaciones/${idActivacion}/activado`);
+
+      actRef.on('value', (snapshot) => {
+        const activado = snapshot.val();
+        const badge = document.getElementById(`badge-act-${idActivacion}`);
+        const boton = document.getElementById(`btn-act-${idActivacion}`);
+
+        if (badge && boton) {
+          if (activado === true) {
+            badge.textContent = "ACTIVADO / EN MARCHA";
+            badge.className = "badge true";
+            boton.textContent = "DESACTIVAR";
+            boton.className = "btn small danger";
+            boton.setAttribute('data-estado', "true");
+          } else if (activado === false) {
+            badge.textContent = "APAGADO / INACTIVO";
+            badge.className = "badge false";
+            boton.textContent = "ACTIVAR";
+            boton.className = "btn small";
+            boton.setAttribute('data-estado', "false");
+          } else {
+            actRef.set(false); // Por defecto las máquinas empiezan apagadas
+          }
+        }
+      });
+    }
+
+    function cambiarEstadoActivacion(idActivacion) {
+      const boton = document.getElementById(`btn-act-${idActivacion}`);
+      const nuevoEstado = !(boton.getAttribute('data-estado') === "true");
+
+      db.ref(`activaciones/${idActivacion}/activado`).set(nuevoEstado)
+        .then(() => toast(`SISTEMA '${idActivacion.toUpperCase()}': ${nuevoEstado ? 'ACTIVADO' : 'APAGADO'}`))
+        .catch(() => toast("ERROR AL CAMBIAR ACTIVACIÓN", true));
+    }
+
+
+    // =====================================================================
+    // 6b. PUERTAS CON CLAVE: el máster abre/cierra sin necesidad de la clave
+    //     Firebase: puertas/<sala>/abierta (true = cualquiera entra sin clave)
+    // =====================================================================
+    const MAPA_PUERTAS = { santuario: "Santuario" };
+
+    function construirInterfazPuertas() {
+      const contenedor = document.getElementById('contenedorPuertas');
+      contenedor.innerHTML = '';
+      const tarjeta = document.createElement('section');
+      tarjeta.className = 'panel';
+      tarjeta.innerHTML = '<h2>Cerraduras</h2><div id="lista-puertas"></div>';
+      contenedor.appendChild(tarjeta);
+      const lista = tarjeta.querySelector('#lista-puertas');
+
+      for (const [idSala, nombre] of Object.entries(MAPA_PUERTAS)) {
+        const fila = document.createElement('div');
+        fila.className = 'fila-item';
+        fila.innerHTML = `
+          <span class="nombre-item">${nombre}</span>
+          <div>
+            <span id="badge-puerta-${idSala}" class="badge">CARGANDO…</span>
+            <button id="btn-puerta-${idSala}" class="btn small" onclick="cambiarEstadoPuerta('${idSala}')">…</button>
+          </div>`;
+        lista.appendChild(fila);
+
+        db.ref(`puertas/${idSala}/abierta`).on('value', snap => {
+          const abierta = snap.val() === true;   // sin dato = cerrada (exige clave)
+          const badge = document.getElementById(`badge-puerta-${idSala}`);
+          const boton = document.getElementById(`btn-puerta-${idSala}`);
+          if (!badge || !boton) return;
+          badge.textContent = abierta ? "ABIERTA (SIN CLAVE)" : "CERRADA (PIDE CLAVE)";
+          badge.className = "badge " + (abierta ? "true" : "false");
+          boton.textContent = abierta ? "CERRAR" : "ABRIR";
+          boton.className = abierta ? "btn small danger" : "btn small";
+          boton.setAttribute('data-estado', abierta ? "true" : "false");
+        });
+      }
+    }
+
+    function cambiarEstadoPuerta(idSala) {
+      const boton = document.getElementById(`btn-puerta-${idSala}`);
+      const nuevoEstado = !(boton.getAttribute('data-estado') === "true");
+      db.ref(`puertas/${idSala}/abierta`).set(nuevoEstado)
+        .then(() => toast(`${MAPA_PUERTAS[idSala].toUpperCase()}: ${nuevoEstado ? 'ABIERTA' : 'CERRADA'}`))
+        .catch(() => toast("ERROR AL CAMBIAR LA PUERTA", true));
+    }
+
+    // =====================================================================
+    // 7. JUGADORES: CARGA INICIAL + TIEMPO REAL + EDICIÓN MANUAL
+    // =====================================================================
+    const jugadoresRef = db.ref('jugadores');
+    const cuerpoJugadores = document.getElementById('cuerpoJugadores');
+    const vacioJugadores = document.getElementById('vacioJugadores');
+
+    // Avisos de "preparado" (listos/<id>): los envía el jugador con la campana; el máster los reinicia.
+    let listosActuales = {};
+    function pintarListos() {
+      Array.from(cuerpoJugadores.children).forEach(tr => {
+        const td = tr.querySelector('td.col-listo');
+        if (td) td.textContent = listosActuales[tr.dataset.id] ? '✔' : '';
+      });
+    }
+    function escucharListos() {
+      db.ref('listos').on('value', snap => {
+        listosActuales = snap.val() || {};
+        pintarListos();
+      });
+    }
+    async function reiniciarAvisos() {
+      if (!await popup({ titulo: 'REINICIAR AVISOS', texto: '¿Quiere reiniciar los avisos?\n\nSe quitarán los ticks de todos los jugadores.', ok: 'SÍ, REINICIAR', cancelar: 'NO' })) return;
+      db.ref('listos').remove()
+        .then(() => toast('AVISOS REINICIADOS'))
+        .catch(() => toast('ERROR AL REINICIAR AVISOS', true));
+    }
+
+    // Curaciones del doctor (curaciones/<doctor>/<jugador> = true): tick en la fila del jugador ya curado.
+    // El botiquín de la cabecera borra todas las curaciones para que el doctor pueda volver a curar.
+    let curasActuales = {};
+    function jugadorCurado(id) {
+      return Object.keys(curasActuales).some(doc => curasActuales[doc] && curasActuales[doc][id] === true);
+    }
+    function pintarCuras() {
+      Array.from(cuerpoJugadores.children).forEach(tr => {
+        const td = tr.querySelector('td.col-cura');
+        if (td) td.textContent = jugadorCurado(tr.dataset.id) ? '✔' : '';
+      });
+    }
+    function escucharCuras() {
+      db.ref('curaciones').on('value', snap => {
+        curasActuales = snap.val() || {};
+        pintarCuras();
+      });
+    }
+    async function reiniciarCuras() {
+      if (!await popup({ titulo: 'REINICIAR CURACIONES', texto: '¿Quiere reiniciar las curaciones?\n\nSe quitarán los ticks y el doctor podrá volver a curar a todos los jugadores.', ok: 'SÍ, REINICIAR', cancelar: 'NO' })) return;
+      db.ref('curaciones').remove()
+        .then(() => toast('CURACIONES REINICIADAS'))
+        .catch(() => toast('ERROR AL REINICIAR CURACIONES', true));
+    }
+
+    // Registros del inspector (registrados/<inspector>/<jugador> = true): tick en la fila del jugador ya registrado.
+    // La lupa de la cabecera borra todos los registros para que el inspector pueda volver a registrar.
+    let registradosActuales = {};
+    function jugadorRegistrado(id) {
+      return Object.keys(registradosActuales).some(insp => registradosActuales[insp] && registradosActuales[insp][id] === true);
+    }
+    function pintarRegistrados() {
+      Array.from(cuerpoJugadores.children).forEach(tr => {
+        const td = tr.querySelector('td.col-registro');
+        if (td) td.textContent = jugadorRegistrado(tr.dataset.id) ? '✔' : '';
+      });
+    }
+    function escucharRegistrados() {
+      db.ref('registrados').on('value', snap => {
+        registradosActuales = snap.val() || {};
+        pintarRegistrados();
+      });
+    }
+    async function reiniciarRegistrados() {
+      if (!await popup({ titulo: 'REINICIAR REGISTROS', texto: '¿Quiere reiniciar los registros?\n\nSe quitarán los ticks y el inspector podrá volver a registrar a todos los jugadores.', ok: 'SÍ, REINICIAR', cancelar: 'NO' })) return;
+      db.ref('registrados').remove()
+        .then(() => toast('REGISTROS REINICIADOS'))
+        .catch(() => toast('ERROR AL REINICIAR REGISTROS', true));
+    }
+
+    // Los IDs se usan como clave de Firebase: quitamos caracteres prohibidos (. # $ [ ] /)
+    function limpiarIdJugador(txt) {
+      return String(txt).trim().replace(/[.#$\[\]\/\s]+/g, '_');
+    }
+
+    function fichaPorDefecto(id) {
+      return Object.assign({ jugador_id: id }, VALORES_POR_DEFECTO);
+    }
+
+    // Crea en Firebase los jugadores iniciales que todavía no existan (no pisa los existentes).
+    // En los que ya existen solo rellena nombre, profesión y foto si faltan.
+    const CAMPOS_IDENTIDAD = ['nombre', 'profesion', 'foto'];
+
+    function sembrarJugadoresIniciales() {
+      return jugadoresRef.once('value').then(snap => {
+        const existentes = snap.val() || {};
+        const nuevos = {};
+        let contador = 0;
+
+        JUGADORES_INICIALES.forEach(j => {
+          const id = limpiarIdJugador(j.jugador_id);
+          if (!existentes[id]) {
+            nuevos[id] = Object.assign(fichaPorDefecto(id), j, { jugador_id: id });
+            contador++;
+          } else {
+            CAMPOS_IDENTIDAD.forEach(k => {
+              const actual = existentes[id][k];
+              if ((actual === undefined || actual === null || actual === '') && j[k]) {
+                nuevos[`${id}/${k}`] = j[k];
+                contador++;
+              }
+            });
+          }
+        });
+
+        if (contador > 0) {
+          return jugadoresRef.update(nuevos)
+            .then(() => toast(`${contador} DATO(S) DE JUGADORES CARGADOS EN FIREBASE`));
+        }
+      }).catch(() => toast("ERROR AL CARGAR JUGADORES INICIALES", true));
+    }
+
+    // Construye (una sola vez) la fila de un jugador
+    function crearFilaJugador(id) {
+      const tr = document.createElement('tr');
+      tr.id = `fila-jug-${id}`;
+      tr.dataset.id = id;
+
+      const tdNombre = document.createElement('td');
+      tdNombre.textContent = id;
+      tr.appendChild(tdNombre);
+
+      const tdNombreReal = document.createElement('td');
+      tdNombreReal.className = 'col-nombre';
+      tdNombreReal.appendChild(crearInputTexto(id, 'nombre', 'Nombre del personaje'));
+      tr.appendChild(tdNombreReal);
+
+      const tdProfesion = document.createElement('td');
+      tdProfesion.className = 'col-nombre';
+      tdProfesion.appendChild(crearInputTexto(id, 'profesion', 'Profesión'));
+      tr.appendChild(tdProfesion);
+
+      const tdFoto = document.createElement('td');
+      tdFoto.className = 'col-foto';
+      const wrapFoto = document.createElement('div');
+      wrapFoto.className = 'celda-foto';
+      const imgFoto = document.createElement('img');
+      imgFoto.className = 'foto-jugador';
+      imgFoto.alt = id;
+      ponerFoto(imgFoto, '');
+      wrapFoto.append(imgFoto, crearInputTexto(id, 'foto', 'images/foto.jpg'));
+      tdFoto.appendChild(wrapFoto);
+      tr.appendChild(tdFoto);
+
+      CAMPOS_JUGADOR.forEach(campo => {
+        const td = document.createElement('td');
+        const wrap = document.createElement('div');
+        wrap.className = 'celda-num';
+
+        const esDinero = campo.id === 'dinero' || campo.id === 'cordura' || campo.id === 'vida'; // dinero, cordura y vida se escriben a mano: sin botones - y +
+        const menos = document.createElement('button');
+        menos.className = 'btn-mini';
+        menos.textContent = '−';
+        menos.title = 'Restar 1';
+        menos.addEventListener('click', () => ajustarCampo(id, campo.id, -1));
+
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.step = 'any';
+        input.className = 'input-num' + (campo.id === 'dinero' ? ' dinero' : '');
+        input.dataset.campo = campo.id;
+        input.addEventListener('input', () => marcarCero(input));
+        input.addEventListener('change', () => guardarCampoDesdeInput(id, campo.id, input));
+
+        const mas = document.createElement('button');
+        mas.className = 'btn-mini';
+        mas.textContent = '+';
+        mas.title = 'Sumar 1';
+        mas.addEventListener('click', () => ajustarCampo(id, campo.id, +1));
+
+        if (esDinero) wrap.append(input); else wrap.append(menos, input, mas);
+        td.appendChild(wrap);
+        tr.appendChild(td);
+      });
+
+      // Habilidad "tirador": gana los empates (jugadores/<id>/habilidad = 'tirador' o '')
+      const tdTirador = document.createElement('td');
+      const chkTirador = document.createElement('input');
+      chkTirador.type = 'checkbox';
+      chkTirador.dataset.habilidad = 'tirador';
+      chkTirador.title = 'Tirador: gana los empates (si se enfrentan dos tiradores, nadie sale herido)';
+      chkTirador.style.cssText = 'width:20px;height:20px;cursor:pointer;accent-color:#6fdc9a;';
+      chkTirador.addEventListener('change', () => {
+        db.ref(`jugadores/${id}/habilidad`).set(chkTirador.checked ? 'tirador' : '')
+          .then(() => toast(`${id.toUpperCase()} · TIRADOR: ${chkTirador.checked ? 'SÍ' : 'NO'}`))
+          .catch(() => { toast("ERROR AL GUARDAR", true); chkTirador.checked = !chkTirador.checked; });
+      });
+      tdTirador.appendChild(chkTirador);
+      tr.appendChild(tdTirador);
+
+      // Aviso "preparado" del jugador (listos/<id>): tick si ya ha pulsado la campana
+      const tdListo = document.createElement('td');
+      tdListo.className = 'col-listo';
+      tdListo.title = 'Preparado: el jugador ha avisado de que lo ha leído todo';
+      tdListo.textContent = listosActuales[id] ? '✔' : '';
+      tr.appendChild(tdListo);
+
+      // Curación del doctor (curaciones/<doctor>/<id>): tick si este jugador ya ha sido curado
+      const tdCura = document.createElement('td');
+      tdCura.className = 'col-cura';
+      tdCura.title = 'Curado: el doctor ya ha curado a este jugador';
+      tdCura.textContent = jugadorCurado(id) ? '✔' : '';
+      tr.appendChild(tdCura);
+
+      // Registro del inspector (registrados/<inspector>/<id>): tick si este jugador ya ha sido registrado
+      const tdRegistro = document.createElement('td');
+      tdRegistro.className = 'col-registro';
+      tdRegistro.title = 'Registrado: el inspector ya ha registrado a este jugador';
+      tdRegistro.textContent = jugadorRegistrado(id) ? '✔' : '';
+      tr.appendChild(tdRegistro);
+
+      const tdUbic = document.createElement('td');
+      tdUbic.className = 'col-ubicacion';
+      tr.appendChild(tdUbic);
+
+      return tr;
+    }
+
+    // Campos de texto (nombre, profesión, foto): se guardan en Firebase al cambiar
+    function crearInputTexto(id, campo, placeholder) {
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'input-ident';
+      input.dataset.texto = campo;
+      input.placeholder = placeholder;
+      input.autocomplete = 'off';
+      input.addEventListener('change', () => guardarTextoDesdeInput(id, campo, input));
+      return input;
+    }
+
+    function guardarTextoDesdeInput(id, campo, input) {
+      const valor = input.value.trim();
+      input.value = valor;
+      db.ref(`jugadores/${id}/${campo}`).set(valor)
+        .then(() => { marcarInput(input, 'guardado'); toast(`${id.toUpperCase()} · ${campo.toUpperCase()} = ${valor || '(vacío)'}`); })
+        .catch(() => { marcarInput(input, 'error'); toast("ERROR AL GUARDAR", true); });
+    }
+
+    function marcarInput(input, clase) {
+      input.classList.add(clase);
+      setTimeout(() => input.classList.remove(clase), 900);
+    }
+
+    function guardarCampoDesdeInput(id, campo, input) {
+      const valor = parseFloat(input.value);
+      if (!isFinite(valor)) {
+        marcarInput(input, 'error');
+        toast("VALOR NO NUMÉRICO", true);
+        return;
+      }
+      db.ref(`jugadores/${id}/${campo}`).set(valor)
+        .then(() => { marcarInput(input, 'guardado'); toast(`${id.toUpperCase()} · ${campo.toUpperCase()} = ${valor}`); })
+        .catch(() => { marcarInput(input, 'error'); toast("ERROR AL GUARDAR", true); });
+    }
+
+    // Botones +/-: transacción para que no se pierdan cambios simultáneos
+    function ajustarCampo(id, campo, delta) {
+      db.ref(`jugadores/${id}/${campo}`).transaction(actual => (Number(actual) || 0) + delta)
+        .catch(() => toast("ERROR AL AJUSTAR VALOR", true));
+    }
+
+    async function eliminarJugador(id) {
+      if (!await popup({ titulo: 'ELIMINAR JUGADOR', texto: `¿Eliminar al jugador "${id}" de Firebase?`, ok: 'ELIMINAR', peligro: true })) return;
+      jugadoresRef.child(id).remove()
+        .then(() => toast(`JUGADOR ${id.toUpperCase()} ELIMINADO`))
+        .catch(() => toast("ERROR AL ELIMINAR", true));
+    }
+
+    // Escucha en tiempo real: añade/quita filas y actualiza valores sin pisar el campo que estás editando
+    function escucharJugadores() {
+      jugadoresRef.on('value', snapshot => {
+        const datos = snapshot.val() || {};
+        const ids = Object.keys(datos).sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
+
+        // Quitar filas de jugadores que ya no existen
+        Array.from(cuerpoJugadores.children).forEach(tr => {
+          if (!datos[tr.dataset.id]) tr.remove();
+        });
+
+        ids.forEach((id, i) => {
+          let tr = document.getElementById(`fila-jug-${id}`);
+          if (!tr) tr = crearFilaJugador(id);
+
+          // Mantener el orden alfabético/numérico
+          if (cuerpoJugadores.children[i] !== tr) {
+            cuerpoJugadores.insertBefore(tr, cuerpoJugadores.children[i] || null);
+          }
+
+          CAMPOS_JUGADOR.forEach(campo => {
+            const input = tr.querySelector(`input[data-campo="${campo.id}"]`);
+            if (input && document.activeElement !== input) {
+              const v = datos[id] ? datos[id][campo.id] : undefined;
+              input.value = (v === undefined || v === null) ? '' : v;
+            }
+            if (input) marcarCero(input);
+          });
+
+          CAMPOS_IDENTIDAD.forEach(k => {
+            const input = tr.querySelector(`input[data-texto="${k}"]`);
+            if (input && document.activeElement !== input) {
+              const v = datos[id] ? datos[id][k] : undefined;
+              input.value = (v === undefined || v === null) ? '' : v;
+            }
+          });
+          const chkTir = tr.querySelector('input[data-habilidad="tirador"]');
+          if (chkTir && document.activeElement !== chkTir) {
+            const h = datos[id] ? datos[id].habilidad : '';
+            chkTir.checked = String(h || '').toLowerCase().trim() === 'tirador';
+          }
+          const imgFila = tr.querySelector('img.foto-jugador');
+          if (imgFila) ponerFoto(imgFila, datos[id] ? datos[id].foto : '');
+
+          const tdUbic = tr.querySelector('td.col-ubicacion');
+          if (tdUbic) {
+            const u = datos[id] ? datos[id].ubicacion : '';
+            const clave = String(u || '').toLowerCase().trim();
+            tdUbic.textContent = clave ? (NOMBRES_UBICACION[clave] || u) : '—';
+            tdUbic.classList.toggle('sin-dato', !clave);
+          }
+        });
+
+        vacioJugadores.style.display = ids.length ? 'none' : 'block';
+      });
+    }
+
+    function anadirJugadorNuevo() {
+      const input = document.getElementById('nuevoJugadorId');
+      const id = limpiarIdJugador(input.value);
+      if (!id) { toast("ESCRIBE UN jugador_id", true); return; }
+
+      jugadoresRef.child(id).once('value').then(snap => {
+        if (snap.exists()) { toast("ESE JUGADOR YA EXISTE", true); return; }
+        return jugadoresRef.child(id).set(fichaPorDefecto(id))
+          .then(() => { input.value = ''; toast(`JUGADOR ${id.toUpperCase()} AÑADIDO`); });
+      }).catch(() => toast("ERROR AL AÑADIR JUGADOR", true));
+    }
+
+    async function restaurarJugadoresIniciales() {
+      if (!await popup({ titulo: 'RESTAURAR JUGADORES', texto: 'Esto sobrescribe nombre, profesión, foto y valores (vida, cordura, etc.) de los jugadores de la lista inicial con los valores iniciales.\n\n¿Continuar?', ok: 'RESTAURAR', peligro: true })) return;
+      const datos = {};
+      JUGADORES_INICIALES.forEach(j => {
+        const id = limpiarIdJugador(j.jugador_id);
+        datos[id] = Object.assign(fichaPorDefecto(id), j, { jugador_id: id });
+      });
+      jugadoresRef.update(datos)
+        .then(() => toast("JUGADORES RESTAURADOS A VALORES INICIALES"))
+        .catch(() => toast("ERROR AL RESTAURAR JUGADORES", true));
+    }
+
+    function iniciarSeccionJugadores() {
+ //     document.getElementById('btnAnadirJugador').addEventListener('click', anadirJugadorNuevo);
+ //     document.getElementById('nuevoJugadorId').addEventListener('keydown', e => { if (e.key === 'Enter') anadirJugadorNuevo(); });
+      document.getElementById('btnRestaurarJugadores').addEventListener('click', restaurarJugadoresIniciales);
+
+      document.getElementById('btnReiniciarAvisos').addEventListener('click', reiniciarAvisos);
+      document.getElementById('btnReiniciarCuras').addEventListener('click', reiniciarCuras);
+      document.getElementById('btnReiniciarRegistros').addEventListener('click', reiniciarRegistrados);
+      escucharListos();
+      escucharCuras();
+      escucharRegistrados();
+      escucharJugadores();
+      sembrarJugadoresIniciales();
+    }
+
+
+    // =====================================================================
+    // 7b. ARMAS
+    // Firebase: armas/<idArma> = { tipo, balas, nombre, dado, maxCarga, coste }
+    //  - <idArma> es la identidad (pistola1, revolver2, hacha1…) y debe coincidir
+    //    con el nombre del objeto del inventario.
+    //  - dado es texto "NdC+B" (ej. "1d8+2").
+    //  - Los campos vacíos se borran de Firebase: el html del jugador usa entonces
+    //    sus valores por defecto.
+    // =====================================================================
+    const ARMAS_BASE = {
+      escopeta:    { nombre: 'Escopeta',          dado: '3d6',   maxCarga: 2 },
+      revolver:    { nombre: 'Revólver',          dado: '1d10+2', maxCarga: 6 },
+      pistola:     { nombre: 'Pistola',           dado: '1d10',  maxCarga: 15 },
+      hacha:       { nombre: 'Hacha',             dado: '1d8+2' },
+      machete:     { nombre: 'Machete',           dado: '1d8' },
+      cuchillo:    { nombre: 'Cuchillo',          dado: '1d6' },
+      ataque_cosa: { nombre: 'Ataque de la Cosa', dado: '2d6' }
+    };
+
+
+    // >>> EDITA AQUÍ las armas que existen de inicio. <<<
+    // Al abrir este html se crean en Firebase las que no existan; en las que ya existen
+    // solo se rellenan los campos que falten (nunca se pisan balas ni lo que hayas editado).
+const ARMAS_INICIALES = {
+  machete1:  { nombre: 'Machete',  dado: '1d8', coste: 1 },
+  cuchillo1: { nombre: 'Cuchillo', dado: '1d6', coste: 1 },
+  hacha1:    { nombre: 'Hacha',    dado: '1d8+2', coste: 1 },
+  pistola1: { nombre: 'Pistola Ref: 143', dado: '1d10', maxCarga: 15, balas: 0, coste: 1 },
+  revolver1: { nombre: 'Revólver Ref: 176', dado: '1d10+2', maxCarga: 6, balas: 0, coste: 1 },
+  escopeta1: { nombre: 'Escopeta Ref: 132', dado: '3d6', maxCarga: 2, balas: 0, coste: 1 }
+};
+    const armasRef = db.ref('armas');
+    const cuerpoArmas = document.getElementById('cuerpoArmas');
+    const vacioArmas = document.getElementById('vacioArmas');
+    let armasDatos = {};
+    let armasFirmaOrden = '';
+
+    function tipoDeArma(id) { return String(id).toLowerCase().trim().replace(/\d+$/, ''); }
+    function baseDeArma(id) { return ARMAS_BASE[tipoDeArma(id)] || {}; }
+    function idArmaValido(id) { return /^[a-z0-9_]+$/.test(id); }
+
+    // "1d8 + 2" -> "1d8+2" ; devuelve null si no es válido
+    function normalizarDado(txt) {
+      const m = String(txt).toLowerCase().replace(/\s+/g, '').match(/^(\d+)d(\d+)([+-]\d+)?$/);
+      if (!m) return null;
+      const n = parseInt(m[1], 10), c = parseInt(m[2], 10), b = m[3] ? parseInt(m[3], 10) : 0;
+      if (n < 1 || n > 50 || c < 2 || c > 1000) return null;
+      return n + 'd' + c + (b > 0 ? '+' + b : b < 0 ? String(b) : '');
+    }
+
+    function maxCargaEfectiva(id, d) {
+      const v = (d && d.maxCarga !== undefined && d.maxCarga !== null) ? Number(d.maxCarga) : Number(baseDeArma(id).maxCarga);
+      return isFinite(v) && v > 0 ? v : 0;
+    }
+
+    function crearInputArma(id, campo, placeholder, clase) {
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'input-ident' + (clase ? ' ' + clase : '');
+      input.dataset.campo = campo;
+      input.placeholder = placeholder;
+      input.autocomplete = 'off';
+      return input;
+    }
+
+    function guardarCampoArma(id, campo, valor, input) {
+      return armasRef.child(`${id}/${campo}`).set(valor === '' ? null : valor)
+        .then(() => { marcarInput(input, 'guardado'); toast(`${id.toUpperCase()} · ${campo.toUpperCase()} = ${valor === '' ? '(por defecto)' : valor}`); })
+        .catch(() => { marcarInput(input, 'error'); toast('ERROR AL GUARDAR EL ARMA', true); });
+    }
+
+    function crearFilaArma(id) {
+      const tr = document.createElement('tr');
+      tr.id = `fila-arma-${id}`;
+      tr.dataset.id = id;
+
+      // Identidad (renombrable)
+      const tdId = document.createElement('td');
+      const inId = crearInputArma(id, 'id', 'pistola1');
+      inId.addEventListener('change', () => renombrarArma(id, inId));
+      tdId.appendChild(inId);
+      tr.appendChild(tdId);
+
+      // Nombre visible
+      const tdNom = document.createElement('td');
+      tdNom.className = 'col-nombre';
+      const inNom = crearInputArma(id, 'nombre', 'Pistola');
+      inNom.addEventListener('change', () => {
+        const v = inNom.value.trim(); inNom.value = v;
+        guardarCampoArma(id, 'nombre', v, inNom);
+      });
+      tdNom.appendChild(inNom);
+      tr.appendChild(tdNom);
+
+      // Daño
+      const tdDado = document.createElement('td');
+      tdDado.className = 'col-dado';
+      const inDado = crearInputArma(id, 'dado', '1d8+2');
+      inDado.addEventListener('change', () => {
+        const txt = inDado.value.trim();
+        if (txt === '') { guardarCampoArma(id, 'dado', '', inDado); return; }
+        const n = normalizarDado(txt);
+        if (!n) { marcarInput(inDado, 'error'); toast('DAÑO NO VÁLIDO (usa 1d8+2, 3d6, 2d4-1…)', true); inDado.value = (armasDatos[id] && armasDatos[id].dado) || ''; return; }
+        inDado.value = n;
+        guardarCampoArma(id, 'dado', n, inDado);
+      });
+      tdDado.appendChild(inDado);
+      tr.appendChild(tdDado);
+
+      // Capacidad máxima del cargador y coste PA (numéricos)
+      ['maxCarga', 'coste'].forEach(campo => {
+        const td = document.createElement('td');
+        const input = document.createElement('input');
+        input.type = 'number'; input.min = '0'; input.step = '1';
+        input.className = 'input-num';
+        input.dataset.campo = campo;
+        input.placeholder = campo === 'maxCarga' ? '—' : 'def.';
+        input.addEventListener('change', () => {
+          const txt = input.value.trim();
+          if (txt === '') { guardarCampoArma(id, campo, '', input); return; }
+          const v = parseInt(txt, 10);
+          if (!isFinite(v) || v < 0) { marcarInput(input, 'error'); toast('VALOR NO VÁLIDO', true); return; }
+          input.value = v;
+          guardarCampoArma(id, campo, v, input);
+        });
+        td.appendChild(input);
+        tr.appendChild(td);
+      });
+      // El orden de las columnas es: maxCarga, balas, coste -> movemos coste al final de momento
+      const tdCoste = tr.lastChild; tr.removeChild(tdCoste);
+
+      // Balas actuales con − / +
+      const tdBalas = document.createElement('td');
+      const wrap = document.createElement('div');
+      wrap.className = 'celda-num';
+      const menos = document.createElement('button');
+      menos.className = 'btn-mini'; menos.textContent = '−'; menos.title = 'Restar 1';
+      menos.addEventListener('click', () => ajustarBalas(id, -1));
+      const inBalas = document.createElement('input');
+      inBalas.type = 'number'; inBalas.min = '0'; inBalas.step = '1';
+      inBalas.className = 'input-num';
+      inBalas.dataset.campo = 'balas';
+      inBalas.addEventListener('input', () => marcarCero(inBalas));
+      inBalas.addEventListener('change', () => {
+        const v = parseInt(inBalas.value, 10);
+        if (!isFinite(v) || v < 0) { marcarInput(inBalas, 'error'); toast('VALOR NO VÁLIDO', true); return; }
+        armasRef.child(`${id}/balas`).set(v)
+          .then(() => { marcarInput(inBalas, 'guardado'); toast(`${id.toUpperCase()} · BALAS = ${v}`); })
+          .catch(() => { marcarInput(inBalas, 'error'); toast('ERROR AL GUARDAR', true); });
+      });
+      const mas = document.createElement('button');
+      mas.className = 'btn-mini'; mas.textContent = '+'; mas.title = 'Sumar 1';
+      mas.addEventListener('click', () => ajustarBalas(id, +1));
+      wrap.append(menos, inBalas, mas);
+      tdBalas.appendChild(wrap);
+      tr.appendChild(tdBalas);
+      tr.appendChild(tdCoste);
+
+      // Acciones
+      const tdAcc = document.createElement('td');
+      tdAcc.className = 'col-acciones';
+      const btnRec = document.createElement('button');
+      btnRec.className = 'btn small'; btnRec.type = 'button'; btnRec.textContent = 'CARGAR AL MÁX.';
+      btnRec.title = 'Pone las balas actuales al máximo del cargador';
+      btnRec.addEventListener('click', () => cargarArmaAlMaximo(id));
+      const btnDel = document.createElement('button');
+      btnDel.className = 'btn small danger'; btnDel.type = 'button'; btnDel.textContent = 'ELIMINAR';
+      btnDel.addEventListener('click', () => eliminarArma(id));
+      tdAcc.append(btnRec, btnDel);
+      tr.appendChild(tdAcc);
+
+      return tr;
+    }
+
+    function ajustarBalas(id, delta) {
+      armasRef.child(`${id}/balas`).transaction(a => Math.max(0, (Number(a) || 0) + delta))
+        .catch(() => toast('ERROR AL AJUSTAR LAS BALAS', true));
+    }
+
+    function cargarArmaAlMaximo(id) {
+      const max = maxCargaEfectiva(id, armasDatos[id]);
+      if (!max) { toast('ESTA ARMA NO USA MUNICIÓN', true); return; }
+      armasRef.child(`${id}/balas`).set(max)
+        .then(() => toast(`${id.toUpperCase()} · BALAS = ${max}`))
+        .catch(() => toast('ERROR AL CARGAR EL ARMA', true));
+    }
+
+    async function eliminarArma(id) {
+      if (!await popup({ titulo: 'ELIMINAR ARMA', texto: `¿Eliminar "${id}" de Firebase? Se pierden sus balas y su configuración (el objeto del inventario no se toca).`, ok: 'ELIMINAR', peligro: true })) return;
+      armasRef.child(id).remove()
+        .then(() => toast(`ARMA ${id.toUpperCase()} ELIMINADA`))
+        .catch(() => toast('ERROR AL ELIMINAR', true));
+    }
+
+    // Cambiar la identidad: copia los datos a la clave nueva y borra la antigua (una sola operación)
+    async function renombrarArma(idViejo, input) {
+      const nuevo = input.value.trim().toLowerCase();
+      if (nuevo === idViejo) { input.value = idViejo; return; }
+      if (!idArmaValido(nuevo)) {
+        marcarInput(input, 'error'); toast('IDENTIDAD NO VÁLIDA (solo a-z, 0-9 y _)', true);
+        input.value = idViejo; return;
+      }
+      if (armasDatos[nuevo]) {
+        marcarInput(input, 'error'); toast(`YA EXISTE UN ARMA "${nuevo.toUpperCase()}"`, true);
+        input.value = idViejo; return;
+      }
+      const ok = await popup({
+        titulo: 'CAMBIAR IDENTIDAD',
+        texto: `Vas a renombrar "${idViejo}" como "${nuevo}". El objeto del inventario (columna de la hoja) debe llamarse igual o los jugadores dejarán de ver el arma. ¿Continuar?`,
+        ok: 'RENOMBRAR'
+      });
+      if (!ok) { input.value = idViejo; return; }
+      const datos = Object.assign({}, armasDatos[idViejo], { tipo: tipoDeArma(nuevo) });
+      const upd = {};
+      upd[nuevo] = datos;
+      upd[idViejo] = null;
+      armasRef.update(upd)
+        .then(() => toast(`${idViejo.toUpperCase()} → ${nuevo.toUpperCase()}`))
+        .catch(() => { toast('ERROR AL RENOMBRAR', true); input.value = idViejo; });
+    }
+
+    function datosNuevaArma(id) {
+      const b = baseDeArma(id);
+      const d = { tipo: tipoDeArma(id) };
+      if (b.nombre) d.nombre = b.nombre;
+      if (b.dado) d.dado = b.dado;
+      if (b.coste !== undefined) d.coste = b.coste;
+      if (b.maxCarga) { d.maxCarga = b.maxCarga; d.balas = 0; }
+      return d;
+    }
+
+    function anadirArma() {
+      const input = document.getElementById('nuevaArmaId');
+      const id = input.value.trim().toLowerCase();
+      if (!id) return;
+      if (!idArmaValido(id)) { marcarInput(input, 'error'); toast('IDENTIDAD NO VÁLIDA (solo a-z, 0-9 y _)', true); return; }
+      if (armasDatos[id]) { marcarInput(input, 'error'); toast(`YA EXISTE "${id.toUpperCase()}"`, true); return; }
+      armasRef.child(id).set(datosNuevaArma(id))
+        .then(() => { input.value = ''; toast(`ARMA ${id.toUpperCase()} AÑADIDA`); })
+        .catch(() => toast('ERROR AL AÑADIR EL ARMA', true));
+    }
+
+    // Rellena nombre, daño y cargador que falten (sin pisar nada de lo que ya hayas escrito)
+    function completarArmasPorDefecto() {
+      const upd = {};
+      let n = 0;
+      Object.keys(armasDatos).forEach(id => {
+        const b = baseDeArma(id), d = armasDatos[id] || {};
+        [['nombre', b.nombre], ['dado', b.dado], ['maxCarga', b.maxCarga], ['coste', b.coste]].forEach(([k, v]) => {
+          if (v !== undefined && (d[k] === undefined || d[k] === null || d[k] === '')) { upd[`${id}/${k}`] = v; n++; }
+        });
+      });
+      if (!n) { toast('NO FALTA NINGÚN VALOR POR DEFECTO'); return; }
+      armasRef.update(upd)
+        .then(() => toast(`${n} VALOR(ES) POR DEFECTO COMPLETADOS`))
+        .catch(() => toast('ERROR AL COMPLETAR VALORES', true));
+    }
+
+    // Sobrescribe las armas de ARMAS_INICIALES con sus valores iniciales (incluidas las balas).
+    // Las demás armas que hayas añadido no se tocan.
+    async function restaurarArmasIniciales() {
+      if (!await popup({ titulo: 'RESTAURAR ARMAS', texto: 'Esto sobrescribe nombre, daño, cargador, balas y coste de las armas de la lista inicial (' + Object.keys(ARMAS_INICIALES).join(', ') + ') con sus valores iniciales. Las demás armas no se tocan.\n\n¿Continuar?', ok: 'RESTAURAR', peligro: true })) return;
+      const datos = {};
+      Object.keys(ARMAS_INICIALES).forEach(id => {
+        datos[id] = Object.assign({ tipo: tipoDeArma(id) }, ARMAS_INICIALES[id]);
+      });
+      armasRef.update(datos)
+        .then(() => toast('ARMAS RESTAURADAS A VALORES INICIALES'))
+        .catch(() => toast('ERROR AL RESTAURAR LAS ARMAS', true));
+    }
+
+    function ordenarIdsArmas(ids) {
+      const tipos = Object.keys(ARMAS_BASE);
+      const pos = id => { const i = tipos.indexOf(tipoDeArma(id)); return i === -1 ? 999 : i; };
+      return ids.sort((a, b) => (pos(a) - pos(b)) || a.localeCompare(b, 'es', { numeric: true }));
+    }
+
+    // Escribe un valor en un input solo si no lo estás editando en este momento
+    function ponerValorSiLibre(input, valor) {
+      if (document.activeElement === input) return;
+      input.value = (valor === undefined || valor === null) ? '' : valor;
+    }
+
+    function escucharArmas() {
+      armasRef.on('value', snapshot => {
+        armasDatos = snapshot.val() || {};
+        const ids = ordenarIdsArmas(Object.keys(armasDatos));
+
+        Array.from(cuerpoArmas.children).forEach(tr => { if (!armasDatos[tr.dataset.id]) tr.remove(); });
+        vacioArmas.style.display = ids.length ? 'none' : 'block';
+
+        ids.forEach(id => {
+          let tr = document.getElementById(`fila-arma-${id}`);
+          if (!tr) tr = crearFilaArma(id);
+          cuerpoArmas.appendChild(tr); // mantiene el orden; mover un nodo no pierde el foco si ya está en su sitio
+        });
+
+        ids.forEach(id => {
+          const d = armasDatos[id] || {};
+          const b = baseDeArma(id);
+          const tr = document.getElementById(`fila-arma-${id}`);
+          if (!tr) return;
+          const q = campo => tr.querySelector(`[data-campo="${campo}"]`);
+
+          ponerValorSiLibre(q('id'), id);
+          ponerValorSiLibre(q('nombre'), d.nombre);
+          q('nombre').placeholder = b.nombre || 'Nombre del arma';
+          ponerValorSiLibre(q('dado'), d.dado);
+          q('dado').placeholder = b.dado || '1d6';
+          ponerValorSiLibre(q('maxCarga'), d.maxCarga);
+          q('maxCarga').placeholder = b.maxCarga ? String(b.maxCarga) : '—';
+          ponerValorSiLibre(q('coste'), d.coste);
+          q('coste').placeholder = b.coste !== undefined ? String(b.coste) : 'def.';
+
+          const inBalas = q('balas');
+          const usa = maxCargaEfectiva(id, d) > 0;
+          ponerValorSiLibre(inBalas, usa ? (Number(d.balas) || 0) : '');
+          inBalas.disabled = !usa;
+          inBalas.classList.toggle('sin-municion', !usa);
+          tr.querySelectorAll('.btn-mini').forEach(bm => bm.disabled = !usa);
+          marcarCero(inBalas);
+        });
+      }, () => toast('ERROR AL LEER LAS ARMAS', true));
+    }
+
+    function sembrarArmasIniciales() {
+      return armasRef.once('value').then(snap => {
+        const existentes = snap.val() || {};
+        const upd = {};
+        let n = 0;
+        Object.keys(ARMAS_INICIALES).forEach(id => {
+          const base = Object.assign({ tipo: tipoDeArma(id) }, ARMAS_INICIALES[id]);
+          Object.keys(base).forEach(k => {
+            const actual = existentes[id] ? existentes[id][k] : undefined;
+            if (actual === undefined || actual === null || actual === '') { upd[`${id}/${k}`] = base[k]; n++; }
+          });
+        });
+        if (n > 0) return armasRef.update(upd).then(() => toast(`${n} DATO(S) DE ARMAS CARGADOS EN FIREBASE`));
+      }).catch(() => toast('ERROR AL CARGAR LAS ARMAS INICIALES', true));
+    }
+
+    function iniciarSeccionArmas() {
+      document.getElementById('btnAnadirArma').addEventListener('click', anadirArma);
+      document.getElementById('nuevaArmaId').addEventListener('keydown', e => { if (e.key === 'Enter') anadirArma(); });
+      document.getElementById('btnArmasDefecto').addEventListener('click', completarArmasPorDefecto);
+      document.getElementById('btnRestaurarArmas').addEventListener('click', restaurarArmasIniciales);
+      sembrarArmasIniciales();
+      escucharArmas();
+    }
+
+    // Cargar todas las secciones al entrar
+    window.onload = () => {
+      construirInterfazSalas();
+      construirInterfazActivaciones();
+      construirInterfazPuertas();
+      iniciarSeccionJugadores();
+      iniciarSeccionArmas();
+    };
+  
+    // Los botones de las tarjetas usan onclick="..." y necesitan funciones globales
+    window.reiniciarTodaLaSala = reiniciarTodaLaSala;
+    window.cambiarEstadoObjeto = cambiarEstadoObjeto;
+    window.cambiarEstadoActivacion = cambiarEstadoActivacion;
+    window.cambiarEstadoPuerta = cambiarEstadoPuerta;
+})();
+  </script>
+
+  <!-- ================= PARTE 2: TRANSMISIÓN (mensajes, sonido ambiente) ================= -->
+  <script>
+(function () {
+// =====================================================================
+//  CONFIGURACIÓN  (lo único que tienes que tocar)
+// =====================================================================
+// Mensajes y transmisiones: todo va por Firebase (tiempo real, sin Apps Script)
+//   master_msg/<jugador_id>   -> lo que el máster muestra a cada jugador  {i, im, a, v, t}
+//   mensajes_master/<id>      -> mensajes que los jugadores envían al máster {j, n, m, t}
+
+// Sugerencias que aparecen al hacer clic en los campos de audio y vídeo.
+// Puedes escribir cualquier otra ruta a mano.
+const AUDIOS = ['audio/audio1.mp3', 'audio/audio2.mp3', 'audio/audio3.mp3'];
+const VIDEOS = ['videos/video1.mp4', 'videos/video2.mp4', 'videos/video3.mp4'];
+
+// Sugerencias del campo de imagen.
+const IMAGENES = ['images/image1.jpg', 'images/image2.jpg', 'images/image3.jpg'];
+
+const MAX_TEXTO = 500;
+// =====================================================================
+
+const $ = id => document.getElementById(id);
+let jugadores = [];
+let seleccion = new Set();
+let enviando = false;
+
+// ---------- utilidades ----------
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function hora() { return new Date().toLocaleTimeString('es-ES'); }
+
+let toastTimer;
+function toast(txt, error) {
+  const t = $('toast');
+  t.textContent = txt;
+  t.className = 'show' + (error ? ' err' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.className = error ? 'err' : '', 2800);
+}
+
+// FINAL: abre final_master.html, abre el formulario (final/abierto = true) y manda a todos los jugadores
+// un pop-up con el botón FINAL, que les lleva a final.html con su personaje.
+async function abrirFinal() {
+  if (!await popup({ titulo: 'TERMINAR PARTIDA', texto: '¿Terminar la partida? Se abrirá el panel de resultados, se abrirá el formulario y se enviará a TODOS los jugadores un aviso con el botón FINAL.', ok: 'TERMINAR', peligro: true })) return;
+
+  // La pestaña se abre antes de cualquier espera para que el navegador no la bloquee
+  const a = window.open('final_master.html', '_blank');
+  if (!a) popup({ titulo: 'PESTAÑA BLOQUEADA', texto: 'El navegador ha bloqueado la pestaña de resultados. Permite las ventanas emergentes para esta página y abre final_master.html a mano.', ok: 'ENTENDIDO', cancelar: false });
+
+  try {
+    const ids = jugadores.map(j => j.jugador_id);
+    if (!ids.length) { toast('No hay jugadores a quienes avisar', true); return; }
+    await firebase.database().ref('final/abierto').set(true);
+    const msg = { i: idMensaje(), t: 'La partida ha terminado.\n\nPulsa FINAL para votar y entregar tus respuestas.', f: 1 };
+    await enviar(ids, JSON.stringify(msg));
+    toast('FINAL ENVIADO A ' + ids.length + ' JUGADORES');
+  } catch (e) {
+    console.error(e);
+    toast('ERROR AL ENVIAR EL AVISO FINAL', true);
+  }
+}
+window.abrirFinal = abrirFinal;   // el botón FINAL de la barra lo llama desde el HTML
+
+function log(html, cls) {
+  const l = $('log-list');
+  const d = document.createElement('div');
+  d.innerHTML = '<span class="log-t">[' + hora() + ']</span> <span class="' + (cls || '') + '">' + html + '</span>';
+  l.insertBefore(d, l.firstChild);
+}
+
+// ---------- jugadores ----------
+function renderJugadores() {
+  const cont = $('players');
+  if (!jugadores.length) { cont.innerHTML = '<div class="hint">No hay jugadores.</div>'; actualizarContador(); return; }
+  cont.innerHTML = '';
+  jugadores.forEach(j => {
+    const id = j.jugador_id;
+    const abierto = !!(j.master_msg && String(j.master_msg).trim());
+    const d = document.createElement('div');
+    d.className = 'player' + (seleccion.has(id) ? ' sel' : '');
+    d.dataset.id = id;
+    d.innerHTML =
+      '<span class="chk">&#10003;</span>' +
+      '<img class="ph' + (j.foto ? '' : ' empty') + '" src="' + esc(j.foto || '') + '" alt="" onerror="this.classList.add(\'empty\')">' +
+      '<div class="pinfo"><div class="pname">' + esc(j.nombre || id) + '</div><div class="pid">' + esc(id) + '</div></div>' +
+      '<span class="badge' + (abierto ? ' open' : '') + '">' + (abierto ? 'VIENDO' : 'LIBRE') + '</span>';
+    d.addEventListener('click', () => {
+      if (seleccion.has(id)) seleccion.delete(id); else seleccion.add(id);
+      d.classList.toggle('sel', seleccion.has(id));
+      actualizarContador();
+    });
+    cont.appendChild(d);
+  });
+  actualizarContador();
+}
+
+function actualizarContador() {
+  const n = seleccion.size;
+  $('sel-count').textContent = n + (n === 1 ? ' seleccionado' : ' seleccionados');
+  actualizarBotonMostrar();
+}
+
+function hayContenido() {
+  return !!($('in-imagen').value.trim() || $('in-audio').value.trim() || $('in-video').value.trim() || $('in-texto').value.trim());
+}
+function actualizarBotonMostrar() {
+  $('btn-mostrar').disabled = enviando || seleccion.size === 0 || !hayContenido();
+}
+
+// Lista de jugadores desde Firebase (jugadores/<id>/nombre y foto) y estado VIENDO/LIBRE
+// desde master_msg/<id>. Todo en tiempo real.
+let identFirebase = null;   // jugadores/
+let masterMsgFb = {};       // master_msg/
+
+function firmaJugadores(lista) {
+  return JSON.stringify(lista.map(j => [j.jugador_id, j.nombre, j.foto, !!(j.master_msg && String(j.master_msg).trim())]));
+}
+
+function reconstruirJugadores() {
+  if (!identFirebase) return;
+  const lista = Object.keys(identFirebase).map(id => {
+    const f = identFirebase[id] || {};
+    const msg = masterMsgFb[id];
+    return {
+      jugador_id: id,
+      nombre: String(f.nombre || '').trim() || id,
+      foto: String(f.foto || '').trim(),
+      master_msg: msg ? (typeof msg === 'string' ? msg : JSON.stringify(msg)) : ''
+    };
+  });
+  jugadores = lista;
+  const firma = firmaJugadores(lista);
+  // Solo se repinta si algo ha cambiado, para no molestar al hacer clic.
+  if (firma !== reconstruirJugadores.ultima) {
+    reconstruirJugadores.ultima = firma;
+    renderJugadores();
+  }
+}
+
+firebase.database().ref('jugadores').on('value', snap => {
+  identFirebase = snap.val() || {};
+  reconstruirJugadores();
+});
+firebase.database().ref('master_msg').on('value', snap => {
+  masterMsgFb = snap.val() || {};
+  reconstruirJugadores();
+});
+firebase.database().ref('.info/connected').on('value', snap => {
+  const ok = snap.val() === true;
+  $('conn').className = ok ? 'on' : 'off';
+  $('conn-txt').textContent = ok ? 'CONECTADO' : 'SIN CONEXIÓN';
+});
+
+// ---------- envío ----------
+function idMensaje() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+// Escribe (o borra, si mensajeJson es '') master_msg/<id> de cada jugador. Llega al instante.
+async function enviar(ids, mensajeJson) {
+  const upd = {};
+  const valor = mensajeJson ? JSON.parse(mensajeJson) : null;
+  ids.forEach(id => { upd['master_msg/' + id] = valor; });
+  await firebase.database().ref().update(upd);
+  return { success: true };
+}
+
+function nombresDe(ids) {
+  return ids.map(id => { const j = jugadores.find(x => x.jugador_id === id); return j ? j.nombre : id; });
+}
+
+async function mostrar() {
+  const ids = Array.from(seleccion);
+  if (!ids.length) { toast('Selecciona al menos un jugador', true); return; }
+  if (!hayContenido()) { toast('No hay nada que enviar', true); return; }
+
+  const msg = { i: idMensaje() };
+  const img = $('in-imagen').value.trim(), aud = $('in-audio').value.trim(), vid = $('in-video').value.trim(), txt = $('in-texto').value.trim();
+  if (img) msg.im = img;
+  if (aud) msg.a = aud;
+  if (vid) msg.v = vid;
+  if (txt) msg.t = txt;
+
+  const json = JSON.stringify(msg);
+  if (json.length > 1500) { toast('El mensaje es demasiado largo: acorta el texto', true); return; }
+
+  enviando = true; actualizarBotonMostrar();
+  $('btn-mostrar').textContent = 'ENVIANDO…';
+  try {
+    const r = await enviar(ids, json);
+    if (!r || !r.success) throw new Error((r && r.error) || 'Error desconocido');
+
+    const partes = [];
+    if (img) partes.push('[IMG] ' + esc(img));
+    if (aud) partes.push('[AUD] ' + esc(aud));
+    if (vid) partes.push('[VID] ' + esc(vid));
+    if (txt) partes.push('[TXT] ' + esc(txt.length > 50 ? txt.slice(0, 50) + '…' : txt));
+    log('→ ' + esc(nombresDe(ids).join(', ')) + ': ' + partes.join(' · '), 'log-ok');
+    toast('ENVIADO A ' + ids.length + (ids.length === 1 ? ' JUGADOR' : ' JUGADORES'));
+
+    // Estado optimista mientras llega el siguiente sondeo.
+    jugadores.forEach(j => { if (ids.includes(j.jugador_id)) j.master_msg = json; });
+    reconstruirJugadores.ultima = null;
+    renderJugadores();
+  } catch (e) {
+    console.error(e);
+    log('Error al enviar: ' + esc(e.message), 'log-err');
+    toast('NO SE HA PODIDO ENVIAR: ' + e.message, true);
+  } finally {
+    enviando = false;
+    $('btn-mostrar').textContent = 'MOSTRAR';
+    actualizarBotonMostrar();
+  }
+}
+
+async function quitar() {
+  const ids = Array.from(seleccion);
+  if (!ids.length) { toast('Selecciona al menos un jugador', true); return; }
+  try {
+    const r = await enviar(ids, '');
+    if (!r || !r.success) throw new Error((r && r.error) || 'Error desconocido');
+    log('✕ Pop-up retirado a ' + esc(nombresDe(ids).join(', ')), 'log-ok');
+    toast('POP-UP RETIRADO');
+    jugadores.forEach(j => { if (ids.includes(j.jugador_id)) j.master_msg = ''; });
+    reconstruirJugadores.ultima = null;
+    renderJugadores();
+  } catch (e) {
+    log('Error al retirar: ' + esc(e.message), 'log-err');
+    toast('NO SE HA PODIDO RETIRAR: ' + e.message, true);
+  }
+}
+
+function limpiarFormulario() {
+  $('in-imagen').value = '';
+  $('in-audio').value = '';
+  $('in-video').value = '';
+  $('in-texto').value = '';
+  $('cnt').textContent = '0';
+  actualizarBotonMostrar();
+}
+
+// ---------- arranque ----------
+window.addEventListener('load', () => {
+  $('dl-imagen').innerHTML = IMAGENES.map(a => '<option value="' + esc(a) + '">').join('');
+  $('dl-audio').innerHTML = AUDIOS.map(a => '<option value="' + esc(a) + '">').join('');
+  $('dl-video').innerHTML = VIDEOS.map(a => '<option value="' + esc(a) + '">').join('');
+
+  ['in-imagen', 'in-audio', 'in-video'].forEach(id => $(id).addEventListener('input', actualizarBotonMostrar));
+  $('in-texto').addEventListener('input', () => { $('cnt').textContent = $('in-texto').value.length; actualizarBotonMostrar(); });
+
+  $('btn-todos').addEventListener('click', () => { jugadores.forEach(j => seleccion.add(j.jugador_id)); renderJugadores(); });
+  $('btn-ninguno').addEventListener('click', () => { seleccion.clear(); renderJugadores(); });
+  $('btn-mostrar').addEventListener('click', mostrar);
+  $('btn-quitar').addEventListener('click', quitar);
+  $('btn-limpiar').addEventListener('click', limpiarFormulario);
+
+  escucharMensajes();
+});
+
+// ---------- mensajes recibidos de los jugadores ----------
+const SONIDO_MENSAJE = 'audio/message.mp3';
+let msgPrimeraCarga = true; // la primera carga (historial) no hace sonar el aviso
+
+function fechaMsg(t) {
+  const d = new Date(t);
+  return d.toLocaleDateString('es-ES') + ' ' + d.toLocaleTimeString('es-ES');
+}
+
+// Respuestas del máster, guardadas en este navegador (clave: fecha + jugador del mensaje).
+const CLAVE_RESP = 'master_respuestas';
+function claveMsg(m) { return m.t + '|' + m.j; }
+function leerRespuestas() {
+  try { return JSON.parse(localStorage.getItem(CLAVE_RESP) || '{}'); } catch (e) { return {}; }
+}
+function guardarRespuesta(m, txt) {
+  try {
+    const todas = leerRespuestas();
+    const k = claveMsg(m);
+    (todas[k] = todas[k] || []).push(txt);
+    localStorage.setItem(CLAVE_RESP, JSON.stringify(todas));
+  } catch (e) {}
+}
+function pintarRespuesta(el, txt) {
+  if (!el) return;
+  const r = document.createElement('div');
+  r.className = 'msg-resp';
+  r.innerHTML = '<b>Respondiste:</b> <span>' + esc(txt) + '</span>';
+  el.appendChild(r);
+}
+
+function escucharMensajes() {
+  const lista = $('msgs-list');
+  const ref = firebase.database().ref('mensajes_master');
+
+  ref.on('child_added', snap => {
+    const m = snap.val();
+    if (!m) return;
+    const d = document.createElement('div');
+    d.dataset.key = snap.key;
+    d.className = 'msg-item' + (msgPrimeraCarga ? '' : ' nuevo');
+    d.title = 'Pulsa para responder';
+    d.innerHTML = '<div class="msg-head"><b>' + esc(m.n || m.j) + '</b> · ' + esc(fechaMsg(m.t)) + '<span class="msg-hint">RESPONDER ↩</span></div>' +
+                  '<div class="msg-txt">' + esc(m.m) + '</div>';
+    d.addEventListener('click', () => abrirRespuesta(m, d));
+    (leerRespuestas()[claveMsg(m)] || []).forEach(t => pintarRespuesta(d, t));
+    lista.insertBefore(d, lista.firstChild); // el más reciente arriba
+
+    if (!msgPrimeraCarga) {
+      try {
+        const a = new Audio(SONIDO_MENSAJE);
+        const p = a.play();
+        if (p && p.catch) p.catch(() => {});
+      } catch (e) {}
+      toast('MENSAJE DE ' + (m.n || m.j).toUpperCase());
+    }
+  });
+
+  // Si se borra el historial (desde esta u otra pestaña), se vacía la lista.
+  ref.on('child_removed', snap => {
+    const el = lista.querySelector('[data-key="' + snap.key + '"]');
+    if (el) el.remove();
+  });
+
+  // Los mensajes que ya existían (historial) llegan antes que este evento: no suenan.
+  ref.once('value').then(() => { msgPrimeraCarga = false; });
+}
+
+// ---------- responder a un jugador desde el historial ----------
+let rpJugador = null;
+let rpEnviando = false;
+
+function rpActualizar() {
+  const t = $('rp-text').value;
+  $('rp-cnt').textContent = t.length;
+  $('rp-send').disabled = rpEnviando || t.trim() === '';
+}
+function rpEstado(txt, cls) {
+  const e = $('rp-status');
+  e.textContent = txt || '';
+  e.className = cls || '';
+}
+function abrirRespuesta(m, el) {
+  rpJugador = { id: m.j, nombre: m.n || m.j, msg: m, el: el };
+  $('rp-title').textContent = 'RESPONDER A ' + rpJugador.nombre.toUpperCase();
+  $('rp-orig').innerHTML = '<div id="rp-orig-meta">' + esc(fechaMsg(m.t)) + '</div>' + esc(m.m);
+  $('rp-text').value = '';
+  rpEstado('');
+  rpActualizar();
+  $('rp-overlay').classList.add('rp-visible');
+  setTimeout(() => $('rp-text').focus(), 50);
+}
+function cerrarRespuesta() {
+  $('rp-overlay').classList.remove('rp-visible');
+  rpJugador = null;
+}
+async function enviarRespuesta() {
+  const txt = $('rp-text').value.trim();
+  if (!rpJugador || !txt || rpEnviando) return;
+
+  const json = JSON.stringify({ i: idMensaje(), t: txt });
+  if (json.length > 1500) { rpEstado('La respuesta es demasiado larga: acórtala.', 'err'); return; }
+
+  const destino = rpJugador;
+  rpEnviando = true; rpActualizar();
+  $('rp-send').textContent = 'ENVIANDO…';
+  rpEstado('');
+  try {
+    const r = await enviar([destino.id], json);
+    if (!r || !r.success) throw new Error((r && r.error) || 'Error desconocido');
+    log('→ ' + esc(destino.nombre) + ': [TXT] ' + esc(txt.length > 50 ? txt.slice(0, 50) + '…' : txt), 'log-ok');
+    toast('RESPUESTA ENVIADA A ' + destino.nombre.toUpperCase());
+    guardarRespuesta(destino.msg, txt);
+    pintarRespuesta(destino.el, txt);
+    jugadores.forEach(j => { if (j.jugador_id === destino.id) j.master_msg = json; });
+    reconstruirJugadores.ultima = null;
+    renderJugadores();
+    rpEstado('✓ RESPUESTA ENVIADA', 'ok');
+    setTimeout(() => { if ($('rp-status').classList.contains('ok')) cerrarRespuesta(); }, 900);
+  } catch (e) {
+    console.error(e);
+    rpEstado('NO SE HA PODIDO ENVIAR: ' + e.message, 'err');
+  } finally {
+    rpEnviando = false;
+    $('rp-send').textContent = 'ENVIAR RESPUESTA';
+    rpActualizar();
+  }
+}
+
+// ---------- borrar historial de mensajes ----------
+function cerrarConfirmacion() { $('cf-overlay').classList.remove('cf-visible'); }
+$('btn-borrar-msgs').addEventListener('click', () => {
+  if (!$('msgs-list').children.length) { toast('NO HAY MENSAJES QUE BORRAR', true); return; }
+  $('cf-overlay').classList.add('cf-visible');
+  setTimeout(() => $('cf-cancel').focus(), 50);
+});
+$('cf-ok').addEventListener('click', async () => {
+  try {
+    await firebase.database().ref('mensajes_master').remove();   // borrado definitivo en Firebase
+    $('msgs-list').innerHTML = '';
+    try { localStorage.removeItem(CLAVE_RESP); } catch (e) {}
+    cerrarConfirmacion();
+    toast('HISTORIAL BORRADO');
+  } catch (e) {
+    console.error('Error al borrar mensajes:', e);
+    toast('NO SE HA PODIDO BORRAR', true);
+  }
+});
+$('cf-cancel').addEventListener('click', cerrarConfirmacion);
+$('cf-overlay').addEventListener('click', e => { if (e.target === $('cf-overlay')) cerrarConfirmacion(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && $('cf-overlay').classList.contains('cf-visible')) cerrarConfirmacion();
+});
+
+$('rp-text').addEventListener('input', rpActualizar);
+$('rp-send').addEventListener('click', enviarRespuesta);
+$('rp-cancel').addEventListener('click', cerrarRespuesta);
+$('rp-close').addEventListener('click', cerrarRespuesta);
+document.addEventListener('keydown', e => {
+  if (!$('rp-overlay').classList.contains('rp-visible')) return;
+  if (e.key === 'Escape') cerrarRespuesta();
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) enviarRespuesta();
+});
+
+// Estructura en Firebase:  ambiente/canal1, ambiente/canal2, ambiente/canal3  y  ambiente/canal4
+//   { archivo, volumen (0-100), loop (true/false), ts }
+// "ts" solo cambia al pulsar APLICAR o PARAR (así los jugadores reinician el sonido);
+// mover el volumen o el loop cambia únicamente ese campo.
+(function () {
+  const AMBIENTES = ['ambiente.mp3', 'ir_salon.mp3', 'ir_santuario.mp3'];   // sugerencias del campo Archivo
+
+  if (!firebase.apps.length) firebase.initializeApp({
+    apiKey: "AIzaSyDBMQU4fRGw-BjfAx8dv84GmcHzA-1ncoY",
+    authDomain: "logia-rol-vivo.firebaseapp.com",
+    databaseURL: "https://logia-rol-vivo-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "logia-rol-vivo",
+    storageBucket: "logia-rol-vivo.firebasestorage.app",
+    messagingSenderId: "432574172065",
+    appId: "1:432574172065:web:0e1d93921e84f51cb099e0"
+  });
+  const dbAmb = firebase.database();
+  const CANALES = ['canal1', 'canal2', 'canal3', 'canal4'];
+  const cargadoInicial = { canal1: false, canal2: false, canal3: false, canal4: false };
+
+  $('dl-amb').innerHTML = AMBIENTES.map(a => '<option value="' + esc(a) + '">').join('');
+
+  function leerForm(c) {
+    const archivo = $('amb-' + c + '-archivo').value.trim();
+    const vol = Math.min(100, Math.max(0, Number($('amb-' + c + '-vol').value) || 0));
+    const loop = $('amb-' + c + '-loop').value !== 'no';
+    return { archivo: archivo, volumen: vol, loop: loop };
+  }
+
+  function aplicar(c) {
+    const f = leerForm(c);
+    if (!f.archivo) { toast('ESCRIBE EL NOMBRE DEL ARCHIVO (O PULSA PARAR)', true); return; }
+    f.ts = firebase.database.ServerValue.TIMESTAMP;
+    dbAmb.ref('ambiente/' + c).set(f)
+      .then(() => toast('AMBIENTE ' + c.replace('canal', 'CANAL ') + ' APLICADO'))
+      .catch(() => toast('ERROR AL GUARDAR EL AMBIENTE', true));
+  }
+
+  function parar(c) {
+    const f = leerForm(c);
+    dbAmb.ref('ambiente/' + c).set({ archivo: '', volumen: f.volumen, loop: f.loop, ts: firebase.database.ServerValue.TIMESTAMP })
+      .then(() => toast(c.replace('canal', 'CANAL ') + ' PARADO'))
+      .catch(() => toast('ERROR AL PARAR EL AMBIENTE', true));
+  }
+
+  CANALES.forEach(c => {
+    $('amb-' + c + '-aplicar').addEventListener('click', () => aplicar(c));
+    $('amb-' + c + '-parar').addEventListener('click', () => parar(c));
+    $('amb-' + c + '-archivo').addEventListener('keydown', e => { if (e.key === 'Enter') aplicar(c); });
+
+    const rango = $('amb-' + c + '-vol');
+    rango.addEventListener('input', () => { $('amb-' + c + '-vol-txt').textContent = rango.value; });
+    // Al soltar el deslizador se cambia solo el volumen (sin reiniciar el sonido)
+    rango.addEventListener('change', () => {
+      dbAmb.ref('ambiente/' + c + '/volumen').set(Number(rango.value))
+        .catch(() => toast('ERROR AL CAMBIAR EL VOLUMEN', true));
+    });
+    $('amb-' + c + '-loop').addEventListener('change', () => {
+      dbAmb.ref('ambiente/' + c + '/loop').set($('amb-' + c + '-loop').value !== 'no')
+        .catch(() => toast('ERROR AL CAMBIAR EL LOOP', true));
+    });
+
+    // Estado en directo (y rellenado inicial del formulario con lo que ya hay guardado)
+    dbAmb.ref('ambiente/' + c).on('value', snap => {
+      const d = snap.val();
+      const est = $('amb-' + c + '-estado');
+      if (d && d.archivo) {
+        est.className = 'amb-estado on';
+        est.textContent = 'EN DIRECTO: ' + d.archivo + ' · vol ' + (d.volumen === undefined ? 50 : d.volumen) + ' · loop ' + (d.loop === false ? 'no' : 'sí');
+      } else {
+        est.className = 'amb-estado';
+        est.textContent = d ? 'SILENCIO' : 'SIN CONFIGURAR (los jugadores usan el valor por defecto)';
+      }
+      if (d && !cargadoInicial[c]) {
+        cargadoInicial[c] = true;
+        $('amb-' + c + '-archivo').value = d.archivo || '';
+        const v = Number(d.volumen); const vol = isFinite(v) ? v : 50;
+        $('amb-' + c + '-vol').value = vol; $('amb-' + c + '-vol-txt').textContent = vol;
+        $('amb-' + c + '-loop').value = d.loop === false ? 'no' : 'si';
+      }
+    });
+  });
+
+  // Mostrar / ocultar las tarjetas de los canales 3 y 4 (empiezan ocultas).
+  // Ocultarlas solo las esconde en pantalla: el sonido y su estado en Firebase no cambian.
+  ['canal3', 'canal4'].forEach(c => {
+    const tarjeta = $('amb-card-' + c), boton = $('amb-toggle-' + c), num = c.replace('canal', '');
+    boton.addEventListener('click', () => {
+      const visible = tarjeta.style.display !== 'none';
+      tarjeta.style.display = visible ? 'none' : '';
+      boton.textContent = (visible ? 'MOSTRAR' : 'OCULTAR') + ' CANAL ' + num;
+    });
+  });
+})();
+})();
+  </script>
+</body>
+</html>

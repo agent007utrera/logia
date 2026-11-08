@@ -1,0 +1,4728 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <!--
+  ╔══════════════════════════════════════════════════════════════════════╗
+  ║  PANEL DEL JUGADOR · ASESINATO EN LA LOGIA DEL CREPÚSCULO DE PLATA   ║
+  ╠══════════════════════════════════════════════════════════════════════╣
+  ║  Es tu jugadorXXXX.html con TODA la lógica intacta (inventario,      ║
+  ║  armas, entregar, mostrar, mensajes al máster...). Solo cambia el    ║
+  ║  aspecto:                                                            ║
+  ║   · Los azules pasan a verdes, con marcos de latón envejecido.       ║
+  ║   · Fuentes: Cinzel (títulos), Special Elite (máquina de escribir    ║
+  ║     de los años 20) e IM Fell English (textos largos).               ║
+  ║   · Ambiente: grano de película, viñeta y retrato en tono daguerro-  ║
+  ║     tipo.                                                            ║
+  ║                                                                      ║
+  ║  DÓNDE TOCAR EL ASPECTO:                                             ║
+  ║   1) Variables de color  → ":root" (arriba del todo del <style>)     ║
+  ║      y ":root" del bloque "ESTILO LOGIA" (al final del <style>).     ║
+  ║   2) Todo lo añadido para la Logia está en el bloque                 ║
+  ║      "ESTILO LOGIA — CAPA EXTRA", al final del <style>, comentado.   ║
+  ╚══════════════════════════════════════════════════════════════════════╝
+  -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventario</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cinzel+Decorative:wght@700&family=IM+Fell+English:ital@0;1&family=Special+Elite&display=swap');
+
+    :root {
+        --bg-color: #06100a;
+        --sidebar-bg: #0f2218;
+        --accent-color: #3e9a6b;
+        --accent-glow: #9bf0c0;
+        --text-main: #d9d3b3;
+        --text-muted: #8fa08a;
+        --border-color: #1d4a33;
+        --font-family: 'Special Elite', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Special Elite', monospace;
+      background-color: #040806;
+      background-image: radial-gradient(circle at center, #0f2318 0%, #030705 100%);
+      color: #d9d3b3;
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* COLUMNA IZQUIERDA: PERSONAJE Y NOTAS */
+    #left-panel {
+      width: 320px;
+      background: linear-gradient(180deg, #0c1b13 0%, #07100b 100%);
+      border-right: 3px solid #1d4a33;
+      box-shadow: 5px 0 25px rgba(95,185,138,0.15);
+      padding: 25px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 5;
+    }
+
+    .character-portrait-frame {
+      width: 100px;
+      height: 120px;
+      border: 3px solid #3e9a6b;
+      outline: 2px solid #06100a;
+      border-radius: 2px;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(95,185,138,0.4);
+      background: #000;
+      margin-bottom: 15px;
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .character-portrait-frame:hover {
+      transform: scale(1.03);
+      border-color: #9bf0c0;
+    }
+
+    .character-portrait-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+
+/* Cambia o elimina el hue-rotate. 
+     Si quieres quitar el azul por completo, déjalo en 0 deg. 180 1.5 y 1.2 para foto azulada */
+
+      filter: hue-rotate(0deg) saturate(1) contrast(1);
+    }
+
+    .character-name {
+      font-family: 'Cinzel', monospace;
+      font-size: 1.8rem;
+      color: #9bf0c0;
+      text-align: center;
+      letter-spacing: 2px;
+      text-shadow: 0 0 8px rgba(155,240,192,0.6);
+      margin-bottom: 4px;
+      word-break: break-word;
+    }
+
+    .character-profession {
+      font-size: 0.85rem;
+      color: #8fa08a;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #1d4a33;
+      padding-bottom: 8px;
+      width: 100%;
+      text-align: center;
+    }
+
+    #goals-section {
+      width: 100%;
+      flex: 1;
+      background: rgba(6,14,9,0.8);
+      border: 1px solid #1d4a33;
+      border-radius: 2px;
+      padding: 15px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      scrollbar-width: auto;
+      scrollbar-color: #3e9a6b #07100b;
+    }
+
+    #goals-section::-webkit-scrollbar {
+      width: 20px;
+    }
+
+    #goals-section::-webkit-scrollbar-track {
+      background: #07100b;
+    }
+
+    #goals-section::-webkit-scrollbar-thumb {
+      background-color: #3e9a6b;
+      border-radius: 4px;
+      border: 3px solid #07100b;
+    }
+
+    #goals-section::-webkit-scrollbar-thumb:hover {
+      background-color: #9bf0c0;
+    }
+
+    .goals-title {
+      font-family: 'Cinzel', monospace;
+      color: #8fa08a;
+      font-size: 1.3rem;
+      border-bottom: 1px dashed #1d4a33;
+      padding-bottom: 5px;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    /* ESTILOS DE BARRA.HTML ADAPTADOS EN LA SECCIÓN OBJETIVOS & NOTAS */
+    .objectives-section {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 5px;
+        width: 100%;
+        font-family: var(--font-family);
+    }
+
+    .objective-btn {
+        background-color: var(--sidebar-bg);
+        border: 1px solid var(--accent-color);
+        color: var(--accent-color);
+        font-family: var(--font-family);
+        font-size: 0.85rem;
+        padding: 12px 10px;
+        border-radius: 2px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 8px rgba(62,154,107,0.2);
+        text-align: left;
+        width: 100%;
+    }
+
+    .objective-btn:hover {
+        background-color: var(--accent-color);
+        color: var(--bg-color);
+        box-shadow: 0 0 15px var(--accent-color);
+    }
+
+    .objective-btn.locked {
+        opacity: 0.6;
+        border-style: dashed;
+    }
+
+    .objective-btn .obj-icon {
+        font-size: 1.2rem;
+    }
+
+    .btn-reset-chapters {
+        background-color: #0f2218;
+        border: 1px solid #1d4a33;
+        color: #8fa08a;
+        font-family: var(--font-family);
+        font-size: 0.75rem;
+        padding: 8px 10px;
+        border-radius: 2px;
+        cursor: pointer;
+        text-align: center;
+        width: 100%;
+        margin-top: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-reset-chapters:hover {
+        background-color: #1d4a33;
+        color: #9bf0c0;
+        border-color: #9bf0c0;
+    }
+
+    /* MODALES DE CAPÍTULOS (POPUPS) */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(3,7,5,0.85);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.4s ease;
+    }
+
+    .modal-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .modal-content {
+        background-color: #0e2016;
+        color: #d9d3b3;
+        width: 90%;
+        max-width: 900px;
+        max-height: 80vh;
+        padding: 30px;
+        border-radius: 2px;
+        box-shadow: inset 0 0 30px rgba(95,185,138,0.2), 0 0 20px rgba(95,185,138,0.3);
+        position: relative;
+        border: 2px solid #3e9a6b;
+        font-family: 'Special Elite', monospace;
+    }
+
+    #phase-content-body {
+        max-height: calc(80vh - 60px);
+        overflow-y: auto;
+        padding-bottom: 25px;
+    }
+
+    .scroll-hint {
+        display: none;
+        position: absolute;
+        bottom: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(12,27,19,0.95);
+        color: #9bf0c0;
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        padding: 4px 14px;
+        border: 1px solid #3e9a6b;
+        border-radius: 12px;
+        pointer-events: none;
+        box-shadow: 0 0 10px rgba(95,185,138,0.5);
+        animation: scrollHintBounce 1.4s infinite;
+    }
+
+    @keyframes scrollHintBounce {
+        0%, 100% { transform: translateX(-50%) translateY(0); }
+        50% { transform: translateX(-50%) translateY(4px); }
+    }
+
+    .modal-content h2 {
+        color: #9bf0c0;
+        border-bottom: 1px solid #3e9a6b;
+        padding-bottom: 10px;
+        font-size: 1.4rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .modal-content h3 {
+        color: #3e9a6b;
+        margin-top: 25px;
+        text-align: left;
+        font-size: 1.1rem;
+    }
+
+    .modal-content ul {
+        list-style-type: none;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        padding-left: 0;
+    }
+
+    .modal-content li {
+        position: relative;
+        padding-left: 20px;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .modal-content li.info-item::before {
+        content: "•";
+        position: absolute;
+        left: 0;
+        top: 0px;
+        color: #9bf0c0;
+        font-size: 2rem;
+        line-height: 1;
+    }
+
+    .companion-photo {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #9bf0c0;
+        flex-shrink: 0;
+    }
+
+
+    .char-hover {
+        position: relative;
+        text-decoration: underline dotted;
+        cursor: help;
+        color: #9bf0c0;
+    }
+
+    .char-hover .char-hover-img {
+        display: none;
+        position: absolute;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 110px;
+        height: 110px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 2px solid #9bf0c0;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+        z-index: 9999;
+        pointer-events: none;
+    }
+
+    .char-hover.flip-down .char-hover-img {
+        bottom: auto;
+        top: 125%;
+    }
+
+    .char-hover:hover .char-hover-img {
+        display: block;
+    }
+
+    .modal-content .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 1.5rem;
+        color: #9bf0c0;
+        cursor: pointer;
+        font-weight: bold;
+        font-family: Arial, sans-serif;
+    }
+
+    /* VENTANA DE CONTRASEÑA */
+    .password-box {
+        background-color: var(--sidebar-bg);
+        border: 2px solid var(--accent-color);
+        padding: 30px;
+        text-align: center;
+        box-shadow: 0 0 20px rgba(95,185,138,0.3);
+        position: relative;
+        width: 350px;
+        max-width: 90%;
+        border-radius: 2px;
+        font-family: 'Special Elite', monospace;
+    }
+
+    .password-box h2 {
+        font-size: 1.1rem;
+        color: var(--accent-glow);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 15px;
+    }
+
+    .password-box p {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-bottom: 15px;
+    }
+
+    .password-box input {
+        background-color: #040806;
+        border: 1px solid var(--accent-color);
+        color: var(--accent-glow);
+        padding: 10px;
+        font-family: 'Special Elite', monospace;
+        font-size: 1.1rem;
+        margin-bottom: 15px;
+        width: 80%;
+        text-align: center;
+        outline: none;
+        letter-spacing: 2px;
+    }
+
+    .password-box button {
+        background-color: var(--accent-color);
+        color: var(--bg-color);
+        border: none;
+        padding: 10px 20px;
+        font-family: 'Special Elite', monospace;
+        cursor: pointer;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        border-radius: 2px;
+    }
+
+    .password-box .close-btn {
+        color: var(--accent-glow);
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        cursor: pointer;
+        font-size: 1.2rem;
+    }
+
+    .error-msg {
+        color: #ff6b6b;
+        font-size: 0.75rem;
+        margin-top: 10px;
+        display: none;
+        font-style: italic;
+    }
+
+    /* COLUMNA DERECHA PRINCIPAL */
+    #right-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #top-stats-bar {
+      background: linear-gradient(180deg, #0f2218 0%, #06100a 100%);
+      border-bottom: 3px solid #1d4a33;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 25px;
+      align-items: center;
+    }
+
+    .stat-card {
+      background: rgba(12,27,19,0.9);
+      border: 1px solid #1d4a33;
+      padding: 10px 20px;
+      border-radius: 2px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 130px;
+      box-shadow: inset 0 0 8px rgba(95,185,138,0.1);
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: #8fa08a;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: 'Cinzel', monospace;
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #d9d3b3;
+    }
+
+    .stat-value.action { color: #9bf0c0; }
+    .stat-value.sanity { color: #a8e6c9; }
+    .stat-value.money { color: #6fdc9a; }
+
+    .transfer-money-inline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(8,18,12,0.8);
+      border: 1px dashed #3e9a6b;
+      padding: 8px 12px;
+      border-radius: 2px;
+    }
+
+    .transfer-money-inline label {
+      font-size: 0.75rem;
+      color: #8fa08a;
+      text-transform: uppercase;
+    }
+
+    .transfer-money-inline input {
+      width: 55px;
+      background: #040806;
+      border: 1px solid #1d4a33;
+      color: #6fdc9a;
+      padding: 4px;
+      text-align: right;
+      font-family: 'Special Elite', monospace;
+      -moz-appearance: textfield;
+    }
+
+    .transfer-money-inline input::-webkit-outer-spin-button,
+    .transfer-money-inline input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .transfer-money-inline select {
+      background: #040806;
+      border: 1px solid #1d4a33;
+      color: #d9d3b3;
+      padding: 4px;
+      font-family: 'Special Elite', monospace;
+      font-size: 0.8rem;
+    }
+
+    .btn-transfer {
+      background: #0c1b13;
+      color: #9bf0c0;
+      border: 1px solid #3e9a6b;
+      padding: 5px 10px;
+      font-family: 'Special Elite', monospace;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-transfer:hover {
+      background: #3e9a6b;
+      color: #040806;
+    }
+
+    .btn-msg-master {
+      width: 100%;
+      margin-top: 10px;
+      background: #0c1b13;
+      color: #9bf0c0;
+      border: 1px solid #3e9a6b;
+      padding: 9px 10px;
+      font-family: 'Special Elite', monospace;
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-msg-master:hover {
+      background: #3e9a6b;
+      color: #040806;
+    }
+    /* Sobre y campana, uno debajo del otro (la barra superior es una fila) */
+    .botones-sobre-campana {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+    /* Campana: avisa al máster de que estás preparado */
+    .btn-campana { margin-top: 6px; }
+    .btn-campana.enviado {
+      background: #1d4a33;
+      border-color: #9bf0c0;
+      box-shadow: 0 0 12px rgba(155,240,192,0.55);
+      cursor: default;
+    }
+
+    #sync-error {
+      min-height: 12px;
+      margin-top: 4px;
+      text-align: center;
+      font-size: 0.6rem;
+      color: #ff4d4d;
+      letter-spacing: 1px;
+      line-height: 1.2;
+    }
+
+    #inventory-section {
+      flex: 1;
+      padding: 25px 30px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .code-unlock-box {
+      background: rgba(12,27,19,0.8);
+      border: 1px solid #1d4a33;
+      padding: 15px 20px;
+      border-radius: 2px;
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    }
+
+#weapons-section .code-unlock-box { margin-bottom: 0; }
+
+    .code-unlock-title {
+      font-family: 'Cinzel', monospace;
+      font-size: 1.3rem;
+      color: #9bf0c0;
+      letter-spacing: 1px;
+    }
+
+    .code-input-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .code-input {
+      width: 90px;
+      background: #040806;
+      border: 1px solid #3e9a6b;
+      color: #9bf0c0;
+      font-family: 'Special Elite', monospace;
+      font-size: 1.2rem;
+      text-align: center;
+      letter-spacing: 4px;
+      padding: 4px 8px;
+      border-radius: 2px;
+    }
+
+    .code-input::placeholder {
+      color: #4b6b58;
+      letter-spacing: 3px;
+    }
+
+    .btn-code-ok {
+      background: #3e9a6b;
+      color: #040806;
+      border: 1px solid #9bf0c0;
+      padding: 6px 15px;
+      font-family: 'Special Elite', monospace;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: background 0.2s;
+    }
+
+    .btn-code-ok:hover {
+      background: #9bf0c0;
+      color: #040806;
+    }
+
+    .inventory-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 20px;
+    }
+
+    .item-card {
+      background: radial-gradient(circle, #0e2016 0%, #07100b 100%);
+      border: 2px solid #1d4a33;
+      border-radius: 2px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .item-card:hover {
+      transform: translateY(-3px);
+      border-color: #9bf0c0;
+    }
+
+    .item-thumb-container {
+      width: 85px;
+      height: 85px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      margin-bottom: 8px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 2px;
+      border: 1px solid #1d4a33;
+    }
+
+    .item-thumb {
+      max-width: 80%;
+      max-height: 80%;
+      object-fit: contain;
+      filter: hue-rotate(0deg) saturate(1) drop-shadow(0 0 4px rgba(95,185,138,0.5));
+      transition: transform 0.2s;
+    }
+
+    .item-thumb-container:hover .item-thumb {
+      transform: scale(1.1);
+    }
+
+    .item-name {
+      font-size: 0.8rem;
+      color: #d9d3b3;
+      text-align: center;
+      margin-bottom: 8px;
+      height: 2.2em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .select-player {
+      width: 100%;
+      background: #040806;
+      color: #8fa08a;
+      border: 1px solid #1d4a33;
+      padding: 4px;
+      font-family: 'Special Elite', monospace;
+      font-size: 0.75rem;
+      margin-bottom: 6px;
+    }
+
+    .btn-deliver {
+      width: 100%;
+      background: #16301f;
+      color: #9bf0c0;
+      border: 1px solid #3e9a6b;
+      padding: 5px;
+      font-family: 'Special Elite', monospace;
+      font-size: 0.75rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: background 0.2s;
+    }
+
+    .btn-deliver:hover {
+      background: #3e9a6b;
+      color: #040806;
+    }
+
+    /* Aspecto del botón ENTREGAR cuando el objeto no se puede entregar
+       (ver OBJETOS_NO_ENTREGABLES más abajo en el <script>). */
+    .btn-deliver:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      background: #16301f;
+      color: #8fa08a;
+    }
+
+    /* Botón DESCRIPCIÓN, debajo del botón ENTREGAR. Mismo tamaño, distinto color
+       (violeta/lila) para diferenciarlo a simple vista del botón de entregar. */
+    .btn-description {
+      width: 100%;
+      background: #0d2b2b;
+      color: #8fd9d0;
+      border: 1px solid #2a8a86;
+      padding: 5px;
+      font-family: 'Special Elite', monospace;
+      font-size: 0.75rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 6px;
+      transition: background 0.2s;
+    }
+
+    .btn-description:hover {
+      background: #2a8a86;
+      color: #040806;
+    }
+
+    /* Botón MOSTRAR, debajo del botón ENTREGAR (color ámbar). */
+    .btn-show {
+      width: 100%;
+      background: #3d2a0a;
+      color: #ffc76b;
+      border: 1px solid #c98a1e;
+      padding: 5px;
+      font-family: 'Special Elite', monospace;
+      font-size: 0.75rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 6px;
+      transition: background 0.2s;
+    }
+
+    .btn-show:hover {
+      background: #c98a1e;
+      color: #040806;
+    }
+
+    /* Botón CURAR (habilidad del doctor), en rojo. */
+    .btn-curar {
+      width: 100%;
+      background: #4a0f0f;
+      color: #ff9b9b;
+      border: 1px solid #e74c3c;
+      padding: 5px;
+      font-family: 'Special Elite', monospace;
+      font-size: 0.75rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 6px;
+      transition: background 0.2s;
+    }
+
+    .btn-curar:hover {
+      background: #e74c3c;
+      color: #040806;
+    }
+
+    /* Botón REGISTRAR (habilidad del inspector), en azul. */
+    .btn-registrar {
+      width: 100%;
+      background: #0f2a4a;
+      color: #9bc8ff;
+      border: 1px solid #3e7fd0;
+      padding: 5px;
+      font-family: 'Special Elite', monospace;
+      font-size: 0.75rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 6px;
+      transition: background 0.2s;
+    }
+
+    .btn-registrar:hover {
+      background: #3e7fd0;
+      color: #040806;
+    }
+
+    .btn-show:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      background: #3d2a0a;
+      color: #a8895a;
+    }
+
+    /* Texto "X te está mostrando Y" bajo la imagen a pantalla completa.
+       Solo se ve cuando otro jugador te muestra un objeto. */
+    #fullscreen-modal.con-caption {
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    #fullscreen-modal.con-caption img {
+      max-height: 75vh;
+    }
+
+    #fullscreen-caption {
+      display: none;
+      color: #9bf0c0;
+      font-family: 'Special Elite', monospace;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+      text-align: center;
+      text-shadow: 0 0 10px rgba(95,185,138,0.6);
+      padding: 0 16px;
+    }
+
+    #fullscreen-modal.con-caption #fullscreen-caption {
+      display: block;
+    }
+
+    /* X de cierre: solo aparece cuando otro jugador te muestra un objeto
+       (con-caption). En ese caso el pop-up solo se cierra pulsando la X. */
+    #fullscreen-box {                 /* envuelve imagen + X: la X se ancla a la esquina del pop-up */
+      position: relative;
+      display: flex;
+    }
+    #fullscreen-close {
+      display: none;
+      position: absolute;
+      top: -14px;
+      right: -14px;
+      width: 32px;
+      height: 32px;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      line-height: 1;
+      cursor: pointer;
+      color: var(--laton);
+      background: #040806;
+      border: 1px solid var(--laton);
+      border-radius: 50%;
+      font-family: var(--fuente-sub);
+      box-shadow: 0 0 8px rgba(0,0,0,0.9);
+      z-index: 2;
+    }
+    #fullscreen-close:hover { color: var(--brillo); text-shadow: 0 0 8px var(--brillo); }
+    #fullscreen-modal.con-caption { cursor: default; }
+    #fullscreen-modal.con-caption #fullscreen-close { display: flex; }
+
+    #fullscreen-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(3,7,5,0.92);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      cursor: pointer;
+      backdrop-filter: blur(5px);
+    }
+
+    #fullscreen-modal img {
+      max-width: 85vw;
+      max-height: 85vh;
+      object-fit: contain;
+      border: 3px solid #9bf0c0;
+      box-shadow: 0 0 30px rgba(95,185,138,0.5);
+      border-radius: 2px;
+      background: #040806;
+      padding: 10px;
+    }
+
+    #confirm-modal, #alert-modal, #description-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(3,7,5,0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 11000;
+    }
+
+    /* Caja del pop-up de DESCRIPCIÓN: como confirm-box pero un poco más ancha,
+       con hueco para la miniatura del objeto arriba del título. */
+    .description-box {
+      background: #0e2016;
+      border: 2px solid #2a8a86;
+      border-radius: 2px;
+      padding: 30px;
+      width: 380px;
+      max-width: 90vw;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(42,138,134,0.4);
+      position: relative;
+    }
+
+    .description-box::before {
+      content: '';
+      position: absolute;
+      top: 4px; left: 4px; right: 4px; bottom: 4px;
+      border: 1px solid #1d4a33;
+      pointer-events: none;
+    }
+
+    .description-img-container {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 15px auto;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid #2a8a86;
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .description-img-container img {
+      max-width: 80%;
+      max-height: 80%;
+      object-fit: contain;
+      filter: drop-shadow(0 0 4px rgba(42,138,134,0.6));
+    }
+
+    .description-title {
+      font-family: 'Cinzel', monospace;
+      color: #8fd9d0;
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .description-text {
+      color: #d9d3b3;
+      font-size: 0.95rem;
+      margin-bottom: 25px;
+      line-height: 1.5;
+      text-align: left;
+    }
+
+    .confirm-box {
+      background: #0e2016;
+      border: 2px solid #3e9a6b;
+      border-radius: 2px;
+      padding: 30px;
+      width: 380px;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(95,185,138,0.3);
+      position: relative;
+    }
+
+    .confirm-box::before {
+      content: '';
+      position: absolute;
+      top: 4px; left: 4px; right: 4px; bottom: 4px;
+      border: 1px solid #1d4a33;
+      pointer-events: none;
+    }
+
+    .confirm-title {
+      font-family: 'Cinzel', monospace;
+      color: #9bf0c0;
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+    }
+
+    .confirm-text {
+      color: #d9d3b3;
+      font-size: 0.95rem;
+      margin-bottom: 25px;
+      line-height: 1.4;
+    }
+
+    .confirm-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .confirm-btn {
+      padding: 8px 25px;
+      cursor: pointer;
+      font-family: 'Special Elite', monospace;
+      font-size: 0.9rem;
+      border-radius: 2px;
+    }
+
+    .btn-yes {
+      background: #3e9a6b;
+      color: #040806;
+      border: 1px solid #9bf0c0;
+      font-weight: bold;
+    }
+
+    .btn-yes:hover { background: #9bf0c0; }
+
+    .btn-no {
+      background: #0f2218;
+      color: #d9d3b3;
+      border: 1px solid #1d4a33;
+    }
+
+    .btn-no:hover { background: #1d4a33; }
+
+    /* Pop-up de MUERTE (la tuya o la de otro jugador): mismo estilo que los demás, con acento rojo */
+    #muerte-modal {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(25,0,0,0.82); display: none;
+      align-items: center; justify-content: center; z-index: 13000;
+    }
+    #muerte-modal .confirm-box {
+      border-color: #ff2b2b;
+      box-shadow: 0 0 0 4px #000, 0 0 0 5px #7a2a2a, 0 10px 40px rgba(0,0,0,0.9), 0 0 40px rgba(255,0,0,0.45);
+      animation: aparecerLogia 0.35s ease-out;
+    }
+    #muerte-modal .confirm-title { color: #ff6b6b; text-shadow: 0 0 10px rgba(255,107,107,0.6); letter-spacing: 3px; }
+    #muerte-modal .confirm-text { font-size: 1.05rem; }
+
+    /* ======================================================================
+       ★★★ ESTILO LOGIA — CAPA EXTRA ★★★
+       Todo lo que sigue SE SUPERPONE al CSS original (va al final, así que
+       manda sobre él). Si quieres volver a algo anterior, borra la regla
+       correspondiente de este bloque y se verá la versión original.
+       ====================================================================== */
+
+    /* ---------- 1. Paleta de la Logia (para usar en reglas nuevas) ---------- */
+    :root {
+        --laton:         #b49a55;   /* dorado envejecido: marcos principales   */
+        --laton-osc:     #6e5c2e;   /* dorado oscuro: filos interiores         */
+        --pergamino:     #d9d3b3;   /* texto principal                         */
+        --pergamino-osc: #a9a285;   /* texto secundario                        */
+        --verdin:        #5fb98a;   /* verde medio                             */
+        --brillo:        #9bf0c0;   /* verde brillante (brillos, hover)        */
+        --fuente-titulo: 'Cinzel Decorative', 'Cinzel', Georgia, serif;
+        --fuente-sub:    'Cinzel', Georgia, serif;
+        --fuente-cuerpo: 'IM Fell English', Georgia, 'Times New Roman', serif;
+        --fuente-maquina:'Special Elite', 'Courier New', monospace;
+        /* Reutilizo las variables originales para que los botones, cajas de
+           contraseña y objetivos hereden el nuevo aspecto automáticamente. */
+        --font-family: 'Special Elite', 'Courier New', monospace;
+    }
+
+    /* ---------- 2. Ambiente general: viñeta + grano de película ---------- */
+    body {
+        background-image: radial-gradient(circle at 50% 40%, #0f2318 0%, #050a07 75%);
+    }
+    /* Viñeta oscura en los bordes (no bloquea clics: pointer-events none) */
+    body::before {
+        content: "";
+        position: fixed; inset: 0;
+        pointer-events: none;
+        z-index: 12000;                      /* por encima de todos los pop-ups */
+        background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.6) 100%);
+    }
+    /* Grano de película antigua (ruido generado con un filtro SVG) */
+    body::after {
+        content: "";
+        position: fixed; inset: 0;
+        pointer-events: none;
+        z-index: 12001;
+        opacity: 0.08;
+        mix-blend-mode: overlay;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    }
+
+    /* ---------- 3. Textos largos en tipografía de imprenta antigua ----------
+       Special Elite cansa en párrafos largos; para descripciones y capítulos
+       uso IM Fell English (más legible y con aire de libro de época). */
+    .modal-content, .modal-content p, .modal-content li,
+    .description-text, .confirm-text {
+        font-family: var(--fuente-cuerpo);
+        font-size: 1.05rem;
+        line-height: 1.6;
+    }
+    .confirm-text, .description-text { font-size: 1.05rem; }
+
+    /* ---------- 4. Títulos (Cinzel es más ancho que la fuente anterior,
+       por eso bajo un poco los tamaños) ---------- */
+    .character-name {
+        font-family: var(--fuente-titulo);
+        font-size: 1.25rem;
+        color: var(--brillo);
+        text-shadow: 0 0 10px rgba(95,185,138,0.55);
+    }
+    .character-profession {
+        font-family: var(--fuente-sub);
+        color: var(--laton);
+        border-bottom: 1px solid var(--laton-osc);
+        letter-spacing: 3px;
+        font-size: 0.75rem;
+    }
+    .goals-title, .code-unlock-title, .confirm-title, .description-title {
+        font-family: var(--fuente-sub);
+        font-size: 1.05rem;
+        letter-spacing: 2px;
+    }
+    .confirm-title { color: var(--brillo); text-shadow: 0 0 8px rgba(95,185,138,0.5); }
+    .stat-value { font-size: 1.5rem; font-family: var(--fuente-sub); }
+    .stat-label { font-family: var(--fuente-sub); letter-spacing: 2px; font-size: 0.65rem; color: var(--pergamino-osc); }
+    .modal-content h2, .password-box h2 {
+        font-family: var(--fuente-titulo);
+        color: var(--verdin);
+        text-shadow: 0 0 10px rgba(95,185,138,0.5);
+    }
+
+    /* ---------- 5. Marcos de latón en los paneles principales ---------- */
+    #left-panel {
+        border-right: 3px double var(--laton-osc);                 /* doble filo dorado */
+        box-shadow: 5px 0 25px rgba(47,125,87,0.25);
+    }
+    #top-stats-bar {
+        border-bottom: 3px double var(--laton-osc);
+    }
+    #goals-section, .stat-card, .code-unlock-box, .transfer-money-inline {
+        border-color: var(--laton-osc);
+    }
+    .transfer-money-inline { border-style: dashed; }
+
+    /* Retrato del personaje: marco de latón y foto en tono daguerrotipo verde.
+       (Para ver la foto a color, deja el filtro en "none"). */
+    .character-portrait-frame {
+        border: 3px solid var(--laton);
+        outline: 2px solid #000;
+        box-shadow: 0 0 0 4px var(--laton-osc), 0 0 18px rgba(95,185,138,0.4);
+    }
+    .character-portrait-frame:hover { border-color: var(--brillo); }
+    .character-portrait-frame img {
+        filter: none;
+    }
+
+    /* ---------- 6. Botones de objetivos (columna izquierda) ---------- */
+    .objective-btn {
+        font-family: var(--fuente-sub);
+        letter-spacing: 2px;
+        font-size: 0.78rem;
+        border-color: var(--laton);
+        color: var(--pergamino);
+        background: linear-gradient(180deg, #14291d, #0b1710);
+    }
+    .objective-btn:hover { background: var(--accent-color); color: #fff; box-shadow: 0 0 14px rgba(155,240,192,0.5); }
+    .btn-reset-chapters { font-family: var(--fuente-sub); border-color: var(--laton-osc); }
+
+    /* ---------- 7. Tarjetas de objeto del inventario ---------- */
+    .item-card {
+        border: 2px solid var(--laton-osc);
+        box-shadow: 0 0 0 3px #000, 0 4px 12px rgba(0,0,0,0.6);
+    }
+    .item-card:hover { border-color: var(--laton); box-shadow: 0 0 0 3px #000, 0 0 16px rgba(95,185,138,0.35); }
+    .item-thumb-container { border-color: var(--laton-osc); }
+    .item-name { font-family: var(--fuente-cuerpo); font-size: 0.95rem; }
+
+    /* ---------- 8. POP-UPS: marco de latón, filo interior y aparición suave ----------
+       Afecta a: capítulos (.modal-content), contraseña (.password-box),
+       confirmación (.confirm-box) y descripción (.description-box). */
+    .modal-content, .password-box, .confirm-box, .description-box {
+        border: 2px solid var(--laton);
+        box-shadow: 0 0 0 4px #000, 0 0 0 5px var(--laton-osc), 0 10px 40px rgba(0,0,0,0.9), 0 0 40px rgba(47,125,87,0.25);
+        background-image:
+            radial-gradient(ellipse at top, rgba(47,125,87,0.16), transparent 60%),
+            linear-gradient(180deg, #14291d 0%, #0b1710 100%);
+    }
+    /* Filo fino interior (ya existía en confirm/description; lo añado al resto) */
+    .modal-content::before, .password-box::before {
+        content: "";
+        position: absolute; top: 5px; left: 5px; right: 5px; bottom: 5px;
+        border: 1px solid var(--laton-osc);
+        pointer-events: none;
+    }
+    .confirm-box::before, .description-box::before { border-color: var(--laton-osc); }
+    /* El pop-up de descripción conserva su acento propio (verdín azulado) */
+    .description-box { border-color: var(--laton); }
+    .description-img-container { border-color: var(--laton-osc); }
+
+    /* Animación de entrada: el pop-up se desliza y aparece */
+    .modal-overlay.active .modal-content,
+    .modal-overlay.active .password-box { animation: aparecerLogia 0.35s ease-out; }
+    @keyframes aparecerLogia {
+        from { opacity: 0; transform: translateY(14px) scale(0.96); }
+        to   { opacity: 1; transform: none; }
+    }
+
+    /* La X de cerrar, en latón */
+    .modal-content .close-btn, .password-box .close-btn { color: var(--laton); font-family: var(--fuente-sub); }
+    .modal-content .close-btn:hover, .password-box .close-btn:hover { color: var(--brillo); text-shadow: 0 0 8px var(--brillo); }
+
+    /* Texto de ayuda "CONTINÚA" al hacer scroll en un capítulo */
+    .scroll-hint { font-family: var(--fuente-sub); border-color: var(--laton); color: var(--brillo); }
+
+    /* ---------- 9. Imagen a pantalla completa ---------- */
+    #fullscreen-modal img {
+        border: 2px solid var(--laton);
+        box-shadow: 0 0 0 4px #000, 0 0 0 5px var(--laton-osc), 0 0 40px rgba(47,125,87,0.4);
+    }
+    #fullscreen-caption { font-family: var(--fuente-cuerpo); font-style: italic; color: var(--pergamino); text-shadow: 0 0 10px rgba(95,185,138,0.5); }
+
+    /* ---------- 10. Botones de los pop-ups (Sí / No) ---------- */
+    .confirm-btn, .password-box button, .btn-code-ok {
+        font-family: var(--fuente-sub);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        font-size: 0.78rem;
+    }
+    .btn-yes { border-color: var(--laton); color: #fff; }
+    .btn-yes:hover { color: #040806; }
+    .btn-no  { border-color: var(--laton-osc); }
+
+    /* ---------- 11. Campos de texto: máquina de escribir sobre fondo oscuro ---------- */
+    .password-box input, .code-input, .transfer-money-inline input,
+    .transfer-money-inline select, .select-player {
+        border-color: var(--laton-osc);
+        font-family: var(--fuente-maquina);
+    }
+    .password-box input:focus, .code-input:focus {
+        box-shadow: 0 0 12px rgba(95,185,138,0.6);
+        border-color: var(--laton);
+    }
+
+    /* ---------- 12. Detalles de personajes en los capítulos ---------- */
+    .companion-photo, .char-hover .char-hover-img {
+        border-color: var(--laton);
+        filter: none;
+    }
+    .char-hover { color: var(--brillo); }
+
+  
+    /* ---------- AVISO DE DINERO RECIBIDO (recuadro abajo) ---------- */
+    #aviso-dinero-contenedor {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: center;
+      gap: 10px;
+      z-index: 12500;
+      pointer-events: none;
+      width: calc(100% - 24px);
+      max-width: 440px;
+    }
+    .aviso-dinero {
+      position: relative;
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      padding: 14px 40px 14px 18px;
+      background: linear-gradient(180deg, rgba(15,34,24,0.97) 0%, rgba(6,16,10,0.97) 100%);
+      border: 1px solid #3e9a6b;
+      border-radius: 3px;
+      box-shadow: 0 0 0 1px rgba(155,240,192,0.12) inset, 0 8px 28px rgba(0,0,0,0.7), 0 0 18px rgba(62,154,107,0.35);
+      color: #d9d3b3;
+      font-family: 'Special Elite', monospace;
+      font-size: 1.05rem;
+      line-height: 1.35;
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+    .aviso-dinero.visible { opacity: 1; transform: translateY(0); }
+    .aviso-dinero-icono {
+      flex: 0 0 auto;
+      width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid #3e9a6b;
+      border-radius: 50%;
+      background: rgba(62,154,107,0.15);
+      color: #9bf0c0;
+      font-size: 1.4rem;
+      font-weight: bold;
+    }
+    .aviso-dinero-cerrar {
+      position: absolute;
+      top: 4px;
+      right: 6px;
+      width: 28px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent;
+      border: none;
+      color: #8fa08a;
+      font-family: 'Special Elite', monospace;
+      font-size: 1.3rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .aviso-dinero-cerrar:hover { color: #9bf0c0; }
+    .aviso-dinero-texto strong { color: #9bf0c0; font-weight: normal; }
+    .aviso-dinero-texto .aviso-dinero-cantidad { color: #6fdc9a; font-size: 1.15rem; }
+  </style>
+
+  <!-- AVISO DE DINERO RECIBIDO -->
+  <div id="aviso-dinero-contenedor"></div>
+
+  <!-- LIBRERÍAS DE FIREBASE (Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+  <!-- AUDIO AMBIENTE (4 canales, sin controles visibles) -->
+  <audio id="ambienteAudio" loop preload="auto"></audio>
+  <audio id="segundoPlanoAudio" loop preload="auto"></audio>
+  <audio id="tercerPlanoAudio" loop preload="auto"></audio>
+  <audio id="cuartoPlanoAudio" loop preload="auto"></audio>
+
+  <!-- PANTALLA DE INICIO DE AUDIO (obligatoria por política de autoplay del navegador) -->
+  <div id="start-audio-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(4,8,6,0.94);display:flex;justify-content:center;align-items:center;z-index:5000;">
+    <button onclick="iniciarAudioAmbiente()" style="background:rgba(12,27,19,0.9);color:#9bf0c0;border:2px solid #b49a55;padding:16px 45px;font-size:1.4rem;font-family:'Special Elite',monospace;letter-spacing:3px;cursor:pointer;border-radius:2px;box-shadow:0 0 25px rgba(180,154,85,0.5);">INICIAR</button>
+  </div>
+
+
+
+  <!-- MODAL DE CONTENIDO DE CAPÍTULOS -->
+  <div class="modal-overlay" id="content-modal" onclick="closeModal('content-modal')">
+      <div class="modal-content" onclick="event.stopPropagation()">
+          <span class="close-btn" onclick="closeModal('content-modal')">X</span>
+          <div id="phase-content-body" onscroll="actualizarScrollHint()"></div>
+          <div id="scroll-hint" class="scroll-hint">▼ CONTINÚA ▼</div>
+      </div>
+  </div>
+
+  <!-- MODAL DE CONTRASEÑA DE CAPÍTULOS -->
+  <div class="modal-overlay" id="password-modal" onclick="closeModal('password-modal')">
+      <div class="password-box" onclick="event.stopPropagation()">
+          <span class="close-btn" onclick="closeModal('password-modal')">X</span>
+          <h2 id="modalTitle">Desbloquear Objetivos</h2>
+          <p>Introduce la clave correcta:</p>
+          <input type="text" id="password-input" placeholder="Clave..." autocomplete="off">
+          <br><br>
+          <button onclick="checkPassword()">Desbloquear</button>
+          <p class="error-msg" id="error-msg">Código incorrecto. Inténtalo de nuevo.</p>
+      </div>
+  </div>
+
+  <div id="left-panel">
+    <div class="character-portrait-frame" onclick="abrirFotoPersonaje()">
+      <img id="char-photo" src="" alt="Foto Jugador" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%239bf0c0\'><path d=\'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z\'/></svg>'">
+    </div>
+    
+    <div class="character-name" id="char-name">Cargando...</div>
+    <div class="character-profession" id="char-profession">---</div>
+
+    <div id="goals-section">
+      
+      <!-- INTEGRACIÓN DE LOS DATOS DE BARRA.HTML -->
+      <div class="objectives-section">
+
+          <button class="objective-btn" id="obj-btn-tus_companeros" onclick="openObjective('tus_companeros')">
+              <span>MIEMBROS</span> <span class="obj-icon" id="obj-icon-tus-companeros">👁️</span>
+          </button>
+
+          <button class="objective-btn" id="obj-btn-1" onclick="openObjective(1)">
+              <span>TRASFONDO</span> <span class="obj-icon" id="obj-icon-1">👁️</span>
+          </button>
+
+          <button class="objective-btn" id="obj-btn-equipo_inicial" onclick="openObjective('equipo_inicial')">
+              <span>SECRETOS</span> <span class="obj-icon" id="obj-icon-equipo_inicial">👁️</span>
+          </button>
+
+          <button class="objective-btn locked" id="obj-btn-2" onclick="openObjective(2)">
+              <span>OBJETIVOS ACTO I</span> <span class="obj-icon" id="obj-icon-2">🔒</span>
+          </button>
+
+          <button class="objective-btn locked" id="obj-btn-3" onclick="openObjective(3)">
+              <span>¿QUÉ HICISTE?</span> <span class="obj-icon" id="obj-icon-3">🔒</span>
+          </button>
+
+
+          <button class="objective-btn locked" id="obj-btn-4" onclick="openObjective(4)">
+              <span>OBJETIVOS ACTO II</span> <span class="obj-icon" id="obj-icon-4">🔒</span>
+          </button>
+
+
+<!-- ******************************* BOTÓN REINICIAR CAPÍTULOS *****************************************
+          <button class="btn-reset-chapters" onclick="solicitarReiniciarCapitulos()">Reiniciar Capítulos</button>  -->
+      </div>
+    </div>
+  </div>
+
+  <div id="right-panel">
+    
+<div id="top-stats-bar">
+      <div class="stats-row">
+        <div class="stat-card" id="stat-card-pa" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('images/puntos_accion.jpg'); background-size: cover; background-position: center;">
+          <span class="stat-label">Puntos de Acción</span>
+          <span class="stat-value action" id="char-pa">0</span>
+        </div>
+
+	<!-- 👇 BLOQUE DE VIDA CORREGIDO 👇 -->
+        <div class="stat-card" id="stat-card-vida" style="align-items: flex-start; text-align: left;">
+          <span class="stat-label">Vida</span>
+          <span class="stat-value" id="char-life" style="color: #ff6b6b;">0</span>
+        </div>
+        <!-- 👆 FIN DEL BLOQUE CORREGIDO 👆 -->
+
+        <div class="stat-card" id="stat-card-cordura" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('images/cordura.webp'); background-size: cover; background-position: center;">
+          <span class="stat-label">Cordura</span>
+          <span class="stat-value sanity" id="char-sanity">0</span>
+        </div>
+
+        <div class="stat-card" id="stat-card-dinero" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('images/dolar.jpg'); background-size: cover; background-position: center;">
+          <span class="stat-label">Dinero</span>
+          <span class="stat-value money" id="char-money">$0</span>
+        </div>
+      </div>
+      <div class="transfer-money-inline">
+        <label>Transferir:</label>
+        <input type="number" id="transfer-amount" min="1" placeholder="$" value="0" onfocus="if(this.value==='0') this.value='';" onblur="if(this.value==='') this.value='0';">
+        <select id="transfer-target-player">
+          <!-- Opciones dinámicas -->
+        </select>
+        <button class="btn-transfer" onclick="solicitarTransferenciaDinero()">Enviar</button>
+      </div>
+<div class="botones-sobre-campana">
+<button type="button" class="btn-msg-master" title="ENVIAR MENSAJE AL MÁSTER" onclick="abrirMensajeMaster()"><img src="images/sobre.jpg" alt="Mensaje al Máster" style="height:1.2em; vertical-align:middle;"></button>
+<button type="button" class="btn-msg-master btn-campana" id="btn-campana" title="AVISAR AL MÁSTER DE QUE ESTÁS PREPARADO" onclick="avisarPreparado()"><img src="images/bell.png" alt="Avisar al Máster" style="height:1.2em; vertical-align:middle;"></button>
+</div>
+      <div id="sync-error"></div>
+    </div>
+
+    <div id="inventory-section">
+
+<!-- 👇 INTRODUCIR CÓDIGO DE OBJETO 👇
+      <div class="code-unlock-box">
+        <div class="code-unlock-title">Introducir Código de Objeto:</div>
+        <div class="code-input-container">
+          <input type="text" id="object-code-input" class="code-input" maxlength="4" placeholder="****" onfocus="if(this.placeholder==='****')this.placeholder='';" onblur="if(this.value==='')this.placeholder='****';">
+          <button class="btn-code-ok" onclick="procesarCodigoObjeto()">OK</button>
+         </div>
+      </div>
+👆 FIN DEL BLOQUE AÑADIDO 👆 -->
+
+      <!-- ================= SECCIÓN DE ARMAS =================
+           Cada arma tiene su propio panel.
+           El cuadradito SELECCIONAR DEFENSA marca el arma que se usará
+           para responder a un ataque entrante. Siempre queda una seleccionada
+           entre las armas que tenga el jugador. -->
+      <div id="weapons-section" style="display:none; margin-bottom:25px;">
+
+
+
+<!-- Las tarjetas de armas se generan por JavaScript: una por cada arma que tenga el
+           jugador (pistola1, pistola2, revolver1, hacha1...). Ver "ARMAS INDEPENDIENTES". -->
+        <div id="weapons-list"></div>
+
+      </div>
+
+
+
+
+      <!-- ================= FIN SECCIÓN DE ARMAS ================= -->
+
+
+      <div class="inventory-grid" id="inventory-grid">
+        <!-- Generado dinámicamente -->
+      </div>
+
+    </div>
+
+  </div>
+
+  <div id="fullscreen-modal" onclick="if (!this.classList.contains('con-caption')) cerrarFullscreen()">
+    <div id="fullscreen-box">
+      <span id="fullscreen-close" onclick="event.stopPropagation(); cerrarFullscreen()">X</span>
+      <img id="fullscreen-img" src="" alt="Objeto">
+    </div>
+    <div id="fullscreen-caption"></div>
+  </div>
+
+  <div id="confirm-modal">
+    <div class="confirm-box">
+      <div class="confirm-title">Confirmar Acción</div>
+      <div class="confirm-text" id="confirm-text">¿Estás seguro?</div>
+      <div class="confirm-buttons">
+        <button class="confirm-btn btn-yes" id="confirm-yes-btn">SÍ</button>
+        <button class="confirm-btn btn-no" onclick="cerrarConfirmacion()">NO</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="alert-modal">
+    <div class="confirm-box">
+      <div class="confirm-title" id="alert-title">Aviso</div>
+      <div class="confirm-text" id="alert-text">Mensaje de aviso</div>
+      <div class="confirm-buttons">
+        <button class="confirm-btn btn-no" onclick="cerrarAlerta()">ACEPTAR</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POP-UP DE MUERTE: "Estás muerto" (propio) o "Ese jugador está muerto" (de otro). Ver mostrarAvisoMuerte(). -->
+  <div id="muerte-modal">
+    <div class="confirm-box">
+      <div class="confirm-title" id="muerte-title">Has muerto</div>
+      <div class="confirm-text" id="muerte-text"></div>
+      <div class="confirm-buttons">
+        <button class="confirm-btn btn-no" onclick="cerrarAvisoMuerte()">CERRAR</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POP-UP DE DESCRIPCIÓN DE OBJETO: se abre al pulsar el botón "Descripción"
+       de cada objeto del inventario. Ver función mostrarDescripcionObjeto() y el
+       objeto DESCRIPCIONES_OBJETOS más abajo para editar los textos. -->
+  <div id="description-modal">
+    <div class="description-box">
+      <div class="description-img-container" onclick="abrirFullscreen(document.getElementById('description-img').src)" title="Ampliar imagen">
+        <img id="description-img" src="" alt="">
+      </div>
+      <div class="description-title" id="description-title">Objeto</div>
+      <div class="description-text" id="description-text">Descripción del objeto.</div>
+      <div class="confirm-buttons">
+        <button class="confirm-btn btn-no" onclick="cerrarDescripcion()">CERRAR</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL DE ATAQUE ENTRANTE (NUEVO) =================
+       Aparece cuando otro jugador te dispara (ataque_de en la hoja no está
+       vacío). No tiene botón de cerrar a propósito: solo se cierra
+       pulsando DISPARAR o ESQUIVAR, y mientras esté abierto suena
+       audio/danger.mp3 en bucle (ver reproducirDangerLoop / detenerDangerLoop). -->
+  <div id="attack-alert-modal" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(40,0,0,0.75); display:none; align-items:center; justify-content:center; z-index:12000;">
+    <div class="confirm-box" style="border-color:#ff2b2b; box-shadow:0 0 40px rgba(255,0,0,0.6);">
+      <div class="confirm-title" style="color:#ff4d4d;">¡TE ESTÁN ATACANDO!</div>
+      <div class="confirm-text" id="attack-alert-text">Alguien te apunta con un arma...</div>
+      <div class="confirm-buttons" id="attack-alert-buttons">
+        <!-- Generado dinámicamente: botón DISPARAR o ESQUIVAR, y luego PIEDRA/PAPEL/TIJERAS -->
+      </div>
+    </div>
+  </div>
+  <!-- ================= FIN MODAL DE ATAQUE ENTRANTE ================= -->
+
+  <script src="objetos.js"></script>
+  <script src="datos_jugador2935.js"></script>
+  <script>
+    const JUGADOR_ACTUAL = 'jugador2935';
+
+    // =====================================================================
+    // FIREBASE: puntos_accion, vida, cordura y dinero se leen de aquí
+    // (nodo jugadores/<JUGADOR_ACTUAL>, el mismo que edita master_objetos.html).
+    // También nombre, profesión y foto (jugadores/<id>/nombre, profesion, foto,
+    // que escribe master.html); si en Firebase falta alguno se usa el de Sheets.
+    // El resto de datos del jugador sigue viniendo de Google Sheets.
+    // =====================================================================
+    firebase.initializeApp({
+      apiKey: "AIzaSyDBMQU4fRGw-BjfAx8dv84GmcHzA-1ncoY",
+      authDomain: "logia-rol-vivo.firebaseapp.com",
+      databaseURL: "https://logia-rol-vivo-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "logia-rol-vivo",
+      storageBucket: "logia-rol-vivo.firebasestorage.app",
+      messagingSenderId: "432574172065",
+      appId: "1:432574172065:web:0e1d93921e84f51cb099e0"
+    });
+    const dbFirebase = firebase.database();
+    const CAMPOS_FIREBASE = ['puntos_accion', 'vida', 'cordura', 'dinero'];
+    let statsFirebase = null; // últimos valores recibidos de Firebase
+
+    // Pisa en miJugadorData los 4 valores con los de Firebase (si existen).
+    function aplicarStatsFirebase() {
+      if (!miJugadorData || !statsFirebase) return;
+      CAMPOS_FIREBASE.forEach(function(campo) {
+        const v = statsFirebase[campo];
+        if (v !== undefined && v !== null && isFinite(Number(v))) {
+          miJugadorData[campo] = Number(v);
+        }
+      });
+    }
+
+    // Tiempo real: cada cambio del máster se refleja al instante en el panel.
+    dbFirebase.ref('jugadores/' + JUGADOR_ACTUAL).on('value', function(snapshot) {
+      statsFirebase = snapshot.val();
+      if (miJugadorData) {
+        aplicarStatsFirebase();
+        renderizarPerfil();
+      }
+    });
+
+    // Nombre, profesión, foto, PA, vida, cordura, dinero, habilidad y ubicación de TODOS los
+    // jugadores viven en Firebase (jugadores/<id>). De ahí salen también los desplegables
+    // (mostrar, entregar, dinero, atacar) y los avisos de ataque.
+    let jugadoresFirebase = null; // últimos datos de jugadores/ recibidos de Firebase
+
+    // Inventario del jugador: inventarios/<jugador>/<objeto> = true (lo tiene).
+    // Lo edita inventario.html (máster) y también el propio juego (entregar, usar, recargar...).
+    let inventarioFirebase = null;
+    // Orden de llegada: inventarioOrden/<jugador>/<objeto> = momento (ms) en que lo recibió.
+    let ordenFirebase = null;
+    // Capítulos desbloqueados: capitulos/<jugador>/cap2, cap3, cap4 = true. Se marcan en inventario.html.
+    let capitulosFirebase = null;
+    // Objeto que otro jugador te está mostrando: mostrar/<jugador> = { de, objeto, t }
+    let mostrarFirebase = null;
+
+    dbFirebase.ref('jugadores').on('value', function(snapshot) {
+      jugadoresFirebase = snapshot.val() || {};
+      reconstruirDatos();
+    });
+
+    dbFirebase.ref('inventarios/' + JUGADOR_ACTUAL).on('value', function(snapshot) {
+      inventarioFirebase = snapshot.val() || {};
+      sincronizarOrdenInventario();
+      reconstruirDatos();
+    });
+
+    dbFirebase.ref('inventarioOrden/' + JUGADOR_ACTUAL).on('value', function(snapshot) {
+      ordenFirebase = snapshot.val() || {};
+      sincronizarOrdenInventario();
+      reconstruirDatos();
+    }, function() {                 // si las reglas no dejan leer, no bloquear el inventario
+      ordenFirebase = {};
+      reconstruirDatos();
+    });
+
+    // Anota la hora de llegada de cada objeto nuevo y borra la de los que ya no tiene.
+    // Los objetos que llegan con la página cerrada se anotan todos a la vez al abrirla
+    // (misma hora) y quedan ordenados alfabéticamente por nombre visible.
+    function sincronizarOrdenInventario() {
+      if (inventarioFirebase === null || ordenFirebase === null) return;
+      const upd = {};
+      Object.keys(inventarioFirebase).forEach(function(k) {
+        if (inventarioFirebase[k] === true && !ordenFirebase[k]) {
+          upd['inventarioOrden/' + JUGADOR_ACTUAL + '/' + k] = firebase.database.ServerValue.TIMESTAMP;
+        }
+      });
+      Object.keys(ordenFirebase).forEach(function(k) {
+        if (inventarioFirebase[k] !== true) upd['inventarioOrden/' + JUGADOR_ACTUAL + '/' + k] = null;
+      });
+      if (Object.keys(upd).length) dbFirebase.ref().update(upd);
+    }
+
+    // Comparador por orden de llegada (más antiguo primero); si empatan, alfabético por nombre visible.
+    function compararPorLlegada(a, b) {
+      const o = ordenFirebase || {};
+      const d = (o[a] || 9e15) - (o[b] || 9e15);
+      if (d !== 0) return d;
+      return obtenerNombreVisible(a).localeCompare(obtenerNombreVisible(b), 'es', { numeric: true, sensitivity: 'base' })
+          || a.localeCompare(b);
+    }
+
+    dbFirebase.ref('capitulos/' + JUGADOR_ACTUAL).on('value', function(snapshot) {
+      capitulosFirebase = snapshot.val() || {};
+      reconstruirDatos();
+    });
+
+    dbFirebase.ref('mostrar/' + JUGADOR_ACTUAL).on('value', function(snapshot) {
+      mostrarFirebase = snapshot.val();
+      if (miJugadorData) comprobarObjetoMostrado();
+    });
+
+    // ---------------------------------------------------------------------
+    // SOLO JUGADORES DE TU SALA
+    // Mostrar, entregar, enviar dinero y atacar solo permiten elegir a los
+    // jugadores cuya ubicación (jugadores/<id>/ubicacion, que escribe
+    // mapa.html) coincide con la tuya. Si no tienes ubicación, la lista
+    // queda vacía.
+    // ---------------------------------------------------------------------
+    function normalizarUbicacion(u) {
+      return String(u || '').toLowerCase().trim();
+    }
+
+    function ubicacionDeJugador(id) {
+      if (!jugadoresFirebase) return '';
+      const clave = String(id || '').toLowerCase().trim();
+      const f = jugadoresFirebase[clave] || jugadoresFirebase[id];
+      return normalizarUbicacion(f && f.ubicacion);
+    }
+
+    function jugadorEstaEnMiSala(id) {
+      const mia = ubicacionDeJugador(JUGADOR_ACTUAL);
+      return mia !== '' && ubicacionDeJugador(id) === mia;
+    }
+
+    function jugadoresEnMiSala() {
+      return todosLosJugadores.filter(function(j) {
+        return String(j.jugador_id).toLowerCase().trim() !== JUGADOR_ACTUAL.toLowerCase().trim()
+          && jugadorEstaEnMiSala(j.jugador_id);
+      });
+    }
+
+    // Texto de la primera opción: si no hay nadie en la sala, lo avisa.
+    function textoPlaceholderSala(texto) {
+      return jugadoresEnMiSala().length > 0 ? texto : 'Nadie en tu sala';
+    }
+
+    // Comprobación al pulsar Mostrar / Entregar / Enviar / Atacar.
+    function verificarEnMiSala(id) {
+      if (jugadorEstaEnMiSala(id)) return !bloquearSiObjetivoMuerto(id);
+      reproducirNope();
+      mostrarAlerta("Fuera de tu sala", "Ese jugador ya no está en tu ubicación.");
+      refrescarDesplegablesSala();
+      return false;
+    }
+
+    function refrescarDesplegablesSala() {
+      if (!miJugadorData) return;
+      renderizarInventario();
+      actualizarDesplegableDinero();
+      renderizarArmas();
+    }
+
+    // Solo redibuja cuando cambia tu sala o quién hay en ella.
+    let firmaSalaAnterior = null;
+    function refrescarDesplegablesSiCambiaSala() {
+      const firma = ubicacionDeJugador(JUGADOR_ACTUAL) + '|' +
+        jugadoresEnMiSala().map(function(j) { return j.jugador_id; }).join(',');
+      if (firma === firmaSalaAnterior) return;
+      firmaSalaAnterior = firma;
+      refrescarDesplegablesSala();
+    }
+
+    // ---------------------------------------------------------------------
+    // COMBATE EN FIREBASE
+    //  - Atacar: los PA del ataque se descuentan de Firebase (al Apps Script
+    //    se le manda coste=0 para que no toque los PA de Sheets).
+    //  - Daño recibido: el Apps Script sigue resolviendo el duelo y bajando
+    //    la vida en Sheets; aquí se copia ese cambio (solo la diferencia) a
+    //    la vida de Firebase. Nunca baja de 0.
+    // ---------------------------------------------------------------------
+    function descontarPAFirebase(coste) {
+      const c = Number(coste) || 0;
+      if (c <= 0) return;
+      dbFirebase.ref('jugadores/' + JUGADOR_ACTUAL + '/puntos_accion').transaction(function(actual) {
+        return Math.max(0, (Number(actual) || 0) - c);
+      }).catch(function(err) {
+        console.error("Error al descontar PA en Firebase:", err);
+      });
+    }
+
+let cancionPrinActual = "";
+let cancionSegActual = "";
+let audioAmbienteIniciado = false;
+
+// ---- AMBIENTE POR FIREBASE (lo controla el máster desde master_transmision.html) ----
+// Nodo: ambiente/canal1 (principal) y ambiente/canal2 (segundo plano)
+//   { archivo, volumen 0-100, loop true/false, ts }
+// Si el máster aún no ha configurado nada, el canal 1 usa ambiente.mp3 al 50 % en bucle.
+let ambienteFB = { canal1: null, canal2: null, canal3: null, canal4: null };
+let ambienteAplicado = { canal1: null, canal2: null, canal3: null, canal4: null };   // { archivo, ts } ya cargado en cada canal
+let ambienteOffsetServidor = 0;
+const AMBIENTE_CANAL1_DEFECTO = { archivo: 'ambiente.mp3', volumen: 50, loop: true, ts: 0 };
+const AMBIENTE_ONESHOT_MAX_MS = 30000;   // un sonido "sin loop" más viejo que esto no se reproduce al entrar
+
+dbFirebase.ref('.info/serverTimeOffset').on('value', function(snap) {
+  ambienteOffsetServidor = Number(snap.val()) || 0;
+});
+dbFirebase.ref('ambiente').on('value', function(snap) {
+  const v = snap.val() || {};
+  ambienteFB.canal1 = v.canal1 || null;
+  ambienteFB.canal2 = v.canal2 || null;
+  ambienteFB.canal3 = v.canal3 || null;
+  ambienteFB.canal4 = v.canal4 || null;
+  if (audioAmbienteIniciado) sincronizarAudioAmbiente();
+});
+
+    // ================= SISTEMA DE ARMAS (NUEVO) =================
+    // NOTA IMPORTANTE: COSTE_DISPARO es el coste en Puntos de Acción que le
+    // cuesta a ESTE jugador iniciar un ataque (disparar primero). Cada
+    // jugadorNc.html deve tener su propio valor aquí, tal y como pediste
+    // ("a algunos jugadores le costará 1 PA, a otros más"). Este archivo es
+    // el de jugadorXXXX, así que puedes dejarlo o cambiarlo a lo que corresponda.
+    // Defenderse (disparar o esquivar) NUNCA consume PA, solo balas si disparas.
+    const COSTE_DISPARO = 1; // <-- CAMBIA ESTE NÚMERO PARA CADA jugador
+    const MAX_BALAS_CARGADOR = 15; // Balas que da un cargador al recargar
+
+    // ================= CONFIGURACIÓN DE ARMAS DEL CLIENTE =================
+    // Para añadir otra arma en el futuro, copia una entrada de esta lista
+    // y cambia sus datos. La selección de defensa usa esta lista.
+    const ARMAS_DEFENSA = ['pistola', 'revolver', 'escopeta', 'ataque_cosa', 'hacha', 'machete', 'cuchillo'];
+    const ARMA_DEFENSA_STORAGE = `game_arma_defensa_${JUGADOR_ACTUAL}`;
+
+    // CAMBIAR AQUÍ PARA EL MÁXIMO DE CARTUCHOS CARGADOS POR ESCOPETA, POR EJEMPLO A 6.
+    const MAX_CARTUCHOS_ESCOPETA = 2;
+
+    // Máximo de balas que puede llevar cargado el revólver.
+    const MAX_BALAS_REVOLVER = 6;
+
+const COSTE_ATAQUE_COSA = 1; // <-- coste en PA para ESTE jugador con este ataque
+const COSTE_ATAQUE_HACHA = 1; // <-- coste en PA para ESTE jugador con este ataque de hacha
+const COSTE_ATAQUE_MACHETE = 1; // <-- coste en PA para ESTE jugador con este ataque de machete
+const COSTE_ATAQUE_CUCHILLO = 1; // <-- coste en PA para ESTE jugador con este ataque de cuchillo
+    // ======================================================================
+
+    // ==============================================================
+
+/* (movido a objetos.js) */
+
+    // --- OBJETOS QUE NO SE PUEDEN ENTREGAR ---
+    // Escribe aquí, en minúsculas, los objetos cuyo botón "Entregar" debe
+    // aparecer deshabilitado (gris, sin poder pulsarlo). Ejemplo: ['hacha'].
+/* (movido a objetos.js) */
+
+    // --- OBJETOS QUE SE PUEDEN "USAR" (consumibles) ---
+    // Cada clave debe ir en minúsculas, igual que el nombre del objeto en el inventario.
+    // stat: la columna del jugador a la que se suma la cantidad. Puedes usar
+    //       'vida', 'puntos_accion', 'cordura', o cualquier otra columna numérica que tengas.
+    // cantidad: cuánto se suma a esa estadística.
+    // Al usarse, el objeto se borra del inventario (se consume).
+/* (movido a objetos.js) */
+
+
+// Objetos de munición que, al pulsar "Usar", recargan directamente el arma correspondiente.
+/* (movido a objetos.js) */
+
+
+
+    // --- DESCRIPCIONES DE OBJETOS (para el pop-up "Descripción" del inventario) INVENTARIO ---
+    // La clave debe ir en minúsculas y sin espacios sobrantes (igual que en
+    // obtenerRutaImagen), aunque el nombre del objeto en el inventario tenga
+    // mayúsculas: la búsqueda ya normaliza el texto por ti.
+    // Añade, quita o edita libremente estas descripciones; si un objeto no
+    // aparece aquí se mostrará un texto genérico por defecto.
+
+
+/* (movido a objetos.js) */
+
+
+    // --- NOMBRES VISIBLES PARA EL JUGADOR ---
+    // Permite que nombres técnicos o numerados (para tener varias copias
+    // del mismo objeto, ej. cargador_pistola1, cargador_pistola2) se
+    // muestren con un nombre limpio y único en el inventario.
+    // IMPORTANTE: las claves van en minúsculas, igual que en
+    // DESCRIPCIONES_OBJETOS y OBJETOS_USABLES; la función que las usa ya
+    // normaliza el texto antes de buscar.
+
+/* (movido a objetos.js) */
+
+
+    let todosLosJugadores = [];
+    let miJugadorData = null;
+    let jugadorEligiendoDestino = false; // true mientras el jugador tiene abierto un desplegable de "Entregar a..."
+
+    function reproducirClick() {
+      const clickAudio = new Audio('audio/click.mp3');
+      clickAudio.play().catch(err => console.log("Audio autoplay prevenido o archivo no encontrado:", err));
+    }
+
+
+function iniciarAudioAmbiente() {
+  if (audioAmbienteIniciado) return;
+  audioAmbienteIniciado = true;
+
+  document.getElementById('start-audio-overlay').style.display = 'none';
+  reproducirClick();
+
+  sincronizarAudioAmbiente();
+  setInterval(sincronizarAudioAmbiente, 8000);
+}
+
+// Aplica a los dos canales lo que hay en Firebase (se llama al iniciar, en cada cambio y cada 8 s).
+function aplicarCanalAmbiente(audio, clave, config) {
+  const c = config || { archivo: '', volumen: 50, loop: true, ts: 0 };
+  const archivo = String(c.archivo || '').trim();
+  const v = Number(c.volumen);
+  const volumen = (c.volumen === undefined || c.volumen === null || c.volumen === '' || !isFinite(v)) ? 50 : Math.min(100, Math.max(0, v));
+  const loop = !(c.loop === false || String(c.loop).toLowerCase() === 'no');
+  const ts = Number(c.ts) || 0;
+
+  audio.loop = loop;
+  audio.volume = volumen / 100;
+
+  const previo = ambienteAplicado[clave];
+  const cambio = !previo || previo.archivo !== archivo || previo.ts !== ts;
+
+  if (cambio) {
+    ambienteAplicado[clave] = { archivo: archivo, ts: ts };
+    if (!archivo) {
+      audio.pause();
+      audio.removeAttribute('src');
+      audio.load();
+      return;
+    }
+    // Un sonido de una sola vez que ya es antiguo (p. ej. al recargar la página) no se repite.
+    const antiguo = !loop && ts && (Date.now() + ambienteOffsetServidor - ts) > AMBIENTE_ONESHOT_MAX_MS;
+    if (antiguo) {
+      audio.pause();
+      audio.removeAttribute('src');
+      audio.load();
+      return;
+    }
+    audio.src = /^(audio\/|https?:)/i.test(archivo) ? archivo : 'audio/' + archivo;
+    audio.play().catch(e => console.log("Audio ambiente " + clave + " bloqueado:", e));
+  } else if (archivo && loop && audio.paused) {
+    audio.play().catch(e => {});
+  }
+}
+
+function sincronizarAudioAmbiente() {
+  try {
+    const audioPrin = document.getElementById('ambienteAudio');
+    const audioSeg = document.getElementById('segundoPlanoAudio');
+    const audioTer = document.getElementById('tercerPlanoAudio');
+    const audioCua = document.getElementById('cuartoPlanoAudio');
+    aplicarCanalAmbiente(audioPrin, 'canal1', ambienteFB.canal1 || AMBIENTE_CANAL1_DEFECTO);
+    aplicarCanalAmbiente(audioSeg, 'canal2', ambienteFB.canal2);
+    aplicarCanalAmbiente(audioTer, 'canal3', ambienteFB.canal3);
+    aplicarCanalAmbiente(audioCua, 'canal4', ambienteFB.canal4);
+  } catch (err) {
+    console.log("Error sincronizando audio ambiente:", err);
+  }
+}
+
+
+function reproducirNope() {
+      const nopeAudio = new Audio('audio/nope.mp3');
+      nopeAudio.play().catch(err => console.log("Audio nope prevenido o archivo no encontrado:", err));
+    }
+
+    // 🔊 Lo oye el jugador cuando su vida llega a 0 (o intenta algo estando muerto).
+    function reproducirMuerto() {
+      const muertoAudio = new Audio('audio/muerto.mp3');
+      muertoAudio.play().catch(err => console.log("Audio muerto prevenido o archivo no encontrado:", err));
+    }
+
+    // 🔊 Lo oye quien intenta interactuar con un jugador muerto.
+    function reproducirMuertoJugador() {
+      const muertoJugAudio = new Audio('audio/muerto_jugador.mp3');
+      muertoJugAudio.play().catch(err => console.log("Audio muerto_jugador prevenido o archivo no encontrado:", err));
+    }
+
+    function reproducirPickup() {
+      const pickupAudio = new Audio('audio/pickup.mp3');
+      pickupAudio.play().catch(err => console.log("Audio pickup prevenido o archivo no encontrado:", err));
+    }
+
+    function reproducirMessage() {
+      const messageAudio = new Audio('audio/message.mp3');
+      messageAudio.play().catch(err => console.log("Audio message prevenido o archivo no encontrado:", err));
+    }
+
+    function reproducirOpenbook() {
+      const openbookAudio = new Audio('audio/openbook.mp3');
+      openbookAudio.play().catch(err => console.log("Audio openbook prevenido o archivo no encontrado:", err));
+    }
+
+    function reproducirCorrect() {
+      const correctAudio = new Audio('audio/correct.mp3');
+      correctAudio.play().catch(err => console.log("Audio correct prevenido o archivo no encontrado:", err));
+    }
+
+    function reproducirObjetivoActualizado() {
+      const objAudio = new Audio('audio/obj_act.mp3');
+      objAudio.play().catch(err => console.log("Audio obj_act prevenido o archivo no encontrado:", err));
+    }
+
+// 👇 AÑADE ESTA FUNCIÓN AQUÍ 👇
+    function reproducirMoney() {
+      const moneyAudio = new Audio('audio/money.mp3');
+      moneyAudio.play().catch(err => console.log("Audio money prevenido o archivo no encontrado:", err));
+    }
+// 👆 FIN DEL BLOQUE AÑADIDO 👆
+
+// ============================================================
+// 🔊 SONIDOS DEL ARMA — SOLO PISTOLA (Beretta)
+// ------------------------------------------------------------
+// IMPORTANTE PARA CUANDO AÑADAS OTRA ARMA MÁS ADELANTE:
+// Estas 3 funciones son EXCLUSIVAS de la pistola (nombres de
+// archivo audio/pistola.mp3, audio/pistola_reload.mp3 y
+// audio/empty.mp3). Si en el futuro añades, por ejemplo, una
+// escopeta, NO reutilices estas funciones: crea unas nuevas
+// (p. ej. reproducirEscopeta(), reproducirEscopetaReload()) con
+// sus propios archivos de audio, y llama a esas nuevas funciones
+// solo en las acciones de esa arma nueva. Así cada arma mantiene
+// su propio sonido sin pisarse entre sí.
+// ============================================================
+    function reproducirPistola() {
+      const pistolaAudio = new Audio('audio/pistola.mp3');
+      pistolaAudio.play().catch(err => console.log("Audio pistola prevenido o archivo no encontrado:", err));
+    }
+
+    function reproducirPistolaReload() {
+      const pistolaReloadAudio = new Audio('audio/pistola_reload.mp3');
+      pistolaReloadAudio.play().catch(err => console.log("Audio pistola_reload prevenido o archivo no encontrado:", err));
+    }
+
+    function reproducirEmpty() {
+      const emptyAudio = new Audio('audio/empty.mp3');
+      emptyAudio.play().catch(err => console.log("Audio empty prevenido o archivo no encontrado:", err));
+    }
+
+    // 🔊 Sonido exclusivo de la escopeta al atacar o defender disparando.
+    function reproducirEscopeta() {
+      const escopetaAudio = new Audio('audio/escopeta.mp3');
+      escopetaAudio.play().catch(err => console.log("Audio escopeta prevenido o archivo no encontrado:", err));
+    }
+
+    // 🔊 Sonido exclusivo de la recarga de la escopeta.
+    function reproducirEscopetaReload() {
+      const escopetaReloadAudio = new Audio('audio/escopeta_reload.mp3');
+      escopetaReloadAudio.play().catch(err => console.log("Audio escopeta_reload prevenido o archivo no encontrado:", err));
+    }
+
+    // 🔊 Sonido exclusivo del revólver al atacar o defender disparando.
+    function reproducirRevolver() {
+      const revolverAudio = new Audio('audio/revolver.mp3');
+      revolverAudio.play().catch(err => console.log("Audio revolver prevenido o archivo no encontrado:", err));
+    }
+
+    // 🔊 Sonido exclusivo de la recarga del revólver.
+    function reproducirRevolverReload() {
+      const revolverReloadAudio = new Audio('audio/revolver_reload.mp3');
+      revolverReloadAudio.play().catch(err => console.log("Audio revolver_reload prevenido o archivo no encontrado:", err));
+    }
+
+
+// 🔊 Sonido exclusivo del ataque de la Cosa (mismo sonido para atacar y para defenderse).
+function reproducirAtaqueCosa() {
+  const cosaAudio = new Audio('audio/ataque_cosa.mp3');
+  cosaAudio.play().catch(err => console.log("Audio ataque_cosa prevenido o archivo no encontrado:", err));
+}
+
+// 🔊 Sonido exclusivo del hacha (mismo sonido para atacar y para defenderse).
+function reproducirHacha() {
+  const hachaAudio = new Audio('audio/hacha.mp3');
+  hachaAudio.play().catch(err => console.log("Audio hacha prevenido o archivo no encontrado:", err));
+}
+
+// 🔊 Sonido exclusivo del machete (mismo sonido para atacar y para defenderse).
+function reproducirMachete() {
+  const macheteAudio = new Audio('audio/machete.mp3');
+  macheteAudio.play().catch(err => console.log("Audio machete prevenido o archivo no encontrado:", err));
+}
+
+// 🔊 Sonido exclusivo del cuchillo (mismo sonido para atacar y para defenderse).
+function reproducirCuchillo() {
+  const cuchilloAudio = new Audio('audio/cuchillo.mp3');
+  cuchilloAudio.play().catch(err => console.log("Audio cuchillo prevenido o archivo no encontrado:", err));
+}
+
+
+// ============================================================
+// 🔊 FIN SONIDOS DEL ARMA — SOLO PISTOLA
+// ============================================================
+
+document.addEventListener('click', function(e) {
+  if (e.target.closest('button:not(.objective-btn), .item-thumb-container, .description-img-container, .character-portrait-frame, #fullscreen-modal, #weapons-section img')) {
+    reproducirClick();
+  }
+});
+
+
+    function obtenerRutaImagen(nombreObjeto) {
+      const nombreClean = nombreObjeto.toLowerCase().trim();
+      if (nombreClean.includes('esposas')) return 'images/esposas.jpg';
+      
+      return 'images/' + nombreClean + '.jpg';
+    }
+
+    // Devuelve el nombre "bonito" para mostrar al jugador. Si el objeto no
+    // está en NOMBRES_VISIBLES, se muestra su nombre real tal cual (así los
+    // objetos que no necesitan alias siguen funcionando sin tocar nada).
+    function obtenerNombreVisible(nombreObjeto) {
+      const clave = String(nombreObjeto).toLowerCase().trim();
+      return NOMBRES_VISIBLES[clave] || nombreObjeto;
+    }
+
+    // =====================================================================
+    // DATOS DEL JUGADOR (todo viene de Firebase, en tiempo real)
+    //   jugadores/<id>                  ficha: nombre, profesión, foto, stats...
+    //   inventarios/<id>/<objeto>=true  objetos que tiene
+    //   capitulos/<id>/cap2|cap3|cap4   capítulos desbloqueados
+    // Cada vez que cambia cualquiera de ellos se reconstruye todo el panel.
+    // =====================================================================
+    let invFirmaDOM = '';
+
+    function reconstruirDatos() {
+      if (!jugadoresFirebase || inventarioFirebase === null || capitulosFirebase === null || ordenFirebase === null) return;
+
+      todosLosJugadores = Object.keys(jugadoresFirebase)
+        .filter(function(id) { return jugadoresFirebase[id] && typeof jugadoresFirebase[id] === 'object'; })
+        .sort(function(a, b) { return a.localeCompare(b, 'es', { numeric: true }); })
+        .map(function(id) { return Object.assign({}, jugadoresFirebase[id], { jugador_id: id }); });
+
+      miJugadorData = todosLosJugadores.find(function(p) {
+        return String(p.jugador_id || '').toLowerCase().trim() === JUGADOR_ACTUAL.toLowerCase().trim();
+      });
+
+      if (!miJugadorData) {
+        document.getElementById('char-name').innerText = "Sin datos para " + JUGADOR_ACTUAL;
+        return;
+      }
+
+      const inv = {};
+      Object.keys(inventarioFirebase).forEach(function(k) {
+        if (inventarioFirebase[k] === true) inv[k] = true;
+      });
+      miJugadorData.inventario = inv;
+
+      aplicarStatsFirebase();
+      renderizarPerfil();
+      renderizarInventario();
+      actualizarDesplegableDinero();
+      sincronizarCapitulosDesdeServidor();
+      renderizarArmas();
+      comprobarAtaquePendiente();
+      comprobarObjetoMostrado();
+    }
+
+    function renderizarPerfil() {
+      document.getElementById('char-name').innerText = miJugadorData.nombre || JUGADOR_ACTUAL;
+      document.getElementById('char-profession').innerText = miJugadorData.profesion || 'Investigador';
+      comprobarMuertePropia();
+      document.getElementById('char-pa').innerText = miJugadorData.puntos_accion || 0;
+      
+// 👇 AÑADE ESTA LÍNEA AQUÍ para el parámetro de vida👇
+      document.getElementById('char-life').innerText = miJugadorData.vida || 0;
+// 👆 FIN DE LA LÍNEA AÑADIDA 👆
+
+// 👇 AÑADE ESTO AQUí para los colores de los números de la vida 👇
+      const lifeVal = Number(miJugadorData.vida) || 0;
+      const lifeElem = document.getElementById('char-life');
+      lifeElem.style.visibility = (lifeVal <= 0) ? 'hidden' : 'visible';   // vida 0: no se ve el número (el cuadro mantiene su tamaño)
+      
+      if (lifeVal >= 7) {
+        lifeElem.style.color = '#6fdc9a'; // Verde (10-9-8-7)
+      } else if (lifeVal >= 5) {
+        lifeElem.style.color = '#ffd700'; // Amarillo (6-5)
+      } else if (lifeVal >= 3) {
+        lifeElem.style.color = '#ff8c00'; // Naranja (4-3)
+      } else {
+        lifeElem.style.color = '#ff6b6b'; // Rojo (2-1-0)
+      }
+// 👆 FIN DEL BLOQUE AÑADIDO 👆
+
+
+// 👇 NUEVO: imagen de fondo del cuadro de Vida según el valor actual 👇
+      const vidaCard = document.getElementById('stat-card-vida');
+      if (vidaCard) {
+        let imagenVida = '';
+
+        if (vidaEsCero(miJugadorData)) {
+          imagenVida = 'images/muerto.jpg';   // vida 0: jugador muerto
+        } else if (lifeVal >= 7) {
+          imagenVida = 'images/v_fine.webp';
+        } else if (lifeVal >= 5) {
+          imagenVida = 'images/v_regular.webp';
+        } else if (lifeVal >= 3) {
+          imagenVida = 'images/v_caution.webp';
+        } else {
+          imagenVida = 'images/v_danger.webp';
+        }
+
+        vidaCard.style.backgroundImage = `url('${imagenVida}')`;
+        vidaCard.style.backgroundSize = 'cover';
+        vidaCard.style.backgroundPosition = 'right center';
+      }
+// 👆 FIN DEL BLOQUE AÑADIDO 👆
+
+
+
+      const sanityVal = Number(miJugadorData.cordura) || 0;
+      const sanityElem = document.getElementById('char-sanity');
+      sanityElem.innerText = sanityVal;
+      sanityElem.style.visibility = (sanityVal <= 0) ? 'hidden' : 'visible';   // cordura 0: no se ve el número
+
+      sanityElem.className = 'stat-value sanity';
+// 👇 MODIFICA O SUSTITUYE ESTOS TRAMOS SEGÚN TUS PREFERENCIAS 👇
+      if (sanityVal >= 6) {
+        sanityElem.style.color = '#6fdc9a'; // Verde (para valores altos de cordura)
+      } else if (sanityVal >= 5) {
+        sanityElem.style.color = '#a8e6c9'; // Turquesa / Verde claro
+      } else if (sanityVal >= 3) {
+        sanityElem.style.color = '#ffd700'; // Amarillo (valores medios)
+      } else if (sanityVal === 2) {
+        sanityElem.style.color = '#ff8c00'; // Naranja (valores bajos)
+      } else {
+        sanityElem.style.color = '#ff6b6b'; // Rojo (0 o 1, peligro crítico)
+      }
+// 👆 FIN DEL BLOQUE ACTUALIZADO 👆
+
+      // Cordura 0: la imagen de fondo del cuadro pasa a images/loco.jpg (si se recupera, vuelve la de siempre).
+      const sanityCard = document.getElementById('stat-card-cordura');
+      if (sanityCard) {
+        const corduraDefinida = miJugadorData.cordura !== undefined && miJugadorData.cordura !== null && miJugadorData.cordura !== '';
+        const imagenCordura = (corduraDefinida && sanityVal <= 0) ? 'images/loco.jpg' : 'images/cordura.webp';
+        sanityCard.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('${imagenCordura}')`;
+      }
+
+      document.getElementById('char-money').innerText = '$' + (miJugadorData.dinero || 0);
+
+      if (miJugadorData.foto) {
+        document.getElementById('char-photo').src = miJugadorData.foto;
+      }
+    }
+
+    function clavesOrdenadasInventario(inventario) {
+      return Object.keys(inventario)
+        .filter(function(k) { return inventario[k] === true; })
+        .sort(compararPorLlegada);
+    }
+
+    function renderizarInventario() {
+      if (jugadorEligiendoDestino) return; // no tocar la rejilla mientras está eligiendo destino
+
+      const grid = document.getElementById('inventory-grid');
+      const inventario = miJugadorData.inventario || {};
+
+      // Solo se redibuja la rejilla si cambia algo visible (objetos o jugadores de tu sala).
+      const firmaInv = clavesOrdenadasInventario(inventario).join('|') +
+        '#' + jugadoresEnMiSala().map(function(j) { return j.jugador_id + ':' + j.nombre; }).join(',');
+      if (firmaInv === invFirmaDOM) return;
+      invFirmaDOM = firmaInv;
+
+      const seleccionesGuardadas = {};
+      for (let objeto in inventario) {
+        const selectElem = document.getElementById(`select-${objeto}`);
+        if (selectElem) {
+          seleccionesGuardadas[objeto] = selectElem.value;
+        }
+      }
+
+      grid.innerHTML = '';
+
+      for (const objeto of clavesOrdenadasInventario(inventario)) {
+        if (inventario[objeto] === true) {
+          const imgSrc = obtenerRutaImagen(objeto);
+
+          const card = document.createElement('div');
+          card.className = 'item-card';
+
+          let optionsHtml = '<option value="">' + textoPlaceholderSala('Elegir a...') + '</option>';
+          jugadoresEnMiSala().forEach(j => {
+            if (String(j.jugador_id).toLowerCase().trim() !== JUGADOR_ACTUAL.toLowerCase().trim()) {
+              optionsHtml += `<option value="${j.jugador_id}">${j.nombre}</option>`;
+            }
+          });
+
+          const noEntregable = OBJETOS_NO_ENTREGABLES.indexOf(String(objeto).toLowerCase().trim()) !== -1;
+          const configUso = OBJETOS_USABLES[String(objeto).toLowerCase().trim()];
+          const configCurar = (typeof OBJETOS_CURAR !== 'undefined') ? OBJETOS_CURAR[String(objeto).toLowerCase().trim()] : undefined;
+          const configRegistrar = (typeof OBJETOS_REGISTRAR !== 'undefined') ? OBJETOS_REGISTRAR[String(objeto).toLowerCase().trim()] : undefined;
+	  const funcionRecarga = tipoDeMunicion(objeto)
+            ? "usarCargador('" + objeto + "')"
+            : (OBJETOS_RECARGA[String(objeto).toLowerCase().trim()] ? OBJETOS_RECARGA[String(objeto).toLowerCase().trim()] + "()" : '');
+
+          card.innerHTML = `
+            <div class="item-thumb-container" onclick="abrirFullscreen('${imgSrc}')">
+              <img src="${imgSrc}" class="item-thumb" alt="${objeto}" onerror="if(fallbackImagenNumerada(this))return; this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 24 24\\' fill=\\'%239bf0c0\\'><path d=\\'M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8 3c1.93 0 3.5 1.57 3.5 3.5S13.93 12 12 12s-3.5-1.57-3.5-3.5S10.07 5 12 5zm6 13H6v-.7c0-2 4-3.1 6-3.1s6 1.1 6 3.1v.7z\\'/></svg> '">
+            </div>
+            <div class="item-name">${obtenerNombreVisible(objeto)}</div>
+            <select class="select-player" id="select-${objeto}" onfocus="jugadorEligiendoDestino = true" onblur="jugadorEligiendoDestino = false" onchange="jugadorEligiendoDestino = false" ${document.activeElement && document.activeElement.id === `select-${objeto}` ? 'data-user-interacting="true"' : ''}>
+              ${optionsHtml}
+            </select>
+            ${(configCurar || configRegistrar) ? '' : `<button class="btn-deliver" ${noEntregable ? 'disabled title="Este objeto no se puede entregar"' : ''} onclick="solicitarEntregaObjeto('${objeto}')">Entregar</button>`}
+                        ${(configCurar || configRegistrar) ? '' : `<button class="btn-show" ${noEntregable ? 'disabled title="Este objeto no se puede mostrar"' : ''} onclick="solicitarMostrarObjeto('${objeto}')">Mostrar</button>`}
+            ${configCurar ? `<button class="btn-curar" onclick="solicitarCurarObjeto('${objeto}')">Curar</button>` : ''}
+
+            ${configRegistrar ? `<button class="btn-curar" onclick="solicitarRegistrarObjeto('${objeto}')">Registrar</button>` : ''}
+
+            ${configUso ? `<button class="btn-deliver" style="background:#123d16; border-color:#2ecc71; color:#7CFFB2;" onclick="solicitarUsarObjeto('${objeto}')">Usar</button>` : ''}
+	    ${funcionRecarga ? `<button class="btn-deliver" style="background:#123d16; border-color:#2ecc71; color:#7CFFB2;" onclick="${funcionRecarga}">Usar</button>` : ''}
+            <button class="btn-description" onclick="mostrarDescripcionObjeto('${objeto}')">Descripción</button>
+          `;
+
+          grid.appendChild(card);
+
+          const nuevoSelect = document.getElementById(`select-${objeto}`);
+          if (nuevoSelect) {
+            if (seleccionesGuardadas[objeto]) {
+              nuevoSelect.value = seleccionesGuardadas[objeto];
+            }
+            if (document.activeElement && document.activeElement.id === `select-${objeto}`) {
+              nuevoSelect.focus();
+            }
+          }
+        }
+      }
+    }
+
+    function actualizarDesplegableDinero() {
+      const selectDinero = document.getElementById('transfer-target-player');
+      let html = '<option value="">' + textoPlaceholderSala('Jugador...') + '</option>';
+
+      jugadoresEnMiSala().forEach(j => {
+        if (String(j.jugador_id).toLowerCase().trim() !== JUGADOR_ACTUAL.toLowerCase().trim()) {
+          html += `<option value="${j.jugador_id}">${j.nombre}</option>`;
+        }
+      });
+      if (selectDinero.dataset.sig === html) return; // nada que cambiar: no tocar el desplegable
+      const valorSeleccionado = selectDinero.value;
+      selectDinero.innerHTML = html;
+      selectDinero.dataset.sig = html;
+      selectDinero.value = valorSeleccionado;
+    }
+
+    // ================================================================
+    // ======================= SISTEMA DE ARMAS ======================
+    // ================================================================
+    // Resumen: el combate funciona por Firebase (ver "ARMAS INDEPENDIENTES" más abajo).
+    //  - Atacar: gasta PA y 1 bala del arma elegida y crea ataques/{objetivo}.
+    //  - El objetivo lo ve al instante, elige DISPARAR/ESQUIVAR + piedra/papel/tijeras
+    //    y su navegador resuelve el duelo, aplica el daño y avisa al atacante.
+    // ================================================================
+
+    let dangerAudioObj = null;       // Instancia de audio en bucle mientras te apuntan
+    let ataqueActivoMostrado = false; // Evita reabrir el modal en cada poll de 3s
+
+
+    function reproducirDangerLoop() {
+      if (dangerAudioObj) return; // Ya está sonando, no lo dupliques
+      dangerAudioObj = new Audio('audio/danger.mp3');
+      dangerAudioObj.loop = true;
+      dangerAudioObj.play().catch(err => console.log("Audio danger prevenido o archivo no encontrado:", err));
+    }
+
+    function detenerDangerLoop() {
+      if (dangerAudioObj) {
+        dangerAudioObj.pause();
+        dangerAudioObj.currentTime = 0;
+        dangerAudioObj = null;
+      }
+    }
+
+    // ================= SISTEMA DE ARMAS DEL CLIENTE =================
+
+    // Comprueba un objeto del inventario sin depender de mayúsculas/minúsculas.
+    // Esto permite usar en la hoja "Escopeta" o "escopeta" sin romper el sistema.
+    function tieneObjetoInventario(nombreObjeto) {
+      const inventario = miJugadorData && miJugadorData.inventario ? miJugadorData.inventario : {};
+      const buscado = String(nombreObjeto).toLowerCase().trim();
+
+      for (const clave in inventario) {
+        if (String(clave).toLowerCase().trim() === buscado && inventario[clave] === true) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    // ================================================================
+    // ARMAS INDEPENDIENTES + COMBATE EN FIREBASE
+    // ================================================================
+    // El objeto físico (pistola1, revolver2, cargador_pistola3...) sigue
+    // en el inventario de Google Sheets: se entrega, se muestra y se
+    // pierde igual que cualquier otro objeto.
+    // Los DATOS del arma y todo el combate viven en Firebase:
+    //   armas/{idArma}/balas   balas cargadas de ESA arma concreta.
+    //                          Viajan con el arma si se la das a otro.
+    //   ataques/{objetivo}     ataque pendiente { de, eleccion, arma, t }
+    //   resultados/{jugador}   mensaje del duelo para el atacante { msg, t }
+    // Los PA y la vida ya estaban en jugadores/{id}.
+    //
+    // Nombres de objeto: <tipo><número>  (pistola1, pistola2, revolver1,
+    // escopeta1, hacha1...). Sin número (pistola) también vale.
+    // Cargadores: cargador_pistola1, cargador_pistola2... municion_revolver1...
+    // cartuchos_escopeta1...  (cada uno recarga UN arma de su tipo).
+    // ================================================================
+
+    // Balas con las que nace un arma la primera vez que aparece en Firebase.
+    // Para dar un arma ya cargada, crea antes armas/pistola1/balas en Firebase.
+    const BALAS_INICIALES_ARMA = 0;
+
+    // dado: [cuántos dados, caras, bonificador]  ->  daño = NdC + bonificador
+    const CONFIG_ARMAS = {
+      pistola: {
+        nombre: 'Pistola', verbo: 'disparar', msg: 'la pistola',
+        municion: 'cargador_pistola', maxCarga: MAX_BALAS_CARGADOR, unidad: 'bala', unidades: 'Balas',
+        coste: COSTE_DISPARO, dado: [1, 10, 0],
+        sonidoAtaque: () => reproducirPistola(), sonidoRecarga: () => reproducirPistolaReload()
+      },
+      revolver: {
+        nombre: 'Revólver', verbo: 'disparar', msg: 'el revólver',
+        municion: 'municion_revolver', maxCarga: MAX_BALAS_REVOLVER, unidad: 'bala', unidades: 'Balas',
+        coste: COSTE_DISPARO, dado: [1, 10, 2],
+        sonidoAtaque: () => reproducirRevolver(), sonidoRecarga: () => reproducirRevolverReload()
+      },
+      escopeta: {
+        nombre: 'Escopeta', verbo: 'disparar', msg: 'la escopeta',
+        municion: 'cartuchos_escopeta', maxCarga: MAX_CARTUCHOS_ESCOPETA, unidad: 'cartucho', unidades: 'Cartuchos',
+        coste: COSTE_DISPARO, dado: [3, 6, 0],
+        sonidoAtaque: () => reproducirEscopeta(), sonidoRecarga: () => reproducirEscopetaReload()
+      },
+      ataque_cosa: {
+        nombre: 'Ataque de la Cosa', verbo: 'atacar', msg: 'un ataque brutal',
+        municion: null, coste: COSTE_ATAQUE_COSA, dado: [2, 6, 0], ganaEmpates: true,
+        sonidoAtaque: () => reproducirAtaqueCosa()
+      },
+      hacha: {
+        nombre: 'Hacha', verbo: 'atacar', msg: 'el hacha',
+        municion: null, coste: COSTE_ATAQUE_HACHA, dado: [1, 8, 2],
+        sonidoAtaque: () => reproducirHacha()
+      },
+      machete: {
+        nombre: 'Machete', verbo: 'atacar', msg: 'el machete',
+        municion: null, coste: COSTE_ATAQUE_MACHETE, dado: [1, 8, 0],
+        sonidoAtaque: () => reproducirMachete()
+      },
+      cuchillo: {
+        nombre: 'Cuchillo', verbo: 'atacar', msg: 'el cuchillo',
+        municion: null, coste: COSTE_ATAQUE_CUCHILLO, dado: [1, 6, 0],
+        sonidoAtaque: () => reproducirCuchillo()
+      }
+    };
+
+    let armasFirebase = null;     // armas/ completo (null hasta la primera lectura)
+    let ataqueEntrante = null;    // ataques/{yo}: { de, eleccion, arma } o null
+    let ataquesTodos = {};        // ataques/ completo: sirve para saber quién está en combate
+    const armasInicializadas = {};
+    let armasFirmaDOM = '';
+
+    // ---------- Utilidades de nombres ----------
+    function tipoDeArma(id) { return String(id).toLowerCase().trim().replace(/\d+$/, ''); }
+    function numeroDeArma(id) { const m = String(id).match(/(\d+)$/); return m ? m[1] : ''; }
+    function configDeArma(id) { return CONFIG_ARMAS[tipoDeArma(id)] || null; }
+    function nombreDeArma(id) {
+      // Si el arma tiene nombre visible (objetos.js), se usa ese.
+      const visible = NOMBRES_VISIBLES[String(id).toLowerCase().trim()];
+      if (visible) return visible;
+      const c = configDeArma(id);
+      const n = numeroDeArma(id);
+      return (c ? c.nombre : id) + (n ? ' ' + n : '');
+    }
+    // Referencia al arma dentro de una frase ("... con el Hacha oxidada").
+    // Usa el nombre visible si existe; si no, el texto genérico de siempre.
+    // El ataque de la Cosa se queda siempre genérico para no revelar quién es.
+    function refArma(id) {
+      const tipo = tipoDeArma(id || '');
+      const c = CONFIG_ARMAS[tipo] || CONFIG_ARMAS.pistola;
+      if (tipo === 'ataque_cosa') return c.msg;
+      return NOMBRES_VISIBLES[String(id).toLowerCase().trim()] || c.msg;
+    }
+    // 'cargador_pistola2' -> 'pistola'  (o null si no es un cargador)
+    function tipoDeMunicion(item) {
+      const base = String(item).toLowerCase().trim().replace(/\d+$/, '');
+      for (const tipo in CONFIG_ARMAS) {
+        if (CONFIG_ARMAS[tipo].municion === base) return tipo;
+      }
+      return null;
+    }
+    function balasDeArma(id) {
+      const d = armasFirebase && armasFirebase[id];
+      return d ? (Number(d.balas) || 0) : 0;
+    }
+    function nombreJugadorPorId(id) {
+      const clave = String(id || '').toLowerCase().trim();
+      const j = todosLosJugadores.find(p => String(p.jugador_id || '').toLowerCase().trim() === clave);
+      return (j && j.nombre) ? j.nombre : id;
+    }
+    function buscarCargador(tipo) {
+      const inv = miJugadorData && miJugadorData.inventario ? miJugadorData.inventario : {};
+      const claves = Object.keys(inv).filter(k => inv[k] === true && tipoDeMunicion(k) === tipo);
+      claves.sort();
+      return claves.length ? claves[0] : null;
+    }
+
+    // Si la imagen de un objeto numerado no existe (images/pistola2.jpg),
+    // prueba con la del tipo (images/pistola.jpg) antes de rendirse.
+    function fallbackImagenNumerada(img) {
+      if (img.dataset.fbNum) return false;
+      const m = (img.getAttribute('src') || '').match(/^(.*?)(\d+)(\.[a-z]+)$/i);
+      if (!m) return false;
+      img.dataset.fbNum = '1';
+      img.src = m[1] + m[3];
+      return true;
+    }
+
+    // ---------- Armas que tiene el jugador (una entrada por arma física) ----------
+    function obtenerArmasDisponibles() {
+      const inv = miJugadorData && miJugadorData.inventario ? miJugadorData.inventario : {};
+      const orden = Object.keys(CONFIG_ARMAS);
+      const lista = [];
+      for (const clave in inv) {
+        if (inv[clave] !== true) continue;
+        const id = String(clave).toLowerCase().trim();
+        if (/^[a-z0-9_]+$/.test(id) && CONFIG_ARMAS[tipoDeArma(id)]) lista.push(id);
+      }
+      lista.sort(compararPorLlegada);   // arma más antigua arriba
+      return lista;
+    }
+
+    function armaCosaPoseida() {
+      return obtenerArmasDisponibles().find(id => tipoDeArma(id) === 'ataque_cosa') || null;
+    }
+
+    // Siempre queda un arma de defensa seleccionada si el jugador tiene alguna.
+    // Con el ataque de la Cosa, es obligatorio usarlo.
+    function obtenerArmaDefensaSeleccionada() {
+      const disponibles = obtenerArmasDisponibles();
+      if (disponibles.length === 0) {
+        localStorage.removeItem(ARMA_DEFENSA_STORAGE);
+        return null;
+      }
+      const cosa = armaCosaPoseida();
+      if (cosa) {
+        localStorage.setItem(ARMA_DEFENSA_STORAGE, cosa);
+        return cosa;
+      }
+      const guardada = String(localStorage.getItem(ARMA_DEFENSA_STORAGE) || '').toLowerCase().trim();
+      if (disponibles.indexOf(guardada) !== -1) return guardada;
+      localStorage.setItem(ARMA_DEFENSA_STORAGE, disponibles[0]);
+      return disponibles[0];
+    }
+
+    function actualizarSeleccionArmaDefensa() {
+      const seleccionada = obtenerArmaDefensaSeleccionada();
+      const hayCosa = !!armaCosaPoseida();
+      obtenerArmasDisponibles().forEach(id => {
+        const cb = document.getElementById('arma-defensa-' + id);
+        if (!cb) return;
+        cb.checked = (seleccionada === id);
+        cb.disabled = hayCosa && tipoDeArma(id) !== 'ataque_cosa';
+      });
+    }
+
+    function seleccionarArmaDefensa(id) {
+      if (bloquearSiMuerto()) { actualizarSeleccionArmaDefensa(); return; }
+      const disponibles = obtenerArmasDisponibles();
+      const cosa = armaCosaPoseida();
+      if (cosa && id !== cosa) { actualizarSeleccionArmaDefensa(); return; }
+      if (disponibles.indexOf(id) === -1) { actualizarSeleccionArmaDefensa(); return; }
+      localStorage.setItem(ARMA_DEFENSA_STORAGE, id);
+      actualizarSeleccionArmaDefensa();
+    }
+
+    // ---------- Tarjetas de armas (se generan una por arma) ----------
+    function htmlTarjetaArma(id) {
+      const c = configDeArma(id);
+      const nombre = NOMBRES_VISIBLES[String(id).toLowerCase().trim()] || nombreDeArma(id); // nombre visible de objetos.js
+      const costeTxt = c.municion ? `${c.coste} PA + 1 ${c.unidad}` : `${c.coste} PA`;
+      const balasHtml = c.municion
+        ? `<div style="font-size:0.8rem; color:#8fa08a;">
+             ${c.unidades}: <span id="weapon-balas-${id}" style="color:#9bf0c0; font-weight:bold;">0</span>/<span>${c.maxCarga}</span>
+           </div>`
+        : '';
+      return `
+        <div id="weapons-section-${id}" style="margin-bottom:0px;">
+          <div class="code-unlock-box" style="padding:12px 20px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:15px; width:100%; flex-wrap:nowrap;">
+
+              <div style="display:flex; align-items:center; gap:12px; flex-shrink:0;">
+                <input type="checkbox" id="arma-defensa-${id}" title="Usar ${nombre} para defender" onchange="seleccionarArmaDefensa('${id}')" style="width:18px; height:18px; cursor:pointer;">
+                <img src="images/${id}.jpg" alt="${nombre}" style="width:50px; height:50px; object-fit:contain; filter:drop-shadow(0 0 4px rgba(95,185,138,0.5)); flex-shrink:0; cursor:pointer;" onclick="abrirFullscreen(this.getAttribute('src'))" onerror="if(fallbackImagenNumerada(this))return; this.style.display='none';">
+                <div>
+                  <div class="code-unlock-title" style="font-size:1.1rem; line-height:1;">${nombre}</div>
+                  ${balasHtml}
+                </div>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:10px; font-size:0.75rem; color:#8fa08a; text-transform:uppercase; letter-spacing:1px; flex-shrink:0;">
+                <span>Atacar (Coste: ${costeTxt}):</span>
+                <select class="select-player" id="select-objetivo-ataque-${id}" style="width:auto; min-width:130px; margin:0;"></select>
+                <button class="btn-deliver" style="width:auto; padding:5px 10px;" onclick="solicitarAtaqueArma('${id}','piedra')">PIEDRA</button>
+                <button class="btn-deliver" style="width:auto; padding:5px 10px;" onclick="solicitarAtaqueArma('${id}','papel')">PAPEL</button>
+                <button class="btn-deliver" style="width:auto; padding:5px 10px;" onclick="solicitarAtaqueArma('${id}','tijeras')">TIJERAS</button>
+              </div>
+
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function actualizarDesplegableAtaqueArma(id) {
+      const select = document.getElementById('select-objetivo-ataque-' + id);
+      if (!select) return;
+      let html = '<option value="">' + textoPlaceholderSala('Selecciona un objetivo...') + '</option>';
+      jugadoresEnMiSala().forEach(j => {
+        if (String(j.jugador_id).toLowerCase().trim() !== JUGADOR_ACTUAL.toLowerCase().trim()) {
+          html += `<option value="${j.jugador_id}">${j.nombre}</option>`;
+        }
+      });
+      if (select.dataset.sig === html) return; // nada que cambiar: no tocar el desplegable
+      const valorSeleccionado = select.value;
+      select.innerHTML = html;
+      select.dataset.sig = html;
+      select.value = valorSeleccionado;
+    }
+
+    // Un arma que aparece por primera vez se da de alta en Firebase (solo si no existe).
+    function inicializarArmasFirebase(disponibles) {
+      if (armasFirebase === null) return;
+      disponibles.forEach(id => {
+        const c = configDeArma(id);
+        if (!c || !c.municion) return;
+        if (armasFirebase[id] !== undefined || armasInicializadas[id]) return;
+        armasInicializadas[id] = true;
+        dbFirebase.ref('armas/' + id).transaction(function(actual) {
+          if (actual !== null) return; // ya existe: no se toca
+          return { tipo: tipoDeArma(id), balas: BALAS_INICIALES_ARMA };
+        }).catch(function(err) { console.error('Error al dar de alta el arma ' + id, err); });
+      });
+    }
+
+    function renderizarArmas() {
+      const seccion = document.getElementById('weapons-section');
+      const lista = document.getElementById('weapons-list');
+      if (!seccion || !lista) return;
+
+      const disponibles = obtenerArmasDisponibles();
+      if (disponibles.length === 0) {
+        seccion.style.display = 'none';
+        lista.innerHTML = '';
+        armasFirmaDOM = '';
+        localStorage.removeItem(ARMA_DEFENSA_STORAGE);
+        return;
+      }
+
+      seccion.style.display = 'block';
+      inicializarArmasFirebase(disponibles);
+
+      // Las tarjetas solo se reconstruyen si cambia el conjunto de armas.
+      const firma = disponibles.join('|');
+      if (firma !== armasFirmaDOM) {
+        lista.innerHTML = disponibles.map(htmlTarjetaArma).join('');
+        armasFirmaDOM = firma;
+      }
+
+      disponibles.forEach(id => {
+        const c = configDeArma(id);
+        if (c.municion) {
+          const el = document.getElementById('weapon-balas-' + id);
+          if (el) el.innerText = balasDeArma(id);
+        }
+        actualizarDesplegableAtaqueArma(id);
+      });
+
+      actualizarSeleccionArmaDefensa();
+    }
+
+    // ---------- Transacciones de Firebase ----------
+    function gastarPA(coste) {
+      const c = Number(coste) || 0;
+      if (c <= 0) return Promise.resolve(true);
+      return dbFirebase.ref('jugadores/' + JUGADOR_ACTUAL + '/puntos_accion').transaction(function(actual) {
+        const a = Number(actual) || 0;
+        if (a < c) return; // aborta: no hay PA suficientes
+        return a - c;
+      }).then(res => res.committed);
+    }
+    function devolverPA(coste) {
+      const c = Number(coste) || 0;
+      if (c <= 0) return Promise.resolve();
+      return dbFirebase.ref('jugadores/' + JUGADOR_ACTUAL + '/puntos_accion').transaction(a => (Number(a) || 0) + c);
+    }
+    function gastarBala(idArma) {
+      return dbFirebase.ref('armas/' + idArma + '/balas').transaction(function(actual) {
+        const a = Number(actual) || 0;
+        if (a < 1) return; // aborta: arma vacía
+        return a - 1;
+      }).then(res => res.committed);
+    }
+    function devolverBala(idArma) {
+      return dbFirebase.ref('armas/' + idArma + '/balas').transaction(a => (Number(a) || 0) + 1);
+    }
+    function aplicarDanio(idJugador, dano) {
+      return dbFirebase.ref('jugadores/' + idJugador + '/vida').transaction(function(v) {
+        return Math.max(0, (Number(v) || 0) - dano);
+      });
+    }
+    function tirarDado(cantidad, caras) {
+      let total = 0;
+      for (let i = 0; i < cantidad; i++) total += Math.floor(Math.random() * caras) + 1;
+      return total;
+    }
+
+    // ---------- RECARGAR ----------
+    // El cargador (objeto del inventario, en Sheets) se gasta; las balas del arma
+    // concreta se suben a su máximo en Firebase.
+    function usarCargador(item) {
+      if (bloquearSiMuerto()) return;
+      const tipo = tipoDeMunicion(item);
+      const candidatas = obtenerArmasDisponibles().filter(id => tipoDeArma(id) === tipo);
+
+      if (candidatas.length === 0) {
+        reproducirNope();
+        mostrarAlerta("Sin arma", "No tienes ningún arma que use esta munición.");
+        return;
+      }
+      if (candidatas.length === 1) {
+        recargarArma(candidatas[0], item);
+        return;
+      }
+      const botones = candidatas.map(id =>
+        `<button class="btn-deliver" style="width:auto; margin:4px; padding:6px 12px;" onclick="cerrarAlerta(); recargarArma('${id}', '${item}')">${nombreDeArma(id)} (${balasDeArma(id)}/${CONFIG_ARMAS[tipo].maxCarga})</button>`
+      ).join('');
+      mostrarAlerta("¿Qué arma recargas?", `Tienes varias armas compatibles. Elige cuál recargar con este cargador:<div style="margin-top:10px;">${botones}</div>`);
+    }
+
+    function recargarArma(id, item) {
+      const c = configDeArma(id);
+      if (!c || !c.municion) return;
+
+      if (!tieneObjetoInventario(id)) {
+        reproducirNope();
+        mostrarAlerta("Sin arma", "No tienes esa arma.");
+        return;
+      }
+      if (balasDeArma(id) >= c.maxCarga) {
+        reproducirNope();
+        mostrarAlerta("Recarga", `${nombreDeArma(id)} ya está al máximo (${c.maxCarga} ${c.unidades.toLowerCase()}).`);
+        return;
+      }
+      const cargador = item || buscarCargador(tipoDeArma(id));
+      if (!cargador) {
+        reproducirNope();
+        mostrarAlerta("Sin cargador", "No tienes cargador.");
+        return;
+      }
+
+      mostrarModalConfirmacion(`¿Estás seguro que quieres gastar el cargador para recargar <strong>${nombreDeArma(id)}</strong> con ${c.maxCarga} ${c.unidades.toLowerCase()}?`, function() {
+        if (c.sonidoRecarga) c.sonidoRecarga();
+
+        // El cargador (objeto del inventario) se gasta y las balas del arma se suben al máximo.
+        dbFirebase.ref('inventarios/' + JUGADOR_ACTUAL + '/' + cargador).transaction(function(actual) {
+          if (actual !== true) return; // aborta: no tienes ese cargador
+          return null;                 // lo gasta
+        }).then(function(res) {
+          if (!res.committed) {
+            reproducirNope();
+            mostrarAlerta("Sin cargador", "No tienes cargador.");
+            return;
+          }
+          return dbFirebase.ref('armas/' + id + '/balas').set(c.maxCarga);
+        }).catch(function(err) {
+          console.error("Error al recargar:", err);
+          reproducirNope();
+          mostrarAlerta("Error", "No se ha podido recargar el arma.");
+        });
+      });
+    }
+
+    // Un jugador está en combate mientras hay un ataque pendiente que lo implica
+    // (como atacado: ataques/{él}; o como atacante: ataques/*/de = él).
+    function jugadorEnCombate(idJugador) {
+      const id = String(idJugador || '').toLowerCase().trim();
+      for (const objetivo in ataquesTodos) {
+        const a = ataquesTodos[objetivo];
+        if (!a) continue;
+        if (String(objetivo).toLowerCase().trim() === id) return true;
+        if (String(a.de || '').toLowerCase().trim() === id) return true;
+      }
+      return false;
+    }
+
+    // ---------- ATACAR (un único código para todas las armas) ----------
+    function solicitarAtaqueArma(id, eleccion) {
+      if (bloquearSiMuerto()) return;
+      const c = configDeArma(id);
+      if (!c) return;
+
+      const cosa = armaCosaPoseida();
+      if (cosa && id !== cosa) {
+        reproducirNope();
+        mostrarAlerta("Bloqueado", "Mientras tengas el ataque de la Cosa, solo puedes atacar con él.");
+        return;
+      }
+      if (!tieneObjetoInventario(id)) {
+        reproducirNope();
+        mostrarAlerta("Sin arma", "Necesitas tener esta arma en tu inventario.");
+        return;
+      }
+
+      const select = document.getElementById('select-objetivo-ataque-' + id);
+      const objetivoId = select ? select.value : '';
+      if (!objetivoId) {
+        reproducirNope();
+        mostrarAlerta("Atención", `Selecciona a qué jugador quieres ${c.verbo}.`);
+        return;
+      }
+      if (!verificarEnMiSala(objetivoId)) return;
+
+      if (jugadorEnCombate(objetivoId)) {
+        reproducirNope();
+        mostrarAlerta("Combate", "No puedes atacar a ese jugador puesto que está en un combate.");
+        return;
+      }
+
+      if (c.municion && balasDeArma(id) < 1) {
+        reproducirEmpty();
+        mostrarAlerta("Sin munición", `No tienes ${c.unidades.toLowerCase()} suficientes en esta arma. Recarga si tienes un cargador.`);
+        return;
+      }
+      if ((Number(miJugadorData.puntos_accion) || 0) < c.coste) {
+        reproducirNope();
+        mostrarAlerta("Sin PA", `No tienes suficientes Puntos de Acción. Necesitas ${c.coste} PA.`);
+        return;
+      }
+
+      const nombreDestino = nombreJugadorPorId(objetivoId);
+      const extra = c.municion ? ` y 1 ${c.unidad}` : '';
+      const texto = `¿Estás seguro que quieres ${c.verbo} a <strong>${nombreDestino}</strong> con <strong>${nombreDeArma(id)}</strong> eligiendo <strong>${eleccion.toUpperCase()}</strong>? Esto te costará ${c.coste} PA${extra}.`;
+
+      mostrarModalConfirmacion(texto, function() {
+        ejecutarAtaqueArma(id, objetivoId, eleccion);
+      });
+    }
+
+    async function ejecutarAtaqueArma(id, objetivoId, eleccion) {
+      const c = configDeArma(id);
+      if (bloquearSiObjetivoMuerto(objetivoId)) return;
+      if (jugadorEnCombate(objetivoId)) {
+        reproducirNope();
+        mostrarAlerta("Combate", "No puedes atacar a ese jugador puesto que está en un combate.");
+        return;
+      }
+      if (c.sonidoAtaque) c.sonidoAtaque();
+
+      try {
+        // 1) PA
+        if (!(await gastarPA(c.coste))) {
+          reproducirNope();
+          mostrarAlerta("Sin PA", "No tienes suficientes Puntos de Acción.");
+          return;
+        }
+        // 2) Bala del arma concreta
+        if (c.municion && !(await gastarBala(id))) {
+          await devolverPA(c.coste);
+          reproducirEmpty();
+          mostrarAlerta("Sin munición", "No tienes balas suficientes.");
+          return;
+        }
+        // 3) Reservar al objetivo (solo uno puede atacarle a la vez)
+        const res = await dbFirebase.ref('ataques/' + objetivoId).transaction(function(actual) {
+          if (actual) return; // ya le están atacando: aborta
+          return { de: JUGADOR_ACTUAL, eleccion: eleccion, arma: id, t: firebase.database.ServerValue.TIMESTAMP };
+        });
+        if (!res.committed) {
+          await devolverPA(c.coste);
+          if (c.municion) await devolverBala(id);
+          reproducirNope();
+          mostrarAlerta("Ocupado", "Ese jugador ya está siendo atacado por otra persona ahora mismo. Espera a que se resuelva.");
+          return;
+        }
+        mostrarAlerta("Ataque realizado", "Has hecho tu jugada. Esperando la reacción del objetivo...");
+      } catch (err) {
+        console.error("Error al iniciar ataque:", err);
+        reproducirNope();
+        mostrarAlerta("Error", "Error de conexión con el servidor.");
+      }
+    }
+
+    // ---------------- ATAQUE ENTRANTE ----------------
+    // Se llama al instante cuando cambia ataques/{yo} y también en cada sondeo de Sheets.
+    function comprobarAtaquePendiente() {
+      const atk = ataqueEntrante;
+      const ataqueDe = atk && atk.de ? String(atk.de).trim() : '';
+
+      // Un jugador muerto no puede ser atacado: se cierra el aviso y se cancela el ataque.
+      if (estoyMuerto()) {
+        if (ataqueActivoMostrado) {
+          document.getElementById('attack-alert-modal').style.display = 'none';
+          detenerDangerLoop();
+          ataqueActivoMostrado = false;
+        }
+        if (ataqueDe) cancelarAtaquePorMuerte(atk);
+        return;
+      }
+
+      if (!ataqueDe) {
+        if (ataqueActivoMostrado) {
+          document.getElementById('attack-alert-modal').style.display = 'none';
+          detenerDangerLoop();
+          ataqueActivoMostrado = false;
+        }
+        return;
+      }
+
+      if (ataqueActivoMostrado) return;
+      ataqueActivoMostrado = true;
+
+      // El atacado oye el sonido del arma con que lo atacan.
+      const cSonidoAtk = configDeArma(atk.arma || '');
+      if (cSonidoAtk && cSonidoAtk.sonidoAtaque) cSonidoAtk.sonidoAtaque();
+
+      const nombreAtacante = nombreJugadorPorId(ataqueDe);
+      const armaDefensa = obtenerArmaDefensaSeleccionada();
+      const cDef = armaDefensa ? configDeArma(armaDefensa) : null;
+
+      // ¿Puede defenderse disparando? Necesita el arma y, si usa munición, balas.
+      const tieneArmaConBalas = !!(cDef && tieneObjetoInventario(armaDefensa) &&
+                                   (!cDef.municion || balasDeArma(armaDefensa) >= 1));
+
+      const textoArma = tieneArmaConBalas
+        ? `Arma de defensa: <strong>${nombreDeArma(armaDefensa)}</strong>.`
+        : `No tienes arma cargada: vas a esquivar.`;
+
+      // El ataque de la Cosa se muestra genérico para no revelar quién es la Cosa.
+      const NOMBRES_ARMA = { pistola: 'pistola', revolver: 'revólver', escopeta: 'escopeta',
+                             hacha: 'hacha', machete: 'machete', cuchillo: 'cuchillo', ataque_cosa: 'un ataque brutal' };
+      const tipoAtaque = tipoDeArma(atk.arma || '');
+      const nombreVisibleAtaque = (tipoAtaque && tipoAtaque !== 'ataque_cosa')
+        ? NOMBRES_VISIBLES[String(atk.arma).toLowerCase().trim()] : '';
+      const textoAtacante = tipoAtaque ? ` con <strong>${nombreVisibleAtaque || NOMBRES_ARMA[tipoAtaque] || tipoAtaque}</strong>` : '';
+
+      document.getElementById('attack-alert-text').innerHTML =
+        `<strong>${nombreAtacante}</strong> te está atacando${textoAtacante}. ${textoArma} ¡Reacciona!`;
+
+      const botones = document.getElementById('attack-alert-buttons');
+      if (tieneArmaConBalas) {
+        botones.innerHTML = `<button class="confirm-btn btn-yes" onclick="mostrarSelectorRespuesta('disparar')">ATACAR</button>`;
+      } else {
+        botones.innerHTML = `<button class="confirm-btn btn-yes" onclick="mostrarSelectorRespuesta('esquivar')">ESQUIVAR</button>`;
+      }
+
+      document.getElementById('attack-alert-modal').style.display = 'flex';
+      reproducirDangerLoop();
+    }
+
+    // Tras pulsar ATACAR o ESQUIVAR, se elige PIEDRA/PAPEL/TIJERAS.
+    function mostrarSelectorRespuesta(modo) {
+      const botones = document.getElementById('attack-alert-buttons');
+      const verbo = (modo === 'disparar') ? 'Disparas' : 'Esquivas';
+
+      botones.innerHTML = `
+        <div style="display:flex; flex-direction:column; gap:12px; width:100%;">
+          <div style="font-size:0.85rem;color:#ffb3b3;">${verbo}. Elige tu jugada:</div>
+          <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+            <button class="confirm-btn btn-yes" onclick="responderAtaqueJugador('${modo}', 'piedra')">PIEDRA</button>
+            <button class="confirm-btn btn-yes" onclick="responderAtaqueJugador('${modo}', 'papel')">PAPEL</button>
+            <button class="confirm-btn btn-yes" onclick="responderAtaqueJugador('${modo}', 'tijeras')">TIJERAS</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Habilidad de un jugador: la que ponga el máster en Firebase (jugadores/<id>/habilidad,
+    // casilla "Tirador" de master.html); si no hay dato en Firebase, la columna "habilidad" de Sheets.
+    function habilidadDeJugador(id) {
+      const clave = String(id || '').toLowerCase().trim();
+      const f = jugadoresFirebase && (jugadoresFirebase[clave] || jugadoresFirebase[id]);
+      if (f && f.habilidad !== undefined && f.habilidad !== null) return String(f.habilidad).toLowerCase().trim();
+      const p = todosLosJugadores.find(p => String(p.jugador_id || '').toLowerCase().trim() === clave);
+      let h = p && p.habilidad;
+      if (!h && clave === String(JUGADOR_ACTUAL).toLowerCase().trim() && miJugadorData) h = miJugadorData.habilidad;
+      return String(h || '').toLowerCase().trim();
+    }
+
+    // Reglas del duelo (las mismas que tenía el Apps Script).
+    function resolverDuelo(atk, modoReal, eleccionDef, armaDefId) {
+      const GANA_A = { piedra: 'tijeras', papel: 'piedra', tijeras: 'papel' };
+      const eleccionAtk = String(atk.eleccion || '').toLowerCase().trim();
+      const cAtk = configDeArma(atk.arma || '') || CONFIG_ARMAS.pistola;
+      const cDef = (modoReal === 'disparar' && armaDefId) ? configDeArma(armaDefId) : null;
+
+      let resultado;
+      if (eleccionAtk === eleccionDef) resultado = 'empate';
+      else if (GANA_A[eleccionAtk] === eleccionDef) resultado = 'atacante';
+      else resultado = 'defensor';
+
+      // Desempate: esquivar pierde los empates; si disparas, gana el "tirador".
+      if (resultado === 'empate') {
+        const hAtk = habilidadDeJugador(atk.de);
+        const hDef = habilidadDeJugador(JUGADOR_ACTUAL);
+        if (modoReal === 'esquivar') resultado = 'atacante';
+        else if (hAtk === 'tirador' && hDef !== 'tirador') resultado = 'atacante';
+        else if (hDef === 'tirador' && hAtk !== 'tirador') resultado = 'defensor';
+      }
+
+      // Desempate por arma que gana siempre los empates (ataque de la Cosa).
+      if (resultado === 'empate') {
+        const a = !!cAtk.ganaEmpates;
+        const d = !!(cDef && cDef.ganaEmpates);
+        if (a && !d) resultado = 'atacante';
+        else if (d && !a) resultado = 'defensor';
+      }
+
+      const nombreAtk = nombreJugadorPorId(atk.de);
+      const nombreDef = nombreJugadorPorId(JUGADOR_ACTUAL);
+      const txtAtaque = ' con ' + refArma(atk.arma);
+      const txtDefensa = cDef ? ' (se ha defendido con ' + refArma(armaDefId) + ')' : ' (se ha defendido esquivando)';
+
+      const r = { dano: 0, victima: null, mensajeAtacante: '', mensajeDefensor: '' };
+
+      if (resultado === 'empate') {
+        r.mensajeAtacante = 'Empate en el duelo contra ' + nombreDef + txtDefensa + '. No has recibido daño.';
+        r.mensajeDefensor = 'Empate en el duelo contra ' + nombreAtk + ', que te atacó' + txtAtaque + '. No has recibido daño.';
+      } else if (resultado === 'atacante') {
+        r.dano = tirarDado(cAtk.dado[0], cAtk.dado[1]) + cAtk.dado[2];
+        r.victima = 'defensor';
+        r.mensajeAtacante = 'Le has hecho ' + r.dano + ' de daño a ' + nombreDef + txtDefensa + '.';
+        r.mensajeDefensor = 'Has recibido ' + r.dano + ' de daño de ' + nombreAtk + txtAtaque + '.';
+      } else if (cDef) {
+        r.dano = tirarDado(cDef.dado[0], cDef.dado[1]) + cDef.dado[2];
+        r.victima = 'atacante';
+        r.mensajeDefensor = 'Le has hecho ' + r.dano + ' de daño a ' + nombreAtk + ' con ' + refArma(armaDefId) + '.';
+        r.mensajeAtacante = 'Has recibido ' + r.dano + ' de daño de ' + nombreDef + ', que se ha defendido con ' + refArma(armaDefId) + '.';
+      } else {
+        r.mensajeDefensor = 'Has esquivado el disparo de ' + nombreAtk + '. No has recibido daño.';
+        r.mensajeAtacante = nombreDef + ' ha esquivado tu disparo. No le has hecho daño.';
+      }
+      return r;
+    }
+
+    async function responderAtaqueJugador(modo, eleccion) {
+      const armaDefensa = obtenerArmaDefensaSeleccionada();
+      const cDef = armaDefensa ? configDeArma(armaDefensa) : null;
+
+      // Si el arma no existe o no tiene munición, disparar se convierte en esquivar.
+      let modoReal = modo;
+      if (modo === 'disparar' && (!cDef || (cDef.municion && balasDeArma(armaDefensa) < 1))) {
+        modoReal = 'esquivar';
+      }
+
+      detenerDangerLoop();
+      document.getElementById('attack-alert-modal').style.display = 'none';
+      ataqueActivoMostrado = false;
+
+      try {
+        // Reclamar el ataque: solo uno lo resuelve y desaparece de Firebase.
+        let atk = null;
+        const claim = await dbFirebase.ref('ataques/' + JUGADOR_ACTUAL).transaction(function(actual) {
+          atk = actual;
+          if (!actual) return; // ya no hay ataque: aborta
+          return null;         // lo borra
+        });
+        if (!claim.committed || !atk) {
+          reproducirNope();
+          mostrarAlerta("Error", "No hay ningún ataque pendiente.");
+          return;
+        }
+
+        // Disparar gasta 1 bala del arma concreta.
+        if (modoReal === 'disparar' && cDef.municion && !(await gastarBala(armaDefensa))) {
+          modoReal = 'esquivar';
+        }
+        if (modoReal === 'disparar' && cDef.sonidoAtaque) cDef.sonidoAtaque();
+
+        const r = resolverDuelo(atk, modoReal, eleccion, armaDefensa);
+
+        // ¿Ha muerto alguien en este duelo? (vida a 0 tras aplicar el daño)
+        let murioDefensor = false;   // yo (defensor) muero -> el atacante recibe "Has matado..."
+        let murioAtacante = false;   // el atacante muere -> yo (defensor) recibo "Has matado..."
+        if (r.dano > 0) {
+          const victimaId = (r.victima === 'defensor') ? JUGADOR_ACTUAL : atk.de;
+          const resDanio = await aplicarDanio(victimaId, r.dano);
+          const vidaTras = Number(resDanio && resDanio.snapshot ? resDanio.snapshot.val() : NaN);
+          if (isFinite(vidaTras) && vidaTras <= 0) {
+            if (r.victima === 'defensor') murioDefensor = true; else murioAtacante = true;
+          }
+        }
+        const datosResultado = { msg: r.mensajeAtacante, arma: (modoReal === 'disparar' ? armaDefensa : ''), t: firebase.database.ServerValue.TIMESTAMP };
+        if (murioDefensor) datosResultado.mato = JUGADOR_ACTUAL;   // el atacante verá "Has matado al jugador X."
+        await dbFirebase.ref('resultados/' + atk.de).set(datosResultado);
+
+        mostrarAlerta("Resultado del duelo", r.mensajeDefensor);
+        if (murioAtacante) mostrarAvisoAsesino(nombreJugadorPorId(atk.de));   // yo he matado al atacante
+      } catch (err) {
+        console.error("Error al responder al ataque:", err);
+        reproducirNope();
+        mostrarAlerta("Error", "No se ha podido procesar tu respuesta.");
+      }
+    }
+
+    // El mensaje del duelo ahora le llega al atacante por Firebase (ver listeners abajo).
+    function comprobarMensajeCombate() { /* ya no se consulta en Sheets */ }
+
+    // ---------------- LISTENERS DE FIREBASE (tiempo real) ----------------
+    dbFirebase.ref('armas').on('value', function(snap) {
+      armasFirebase = snap.val() || {};
+      if (miJugadorData) renderizarArmas();
+    });
+
+    dbFirebase.ref('ataques/' + JUGADOR_ACTUAL).on('value', function(snap) {
+      ataqueEntrante = snap.val();
+      if (miJugadorData) comprobarAtaquePendiente();
+    });
+
+    dbFirebase.ref('ataques').on('value', function(snap) {
+      ataquesTodos = snap.val() || {};
+    });
+
+    dbFirebase.ref('resultados/' + JUGADOR_ACTUAL).on('value', function(snap) {
+      const r = snap.val();
+      if (!r || !r.msg) return;
+      snap.ref.remove();
+      if (r.muerto) { mostrarAvisoMuerte(false); return; }
+      // Si el defensor contraatacó, el atacante oye el sonido de su arma.
+      const cSonidoDef = r.arma ? configDeArma(r.arma) : null;
+      if (cSonidoDef && cSonidoDef.sonidoAtaque) cSonidoDef.sonidoAtaque();
+      mostrarAlerta("Resultado del duelo", r.msg);
+      if (r.mato) mostrarAvisoAsesino(nombreJugadorPorId(r.mato));   // has matado a ese jugador
+    });
+
+    // ================================================================
+    // ================= FIN SISTEMA DE ARMAS =========================
+    // ================================================================
+
+    function procesarCodigoObjeto() {
+      if (bloquearSiMuerto()) return;
+      const input = document.getElementById('object-code-input');
+      const codigo = input.value.trim();
+
+      if (CODIGOS_OBJETOS[codigo]) {
+        const nombreObjeto = String(CODIGOS_OBJETOS[codigo]).toLowerCase().trim();
+        const poseeObjeto = !!(miJugadorData && miJugadorData.inventario && miJugadorData.inventario[nombreObjeto] === true);
+
+        if (poseeObjeto) {
+          reproducirNope();
+          mostrarAlerta("Atención", "Ya posees este objeto en tu inventario.");
+        } else {
+          reproducirPickup();
+          // El panel se actualiza solo por el listener de Firebase.
+          dbFirebase.ref('inventarios/' + JUGADOR_ACTUAL + '/' + nombreObjeto).set(true)
+            .catch(err => {
+              console.error("Error al obtener objeto por código:", err);
+              mostrarAlerta("Error", "No se ha podido añadir el objeto.");
+            });
+        }
+        input.value = '';
+        input.placeholder = '****';
+      } else {
+        reproducirNope();
+        mostrarAlerta("Error", "Código incorrecto o desconocido.");
+        input.value = '';
+        input.placeholder = '****';
+      }
+    }
+
+    function abrirFotoPersonaje() {
+      const srcFoto = document.getElementById('char-photo').src;
+      abrirFullscreen(srcFoto);
+    }
+
+    function abrirFullscreen(imgSrc, textoCaption) {
+      const modal = document.getElementById('fullscreen-modal');
+      document.getElementById('fullscreen-img').src = imgSrc;
+
+      // Texto bajo la imagen: solo cuando se pasa un segundo parámetro
+      // (objeto mostrado por otro jugador). Con una imagen normal no hay texto.
+      const caption = document.getElementById('fullscreen-caption');
+      if (textoCaption) {
+        caption.innerText = textoCaption;
+        modal.classList.add('con-caption');
+      } else {
+        caption.innerText = '';
+        modal.classList.remove('con-caption');
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    function cerrarFullscreen() {
+      document.getElementById('fullscreen-modal').style.display = 'none';
+
+      // Si lo que se veía era un objeto mostrado por otro jugador, se borra el aviso
+      // en Firebase (mostrar/<yo>) para que no vuelva a aparecer.
+      if (mostrarObjetoEnCurso) {
+        dbFirebase.ref('mostrar/' + JUGADOR_ACTUAL).remove()
+          .catch(err => console.error("Error al confirmar objeto mostrado:", err));
+        mostrarObjetoEnCurso = false;
+      }
+    }
+
+    // ===== MOSTRAR OBJETO (Firebase: mostrar/<destino> = { de, objeto, t }) =====
+    let mostrarObjetoEnCurso = false; // true mientras se está viendo un objeto mostrado
+
+    // Emisor: pide confirmación y deja el aviso en Firebase. NO quita el objeto del inventario.
+    function solicitarMostrarObjeto(nombreObjeto) {
+      if (bloquearSiMuerto()) return;
+      const select = document.getElementById(`select-${nombreObjeto}`);
+      const destinoId = select.value;
+
+      if (!destinoId) {
+        reproducirNope();
+        mostrarAlerta("Atención", "Selecciona a qué jugador quieres mostrarle el objeto.");
+        return;
+      }
+      if (!verificarEnMiSala(destinoId)) return;
+
+      const jugadorDestino = todosLosJugadores.find(j => j.jugador_id === destinoId);
+      const nombreDestino = jugadorDestino ? jugadorDestino.nombre : destinoId;
+
+      const texto = `¿Quieres mostrar <strong>${obtenerNombreVisible(nombreObjeto)}</strong> a <strong>${nombreDestino}</strong>? Lo verá a pantalla completa, pero seguirás teniendo el objeto.`;
+
+      mostrarModalConfirmacion(texto, function() {
+        if (bloquearSiObjetivoMuerto(destinoId)) return;
+        if (!tieneObjetoInventario(nombreObjeto)) {
+          reproducirNope();
+          mostrarAlerta("Error", "Ya no tienes ese objeto.");
+          return;
+        }
+        dbFirebase.ref('mostrar/' + destinoId).set({
+          de: JUGADOR_ACTUAL,
+          objeto: nombreObjeto,
+          t: firebase.database.ServerValue.TIMESTAMP
+        })
+          .then(() => {
+            reproducirOpenbook();
+            mostrarAlerta("Objeto mostrado", `Le has mostrado ${obtenerNombreVisible(nombreObjeto)} a ${nombreDestino}.`);
+          })
+          .catch(err => {
+            console.error("Error al mostrar objeto:", err);
+            reproducirNope();
+            mostrarAlerta("Error", "No se ha podido mostrar el objeto.");
+          });
+      });
+    }
+
+    // Receptor: se llama al instante cuando cambia mostrar/<yo>. Si hay algo, lo enseña
+    // a pantalla completa con el texto "X te está mostrando Y".
+    function comprobarObjetoMostrado() {
+      const v = mostrarFirebase;
+      if (!v || mostrarObjetoEnCurso) return;
+
+      let emisorId = '';
+      let objeto = '';
+      if (typeof v === 'string') {                       // formato antiguo "emisor|objeto"
+        const partes = v.split('|');
+        emisorId = partes.length > 1 ? partes[0].trim() : '';
+        objeto = (partes.length > 1 ? partes.slice(1).join('|') : partes[0]).trim();
+      } else {
+        emisorId = String(v.de || '').trim();
+        objeto = String(v.objeto || '').trim();
+      }
+      if (!objeto) return;
+
+      const emisor = todosLosJugadores.find(j => String(j.jugador_id).toLowerCase().trim() === emisorId.toLowerCase());
+      const nombreEmisor = emisor ? emisor.nombre : (emisorId || 'Alguien');
+
+      mostrarObjetoEnCurso = true;
+      reproducirOpenbook();
+      abrirFullscreen(obtenerRutaImagen(objeto), `${nombreEmisor} te está mostrando ${obtenerNombreVisible(objeto)}`);
+    }
+
+    function solicitarEntregaObjeto(nombreObjeto) {
+      if (bloquearSiMuerto()) return;
+      const select = document.getElementById(`select-${nombreObjeto}`);
+      const destinoId = select.value;
+
+      if (!destinoId) {
+        reproducirNope();
+        mostrarAlerta("Atención", "Por favor, selecciona un jugador destino en el desplegable.");
+        return;
+      }
+      if (!verificarEnMiSala(destinoId)) return;
+
+      const jugadorDestino = todosLosJugadores.find(j => j.jugador_id === destinoId);
+      const nombreDestino = jugadorDestino ? jugadorDestino.nombre : destinoId;
+
+      const texto = `¿Estás seguro de entregar el objeto <strong>${obtenerNombreVisible(nombreObjeto)}</strong> a <strong>${nombreDestino}</strong>?`;
+
+      mostrarModalConfirmacion(texto, function() {
+        if (bloquearSiObjetivoMuerto(destinoId)) return;
+        reproducirPickup(); // 🔊 Sonido de entrega de objeto (pickup.mp3) — SOLO aquí, al entregar
+        // El panel (inventario y armas) se actualiza solo por el listener de Firebase.
+        entregarObjetoFirebase(nombreObjeto, destinoId);
+      });
+    }
+
+    // --- USAR OBJETO (consumible) ---
+    // Pide confirmación y, si el jugador acepta, llama a ejecutarUsarObjeto().
+    function solicitarUsarObjeto(nombreObjeto) {
+      if (bloquearSiMuerto()) return;
+      const config = OBJETOS_USABLES[String(nombreObjeto).toLowerCase().trim()];
+      if (!config) return; // Por seguridad: el botón solo aparece si existe config.
+
+      const nombreStatBonito = {
+        vida: 'Vida',
+        puntos_accion: 'Puntos de Acción',
+        cordura: 'Cordura'
+      }[config.stat] || config.stat;
+
+const texto = `¿Estás seguro que quieres usar <strong>${obtenerNombreVisible(nombreObjeto)}</strong>? Ganarás ${config.cantidad} de ${nombreStatBonito}.`;
+
+      mostrarModalConfirmacion(texto, function() {
+        ejecutarUsarObjeto(nombreObjeto, config.stat, config.cantidad);
+      });
+    }
+
+    // Gasta el objeto (lo borra de inventarios/<yo>) y suma la estadística en jugadores/<yo>/<stat>.
+    function ejecutarUsarObjeto(nombreObjeto, stat, cantidad) {
+      reproducirPickup(); // Reutiliza el sonido de "pickup" al consumir el objeto.
+
+      const cantidadNum = Number(cantidad) || 0;
+
+      dbFirebase.ref('inventarios/' + JUGADOR_ACTUAL + '/' + nombreObjeto).transaction(function(actual) {
+        if (actual !== true) return; // aborta: ya no tienes el objeto
+        return null;                 // lo consume
+      }).then(function(res) {
+        if (!res.committed) throw new Error('el objeto ya no está en el inventario');
+        // El panel se actualiza solo por el listener de Firebase.
+        return dbFirebase.ref('jugadores/' + JUGADOR_ACTUAL + '/' + stat).transaction(function(actual) {
+          return (Number(actual) || 0) + cantidadNum;
+        });
+      }).catch(function(err) {
+        console.error("Error al usar el objeto (Firebase):", err);
+        reproducirNope();
+        mostrarAlerta("Error", "No se ha podido usar el objeto.");
+      });
+    }
+
+    // Coste en PA de una habilidad (objetos.js: gastaPA + costePA). 0 = gratis.
+    function costePAHabilidad(nombreObjeto) {
+      const c = (typeof OBJETOS_COSTE_PA !== 'undefined') ? OBJETOS_COSTE_PA[String(nombreObjeto).toLowerCase().trim()] : 0;
+      return Number(c) || 0;
+    }
+
+    // --- HABILIDAD CURAR (doctor) ---
+    // Cura 'cantidad' de 'stat' al jugador elegido (nunca a uno mismo), una sola vez por jugador.
+    // Se apunta en Firebase: curaciones/<yo>/<destino> = true. El objeto NO se consume.
+    function solicitarCurarObjeto(nombreObjeto) {
+      if (bloquearSiMuerto()) return;
+      const config = (typeof OBJETOS_CURAR !== 'undefined') ? OBJETOS_CURAR[String(nombreObjeto).toLowerCase().trim()] : null;
+      if (!config) return;
+
+      const select = document.getElementById(`select-${nombreObjeto}`);
+      const destinoId = select ? select.value : '';
+      if (!destinoId) {
+        reproducirNope();
+        mostrarAlerta("Atención", "Por favor, selecciona un jugador en el desplegable.");
+        return;
+      }
+      if (String(destinoId).toLowerCase().trim() === String(JUGADOR_ACTUAL).toLowerCase().trim()) {
+        reproducirNope();
+        mostrarAlerta("Atención", "No puedes curarte a ti mismo.");
+        return;
+      }
+      if (!verificarEnMiSala(destinoId)) return;
+
+      const jugadorDestino = todosLosJugadores.find(j => j.jugador_id === destinoId);
+      const nombreDestino = jugadorDestino ? jugadorDestino.nombre : destinoId;
+      const nombreStat = { vida: 'Vida', puntos_accion: 'Puntos de Acción', cordura: 'Cordura' }[config.stat] || config.stat;
+
+      dbFirebase.ref('curaciones/' + JUGADOR_ACTUAL + '/' + destinoId).once('value').then(function(snap) {
+        if (snap.val() === true) {
+          reproducirNope();
+          mostrarAlerta("Ya curado", `Ya has curado a ${nombreDestino}. Solo puedes curar una vez a cada jugador.`);
+          return;
+        }
+        const coste = costePAHabilidad(nombreObjeto);
+        if (coste > 0 && (Number(miJugadorData.puntos_accion) || 0) < coste) {
+          reproducirNope();
+          mostrarAlerta("Sin PA", `No tienes suficientes Puntos de Acción. Necesitas ${coste} PA.`);
+          return;
+        }
+        const txtCoste = coste > 0 ? ` Esto te costará ${coste} PA.` : '';
+        const texto = `¿Quieres curar a <strong>${nombreDestino}</strong>? Recuperará ${config.cantidad} de ${nombreStat}. Solo puedes curar una vez a cada jugador.${txtCoste}`;
+        mostrarModalConfirmacion(texto, function() {
+          ejecutarCurar(destinoId, config.stat, config.cantidad, nombreDestino, coste);
+        });
+      }).catch(function(err) {
+        console.error("Error al comprobar la curación (Firebase):", err);
+        reproducirNope();
+        mostrarAlerta("Error", "No se ha podido comprobar la curación.");
+      });
+    }
+
+    function ejecutarCurar(destinoId, stat, cantidad, nombreDestino, costePA) {
+      if (bloquearSiObjetivoMuerto(destinoId)) return;
+      const cantidadNum = Number(cantidad) || 0;
+      const coste = Number(costePA) || 0;
+      let paGastados = false;
+
+      gastarPA(coste).then(function(ok) {
+        if (!ok) throw new Error('sin PA');
+        paGastados = coste > 0;
+        return dbFirebase.ref('curaciones/' + JUGADOR_ACTUAL + '/' + destinoId).transaction(function(actual) {
+          if (actual === true) return; // aborta: ya lo habías curado
+          return true;
+        });
+      }).then(function(res) {
+        if (!res.committed) throw new Error('ya curado');
+        reproducirPickup();
+        return dbFirebase.ref('jugadores/' + destinoId + '/' + stat).transaction(function(actual) {
+          return (Number(actual) || 0) + cantidadNum;
+        });
+      }).then(function() {
+        notificarCuracionRecibida(destinoId, stat, cantidadNum); // aviso "X te ha curado Y de cordura"
+        mostrarAlerta("Curación", `Has curado a ${nombreDestino}.`);
+      }).catch(function(err) {
+        console.error("Error al curar (Firebase):", err);
+        if (paGastados) devolverPA(coste); // si algo falla, se devuelven los PA
+        reproducirNope();
+        if (err && err.message === 'sin PA') {
+          mostrarAlerta("Sin PA", `No tienes suficientes Puntos de Acción. Necesitas ${coste} PA.`);
+        } else {
+          mostrarAlerta("Error", "No se ha podido curar.");
+        }
+      });
+    }
+
+    // --- HABILIDAD REGISTRAR (inspector) ---
+    // Muestra la lista de objetos que lleva otro jugador (nunca uno mismo), una sola vez por jugador.
+    // Se apunta en Firebase: registrados/<yo>/<destino> = true. No se quita nada al registrado.
+    function solicitarRegistrarObjeto(nombreObjeto) {
+      if (bloquearSiMuerto()) return;
+      const config = (typeof OBJETOS_REGISTRAR !== 'undefined') ? OBJETOS_REGISTRAR[String(nombreObjeto).toLowerCase().trim()] : null;
+      if (!config) return;
+
+      const select = document.getElementById(`select-${nombreObjeto}`);
+      const destinoId = select ? select.value : '';
+      if (!destinoId) {
+        reproducirNope();
+        mostrarAlerta("Atención", "Por favor, selecciona un jugador en el desplegable.");
+        return;
+      }
+      if (String(destinoId).toLowerCase().trim() === String(JUGADOR_ACTUAL).toLowerCase().trim()) {
+        reproducirNope();
+        mostrarAlerta("Atención", "No puedes registrarte a ti mismo.");
+        return;
+      }
+      if (!verificarEnMiSala(destinoId)) return;
+
+      const jugadorDestino = todosLosJugadores.find(j => j.jugador_id === destinoId);
+      const nombreDestino = jugadorDestino ? jugadorDestino.nombre : destinoId;
+
+      dbFirebase.ref('registrados/' + JUGADOR_ACTUAL + '/' + destinoId).once('value').then(function(snap) {
+        if (snap.val() === true) {
+          reproducirNope();
+          mostrarAlerta("Ya registrado", `Ya has registrado a ${nombreDestino}. Solo puedes registrar una vez a cada jugador.`);
+          return;
+        }
+        const coste = costePAHabilidad(nombreObjeto);
+        if (coste > 0 && (Number(miJugadorData.puntos_accion) || 0) < coste) {
+          reproducirNope();
+          mostrarAlerta("Sin PA", `No tienes suficientes Puntos de Acción. Necesitas ${coste} PA.`);
+          return;
+        }
+        const txtCoste = coste > 0 ? ` Esto te costará ${coste} PA.` : '';
+        const texto = `¿Quieres registrar a <strong>${nombreDestino}</strong>? Verás los objetos que lleva encima. Solo puedes registrar una vez a cada jugador.${txtCoste}`;
+        mostrarModalConfirmacion(texto, function() {
+          ejecutarRegistrar(destinoId, nombreDestino, coste);
+        });
+      }).catch(function(err) {
+        console.error("Error al comprobar el registro (Firebase):", err);
+        reproducirNope();
+        mostrarAlerta("Error", "No se ha podido comprobar el registro.");
+      });
+    }
+
+    function ejecutarRegistrar(destinoId, nombreDestino, costePA) {
+      if (bloquearSiObjetivoMuerto(destinoId)) return;
+      const coste = Number(costePA) || 0;
+      let paGastados = false;
+
+      // Primero se lee su inventario; solo si se lee bien se gasta el registro.
+      dbFirebase.ref('inventarios/' + destinoId).once('value').then(function(snapInv) {
+        const inv = snapInv.val() || {};
+        return gastarPA(coste).then(function(ok) {
+          if (!ok) throw new Error('sin PA');
+          paGastados = coste > 0;
+          return dbFirebase.ref('registrados/' + JUGADOR_ACTUAL + '/' + destinoId).transaction(function(actual) {
+            if (actual === true) return; // aborta: ya lo habías registrado
+            return true;
+          });
+        }).then(function(res) {
+          if (!res.committed) throw new Error('ya registrado');
+          reproducirPickup();
+          // Las habilidades y los objetos con doble fondo no salen en la lista.
+          const nombres = Object.keys(inv)
+            .filter(function(k) {
+              const c = String(k).toLowerCase().trim();
+              return inv[k] === true
+                && !(typeof OBJETOS_CURAR !== 'undefined' && OBJETOS_CURAR[c])
+                && !(typeof OBJETOS_REGISTRAR !== 'undefined' && OBJETOS_REGISTRAR[c])
+                && !(typeof OBJETOS_OCULTOS_REGISTRO !== 'undefined' && OBJETOS_OCULTOS_REGISTRO.indexOf(c) !== -1); // doble fondo: no se detecta
+            })
+            .map(function(k) { return obtenerNombreVisible(k); })
+            .sort(function(a, b) { return a.localeCompare(b, 'es', { sensitivity: 'base' }); });
+          const lista = nombres.length
+            ? nombres.map(function(n) { return '• ' + n; }).join('<br>')
+            : 'No lleva nada encima.';
+          notificarRegistroRecibido(destinoId); // aviso "X te ha registrado"
+          mostrarAlerta("Registro de " + nombreDestino, lista);
+        });
+      }).catch(function(err) {
+        console.error("Error al registrar (Firebase):", err);
+        if (paGastados) devolverPA(coste); // si algo falla, se devuelven los PA
+        reproducirNope();
+        if (err && err.message === 'sin PA') {
+          mostrarAlerta("Sin PA", `No tienes suficientes Puntos de Acción. Necesitas ${coste} PA.`);
+        } else {
+          mostrarAlerta("Error", "No se ha podido registrar.");
+        }
+      });
+    }
+
+    function solicitarTransferenciaDinero() {
+      if (bloquearSiMuerto()) return;
+      const inputAmount = document.getElementById('transfer-amount');
+      const cantidad = parseInt(inputAmount.value, 10);
+      const destinoId = document.getElementById('transfer-target-player').value;
+
+      if (!destinoId) {
+  reproducirNope();
+        mostrarAlerta("Atención", "Selecciona a qué jugador enviar dinero.");
+        return;
+      }
+      if (!verificarEnMiSala(destinoId)) return;
+
+      if (isNaN(cantidad) || cantidad <= 0) {
+  reproducirNope();
+        mostrarAlerta("Atención", "Introduce una cantidad válida.");
+        return;
+      }
+
+      if (cantidad > miJugadorData.dinero) {
+        reproducirNope();
+        mostrarAlerta("Error", "No dispones de suficiente dinero.");
+        return;
+      }
+
+      const jugadorDestino = todosLosJugadores.find(j => j.jugador_id === destinoId);
+      const nombreDestino = jugadorDestino ? jugadorDestino.nombre : destinoId;
+
+      const texto = `¿Estás seguro de enviar <strong>$${cantidad}</strong> a <strong>${nombreDestino}</strong>?`;
+
+      mostrarModalConfirmacion(texto, function() {
+        if (bloquearSiObjetivoMuerto(destinoId)) return;
+
+// 👇 AÑADE ESTA LÍNEA AQUÍ para que suene billetes 👇
+        reproducirMoney(); 
+// 👆 FIN DE LA LÍNEA AÑADIDA 👆
+
+        miJugadorData.dinero = Math.max(0, miJugadorData.dinero - cantidad);
+        renderizarPerfil();
+
+        // El dinero ya NO pasa por Google Apps Script: se resta/suma en Firebase.
+        transferirDineroFirebase(destinoId, cantidad);
+        inputAmount.value = 0;
+      });
+    }
+
+    // Transferencia de dinero en Firebase (jugadores/<id>/dinero).
+    // 1) Resta la cantidad al jugador actual con una transacción (si no hay saldo, se cancela).
+    // 2) Suma la cantidad al jugador destino con otra transacción.
+    // Si falla el paso 2, se devuelve el dinero al jugador actual.
+    function transferirDineroFirebase(destinoId, cantidad) {
+      const refOrigen = dbFirebase.ref('jugadores/' + JUGADOR_ACTUAL + '/dinero');
+      const refDestino = dbFirebase.ref('jugadores/' + destinoId + '/dinero');
+
+      refOrigen.transaction(function(actual) {
+        const saldo = Number(actual) || 0;
+        if (saldo < cantidad) return; // sin saldo suficiente: se aborta
+        return saldo - cantidad;
+      }).then(function(res) {
+        if (!res.committed) {
+          reproducirNope();
+          mostrarAlerta("Error", "No dispones de suficiente dinero.");
+          return;
+        }
+        return refDestino.transaction(function(actual) {
+          return (Number(actual) || 0) + cantidad;
+        }).then(function() {
+          notificarDineroRecibido(destinoId, cantidad); // aviso "X te ha entregado Y dólares"
+        }).catch(function(err) {
+          // No se pudo abonar al destino: se devuelve el dinero al origen.
+          refOrigen.transaction(function(actual) { return (Number(actual) || 0) + cantidad; });
+          throw err;
+        });
+      }).catch(function(err) {
+        console.error("Error al transferir dinero en Firebase:", err);
+        reproducirNope();
+        mostrarAlerta("Error", "No se ha podido completar la transferencia.");
+      });
+    }
+
+    function mostrarModalConfirmacion(mensajeHtml, accionSi) {
+      const modal = document.getElementById('confirm-modal');
+      document.getElementById('confirm-text').innerHTML = mensajeHtml;
+      
+      const btnYes = document.getElementById('confirm-yes-btn');
+      btnYes.onclick = function() {
+        cerrarConfirmacion();
+        if (bloquearSiMuerto()) return;
+        accionSi();
+      };
+
+      modal.style.display = 'flex';
+    }
+
+    function cerrarConfirmacion() {
+      document.getElementById('confirm-modal').style.display = 'none';
+    }
+
+    function mostrarAlerta(titulo, mensajeHtml) {
+      const modal = document.getElementById('alert-modal');
+      document.getElementById('alert-title').innerText = titulo;
+      document.getElementById('alert-text').innerHTML = mensajeHtml;
+      modal.style.display = 'flex';
+    }
+
+    function cerrarAlerta() {
+      document.getElementById('alert-modal').style.display = 'none';
+    }
+
+    // =====================================================================
+    // MUERTE (vida a 0)
+    //  · Un jugador con vida 0 no puede hacer nada con su inventario: ni usar,
+    //    entregar, mostrar, recargar, enviar dinero, atacar ni poner códigos.
+    //  · Nadie puede atacarle ni mostrarle/entregarle/enviarle nada.
+    //  Solo cuenta como muerto si el campo vida existe en Firebase y es 0 o menos.
+    // =====================================================================
+    function vidaEsCero(f) {
+      if (!f || f.vida === undefined || f.vida === null || f.vida === '') return false;
+      const v = Number(f.vida);
+      return isFinite(v) && v <= 0;
+    }
+
+    function jugadorMuerto(id) {
+      if (!jugadoresFirebase) return false;
+      const clave = String(id || '').toLowerCase().trim();
+      return vidaEsCero(jugadoresFirebase[clave] || jugadoresFirebase[id]);
+    }
+
+    function estoyMuerto() {
+      return !!miJugadorData && vidaEsCero(miJugadorData);
+    }
+
+    // propio = true -> "Estás muerto" ; false -> "Ese jugador está muerto"
+    function mostrarAvisoMuerte(propio) {
+      const modal = document.getElementById('muerte-modal');
+      const yaVisible = modal.style.display === 'flex';
+      document.getElementById('muerte-title').innerText = propio ? 'Has muerto' : 'Jugador muerto';
+      document.getElementById('muerte-text').innerHTML = propio
+        ? 'Lo siento. Estás muerto. No puedes hacer nada.'
+        : 'Ese jugador está muerto. No puedes interaccionar con él.';
+      modal.style.display = 'flex';
+      if (!yaVisible) { if (propio) reproducirMuerto(); else reproducirMuertoJugador(); }
+    }
+
+    function cerrarAvisoMuerte() {
+      document.getElementById('muerte-modal').style.display = 'none';
+    }
+
+    // Aviso para el jugador que acaba de matar a otro: "Has matado al jugador X." + CERRAR
+    function mostrarAvisoAsesino(nombreVictima) {
+      document.getElementById('muerte-title').innerText = 'Has matado';
+      document.getElementById('muerte-text').innerText = 'Has matado al jugador ' + nombreVictima + '.';
+      document.getElementById('muerte-modal').style.display = 'flex';
+    }
+
+    // Devuelve true (y avisa) si YO estoy muerto: la acción debe cancelarse.
+    function bloquearSiMuerto() {
+      if (!estoyMuerto()) return false;
+      mostrarAvisoMuerte(true);
+      return true;
+    }
+
+    // Devuelve true (y avisa) si el jugador objetivo está muerto: la acción debe cancelarse.
+    function bloquearSiObjetivoMuerto(id) {
+      if (!jugadorMuerto(id)) return false;
+      mostrarAvisoMuerte(false);
+      return true;
+    }
+
+    // Aviso automático en el momento en que MI vida llega a 0 (no al cargar la página ya muerto).
+    let muertePropiaPrevia = null;
+    function comprobarMuertePropia() {
+      const muerto = estoyMuerto();
+      if (muerto && muertePropiaPrevia === false) {
+        cerrarConfirmacion();
+        mostrarAvisoMuerte(true);
+      }
+      muertePropiaPrevia = muerto;
+    }
+
+    // Un muerto no puede ser atacado: se cancela el ataque pendiente y se avisa al atacante.
+    function cancelarAtaquePorMuerte(atk) {
+      const atacanteId = atk && atk.de ? String(atk.de).trim() : '';
+      dbFirebase.ref('ataques/' + JUGADOR_ACTUAL).transaction(function(actual) {
+        if (!actual) return; // ya no hay ataque: aborta
+        return null;         // lo borra
+      }).then(function(res) {
+        if (!res.committed || !atacanteId) return;
+        return dbFirebase.ref('resultados/' + atacanteId).set({
+          msg: 'Ese jugador está muerto. No puedes interaccionar con él.',
+          muerto: true,
+          arma: '',
+          t: firebase.database.ServerValue.TIMESTAMP
+        });
+      }).catch(function(err) { console.error("Error al cancelar el ataque a un jugador muerto:", err); });
+    }
+
+    // Devuelve la descripción configurada para un objeto (ver DESCRIPCIONES_OBJETOS),
+    // o un texto genérico por defecto si todavía no se ha escrito ninguna.
+    function obtenerDescripcion(nombreObjeto) {
+      const nombreClean = nombreObjeto.toLowerCase().trim();
+      return DESCRIPCIONES_OBJETOS[nombreClean] || 'Todavía no hay una descripción para este objeto.';
+    }
+
+    // Abre el pop-up de descripción de un objeto del inventario: muestra su
+    // miniatura (misma imagen que la ficha), su nombre y su descripción.
+    let audioDescripcion = null;
+    function pararAudioDescripcion() {
+      if (audioDescripcion) { audioDescripcion.pause(); audioDescripcion = null; }
+    }
+
+    function mostrarDescripcionObjeto(nombreObjeto) {
+      document.getElementById('description-img').src = obtenerRutaImagen(nombreObjeto);
+      document.getElementById('description-img').alt = nombreObjeto;
+      document.getElementById('description-title').innerText = obtenerNombreVisible(nombreObjeto);
+      document.getElementById('description-text').innerText = obtenerDescripcion(nombreObjeto);
+      document.getElementById('description-modal').style.display = 'flex';
+
+      pararAudioDescripcion();
+      audioDescripcion = new Audio('audio/d_' + nombreObjeto.toLowerCase().trim() + '.mp3');
+      audioDescripcion.play().catch(() => {});
+    }
+
+    function cerrarDescripcion() {
+      document.getElementById('description-modal').style.display = 'none';
+      pararAudioDescripcion();
+    }
+
+    // Entrega un objeto a otro jugador: lo quita de inventarios/<yo> y lo pone en
+    // inventarios/<destino>. Las balas de un arma viajan con ella (armas/<idArma>).
+    function entregarObjetoFirebase(objeto, destinoId) {
+      return dbFirebase.ref('inventarios/' + JUGADOR_ACTUAL + '/' + objeto).transaction(function(actual) {
+        if (actual !== true) return; // aborta: ya no lo tienes
+        return null;
+      }).then(function(res) {
+        if (!res.committed) throw new Error('el objeto ya no está en el inventario');
+        return dbFirebase.ref('inventarios/' + destinoId + '/' + objeto).set(true);
+      }).catch(function(err) {
+        console.error("Error al entregar el objeto:", err);
+        reproducirNope();
+        mostrarAlerta("Error", "No se ha podido entregar el objeto.");
+      });
+    }
+
+    /* LÓGICA DE OBJETIVOS Y CONTRASEÑAS */
+/* (movido a datos_jugadorXXXX.js) */
+
+    let currentAttemptObjective = null;
+    let activeChapterModalId = null;
+    let primeraSincronizacionCapitulos = true; // evita sonar en la carga inicial de la página
+
+    // Capítulos que se desbloquean desde inventario.html (capitulos/<jugador>/cap2, cap3, cap4).
+    const CAPITULOS_FIREBASE = ['2', '3', '4'];
+
+    function sincronizarCapitulosDesdeServidor() {
+        if (!miJugadorData || capitulosFirebase === null) return;
+
+        CAPITULOS_FIREBASE.forEach(function(id) {
+            const obj = objectivesData[id];
+            if (!obj) return;
+            const btn = document.getElementById(`obj-btn-${id}`);
+            const icon = document.getElementById(`obj-icon-${id}`);
+
+            const estaDesbloqueado = (capitulosFirebase['cap' + id] === true);
+
+            if (estaDesbloqueado && !obj.unlocked && !primeraSincronizacionCapitulos) {
+                reproducirObjetivoActualizado();
+            }
+
+            obj.unlocked = estaDesbloqueado;
+
+            if (btn && icon) {
+                if (estaDesbloqueado) {
+                    btn.classList.remove('locked');
+                    icon.textContent = "👁️";
+                } else {
+                    btn.classList.add('locked');
+                    icon.textContent = "🔒";
+                }
+            }
+        });
+
+        primeraSincronizacionCapitulos = false;
+    }
+
+    function guardarEstadoMemoria(chapterId) {
+        const checksObj = {};
+        const checkboxes = document.querySelectorAll('#phase-content-body input[type="checkbox"]');
+        checkboxes.forEach((cb) => {
+            const index = cb.getAttribute('data-index');
+            if (index !== null) {
+                checksObj[index] = cb.checked;
+            }
+        });
+        localStorage.setItem(`game_checked_items_${JUGADOR_ACTUAL}_ch_${chapterId}`, JSON.stringify(checksObj));
+    }
+
+    function openObjective(id) {
+        const obj = objectivesData[id];
+        if (obj.unlocked) {
+            reproducirClick();
+            showContent(id);
+        } else {
+            currentAttemptObjective = id;
+            document.getElementById('modalTitle').textContent = `Desbloquear Contenido`;
+            document.getElementById('password-input').value = '';
+            document.getElementById('error-msg').style.display = 'none';
+            document.getElementById('password-modal').classList.add('active');
+            document.getElementById('password-input').focus();
+        }
+    }
+
+    function checkPassword() {
+        const input = document.getElementById('password-input').value.trim().toLowerCase();
+        const errorMsg = document.getElementById('error-msg');
+        const obj = objectivesData[currentAttemptObjective];
+
+        if (input === obj.code) {
+            obj.unlocked = true;
+            localStorage.setItem(`game_unlocked_${JUGADOR_ACTUAL}_ch_${currentAttemptObjective}`, 'true');
+
+            const btn = document.getElementById(`obj-btn-${currentAttemptObjective}`);
+            const icon = document.getElementById(`obj-icon-${currentAttemptObjective}`);
+            btn.classList.remove('locked');
+            icon.textContent = "👁️";
+            
+            const targetId = currentAttemptObjective;
+            closeModal('password-modal');
+            reproducirCorrect();
+
+            if (CAPITULOS_FIREBASE.indexOf(String(targetId)) !== -1) {
+                dbFirebase.ref('capitulos/' + JUGADOR_ACTUAL + '/cap' + targetId).set(true)
+                    .catch(err => console.error("Error al guardar capítulo en Firebase:", err));
+            }
+
+            showContent(targetId);
+        } else {
+            reproducirNope();
+            errorMsg.style.display = 'block';
+        }
+    }
+
+    document.getElementById('password-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') checkPassword();
+    });
+
+    function configurarCharHovers() {
+        const contenedor = document.getElementById('phase-content-body');
+        if (!contenedor) return;
+        contenedor.querySelectorAll('.char-hover').forEach(span => {
+            span.addEventListener('mouseenter', () => {
+                const rectSpan = span.getBoundingClientRect();
+                const rectContenedor = contenedor.getBoundingClientRect();
+                const espacioArriba = rectSpan.top - rectContenedor.top;
+                span.classList.toggle('flip-down', espacioArriba < 120);
+            });
+        });
+    }
+
+    function actualizarScrollHint() {
+        const body = document.getElementById('phase-content-body');
+        const hint = document.getElementById('scroll-hint');
+        if (!body || !hint) return;
+        const hayMasAbajo = body.scrollTop + body.clientHeight < body.scrollHeight - 5;
+        hint.style.display = hayMasAbajo ? 'block' : 'none';
+    }
+
+    function showContent(id) {
+        const obj = objectivesData[id];
+        const body = document.getElementById('phase-content-body');
+        activeChapterModalId = id;
+        
+        let listItemsHTML = '';
+        let checkCounter = 0;
+        obj.items.forEach((item) => {
+            if (item.type === "subheading") {
+                listItemsHTML += `</ul><h3>${item.text}</h3><ul>`;
+            } else if (item.type === "space") {
+                listItemsHTML += `</ul><div style="height: 15px;"></div><ul>`;
+            } else if (item.type === "line") {
+                listItemsHTML += `</ul><hr style="border: none; border-top: 1px solid #3e9a6b; margin: 20px 0;"><ul>`;
+            } else if (item.type === "info") {
+                const fotoHTML = item.img ? `<img src="${item.img}" class="companion-photo" alt="">` : '';
+                listItemsHTML += `<li class="info-item">${fotoHTML}<span class="obj-text">${item.text}</span></li>`;
+            } else {
+                listItemsHTML += `<li><input type="checkbox" data-index="${checkCounter}" onchange="toggleCheck(this, '${id}')"><span class="obj-text">${item.text}</span></li>`;
+                checkCounter++;
+            }
+        });
+
+        body.innerHTML = `<h2>${obj.title}</h2><ul>${listItemsHTML}</ul>`;
+        body.scrollTop = 0;
+        setTimeout(actualizarScrollHint, 0);
+        configurarCharHovers();
+        
+        const savedChecks = localStorage.getItem(`game_checked_items_${JUGADOR_ACTUAL}_ch_${id}`);
+        if (savedChecks) {
+            try {
+                const checksObj = JSON.parse(savedChecks);
+                const checkboxes = body.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(cb => {
+                    const idx = cb.getAttribute('data-index');
+                    if (checksObj[idx]) {
+                        cb.checked = true;
+                        const textSpan = cb.nextElementSibling;
+                        if (textSpan) textSpan.style.textDecoration = 'line-through';
+                    }
+                });
+            } catch (e) {
+                console.error("Error al cargar checks", e);
+            }
+        }
+
+        document.getElementById('content-modal').classList.add('active');
+    }
+
+    function toggleCheck(checkbox, chapterId) {
+        const textSpan = checkbox.nextElementSibling;
+        if (checkbox.checked) {
+            if (textSpan) textSpan.style.textDecoration = 'line-through';
+        } else {
+            if (textSpan) textSpan.style.textDecoration = 'none';
+        }
+        guardarEstadoMemoria(chapterId);
+    }
+
+    function solicitarReiniciarCapitulos() {
+        mostrarModalConfirmacion("¿Estás seguro de reiniciar todos los capítulos? Se desmarcarán las casillas y se bloquearán de nuevo.", function() {
+            for (let id in objectivesData) {
+                localStorage.removeItem(`game_checked_items_${JUGADOR_ACTUAL}_ch_${id}`);
+                localStorage.removeItem(`game_unlocked_${JUGADOR_ACTUAL}_ch_${id}`);
+            }
+
+            for (let id in objectivesData) {
+                const obj = objectivesData[id];
+                if (id !== '1') {
+                    obj.unlocked = false;
+                    if (miJugadorData && obj.sheetKey) {
+                        miJugadorData[obj.sheetKey] = '';
+                    }
+                }
+            }
+
+            for (let id = 2; id <= 4; id++) {
+                const btn = document.getElementById(`obj-btn-${id}`);
+                const icon = document.getElementById(`obj-icon-${id}`);
+                if (btn && icon) {
+                    btn.classList.add('locked');
+                    icon.textContent = "🔒";
+                }
+            }
+
+            closeModal('content-modal');
+
+            dbFirebase.ref('capitulos/' + JUGADOR_ACTUAL).remove()
+                .catch(err => console.error("Error al reiniciar capítulos en Firebase:", err));
+
+            reproducirClick();
+        });
+    }
+
+    function closeModal(modalId) {
+        reproducirClick();
+        document.getElementById(modalId).classList.remove('active');
+        if (modalId === 'password-modal') {
+            currentAttemptObjective = null;
+        }
+        if (modalId === 'content-modal') {
+            activeChapterModalId = null;
+        }
+    }
+  </script>
+  <!-- ================= POP-UP DE TRANSMISIONES DEL MÁSTER (estilo Logia) =================
+       Sustituye al antiguo master_popup.js (ya no hace falta cargarlo).
+       Muestra lo que el máster envía desde master.html: imagen, vídeo, audio y/o texto.
+       Escucha en tiempo real (Firebase) master_msg/<jugador> con el
+       formato {"i":id,"im":imagen,"v":video,"a":audio,"t":texto}. Al cerrarlo con la X
+       (o con CERRAR) borra ese nodo de Firebase. Si el máster pulsa
+       "Quitar pop-up", se cierra solo. -->
+  <style>
+    #master-popup-modal {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(3,7,5,0.88);
+      display: none; align-items: center; justify-content: center;
+      z-index: 11800;
+      backdrop-filter: blur(3px);
+      padding: 16px;
+    }
+    #master-popup-modal.active { display: flex; }
+
+    .master-popup-box {
+      position: relative;
+      width: 560px; max-width: 100%; max-height: 92vh;
+      display: flex; flex-direction: column;
+      padding: 26px 28px 22px 28px;
+      border-radius: 2px;
+      border: 2px solid var(--laton);
+      box-shadow: 0 0 0 4px #000, 0 0 0 5px var(--laton-osc), 0 10px 40px rgba(0,0,0,0.9), 0 0 40px rgba(47,125,87,0.25);
+      background-image:
+        radial-gradient(ellipse at top, rgba(47,125,87,0.16), transparent 60%),
+        linear-gradient(180deg, #14291d 0%, #0b1710 100%);
+      animation: aparecerLogia 0.35s ease-out;
+    }
+    .master-popup-box::before {
+      content: "";
+      position: absolute; top: 5px; left: 5px; right: 5px; bottom: 5px;
+      border: 1px solid var(--laton-osc);
+      pointer-events: none;
+    }
+    .master-popup-box .close-btn {
+      position: absolute; top: 10px; right: 15px;
+      font-size: 1.5rem; font-weight: bold; cursor: pointer;
+      color: var(--laton); font-family: var(--fuente-sub);
+      z-index: 2;
+    }
+    .master-popup-box .close-btn:hover { color: var(--brillo); text-shadow: 0 0 8px var(--brillo); }
+
+    .master-popup-title {
+      font-family: var(--fuente-titulo);
+      font-size: 1.05rem;
+      color: var(--verdin);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-align: center;
+      text-shadow: 0 0 10px rgba(95,185,138,0.5);
+      border-bottom: 1px solid var(--laton-osc);
+      padding: 0 24px 10px 24px;
+      margin-bottom: 14px;
+    }
+
+    #master-popup-body {
+      position: relative;
+      overflow-y: auto;
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+      padding: 2px 4px 6px 4px;
+    }
+    #master-popup-body img.mp-img {
+      max-width: 100%; max-height: 55vh; object-fit: contain;
+      border: 2px solid var(--laton);
+      box-shadow: 0 0 0 3px #000, 0 0 24px rgba(47,125,87,0.4);
+      background: #040806; padding: 6px;
+      cursor: zoom-in;
+    }
+    /* La imagen ampliada (#fullscreen-modal, que ya existía) debe verse por encima de este pop-up. */
+    #fullscreen-modal { z-index: 11900; }
+    #master-popup-body video.mp-video {
+      width: 100%; max-height: 55vh;
+      border: 2px solid var(--laton);
+      box-shadow: 0 0 0 3px #000, 0 0 24px rgba(47,125,87,0.4);
+      background: #000;
+    }
+    #master-popup-body audio.mp-audio {
+      width: 100%;
+      color-scheme: dark;
+    }
+    #master-popup-body .mp-texto {
+      width: 100%;
+      font-family: var(--fuente-cuerpo);
+      font-size: 1.1rem; line-height: 1.6;
+      color: var(--pergamino);
+      white-space: pre-wrap; word-wrap: break-word;
+      text-align: left;
+      padding: 12px 14px;
+      background: rgba(4,8,6,0.6);
+      border-left: 3px solid var(--laton);
+      border-radius: 2px;
+      user-select: text; -webkit-user-select: text;
+    }
+    .master-popup-buttons {
+      display: flex; justify-content: center; gap: 15px;
+      margin-top: 14px;
+    }
+  </style>
+
+  <div id="master-popup-modal">
+    <div class="master-popup-box" role="dialog" aria-modal="true" aria-label="Transmisión del máster" onclick="event.stopPropagation()">
+      <span class="close-btn" onclick="cerrarMasterPopup()">X</span>
+      <div class="master-popup-title">Mensaje del Máster</div>
+      <div id="master-popup-body"></div>
+      <div class="master-popup-buttons">
+        <button class="confirm-btn btn-no" onclick="cerrarMasterPopup()">CERRAR</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let mpIdActual = null;   // id del mensaje que se está mostrando ahora
+    let mpIdCerrado = null;  // id del último mensaje cerrado por el jugador (para no reabrirlo)
+
+    function mpLimpiarMedios() {
+      const body = document.getElementById('master-popup-body');
+      body.querySelectorAll('audio, video').forEach(function(m) {
+        try { m.pause(); } catch (e) {}
+        m.removeAttribute('src');
+        try { m.load(); } catch (e) {}
+      });
+      body.innerHTML = '';
+      const bf = document.getElementById('mp-btn-final');
+      if (bf) bf.remove();
+    }
+
+    // Botón FINAL del pop-up: abre el formulario de votación con este personaje
+    function abrirFinalVotacion() {
+      const w = window.open('final.html?jugador=' + encodeURIComponent(JUGADOR_ACTUAL), '_blank');
+      if (w) cerrarMasterPopup();
+      else alert('Tu navegador ha bloqueado la pestaña. Permite las ventanas emergentes para esta página y pulsa FINAL otra vez.');
+    }
+
+    function mostrarMasterPopup(msg, id) {
+//     	a) esto es para que suene siempre el audio de aviso con vídeo, mensaje y audio:
+//	reproducirMessage();
+
+// 	b) El aviso solo suena si el mensaje es solo de texto (sin imagen, vídeo ni audio):
+  	if (msg.t && !msg.im && !msg.v && !msg.a) reproducirMessage();
+
+//	c) El aviso suena cuando haya texto, aunque haya vídeo, audio, etc.
+// 	if (msg.t) reproducirMessage();
+
+     mpLimpiarMedios();
+      const body = document.getElementById('master-popup-body');
+
+      if (msg.im) {
+        const img = document.createElement('img');
+        img.className = 'mp-img';
+        img.alt = '';
+        img.src = msg.im;
+        img.title = 'Pulsa para ampliar';
+        img.onclick = function() { abrirFullscreen(msg.im); };   // pantalla completa
+        img.onerror = function() { img.style.display = 'none'; };
+        body.appendChild(img);
+      }
+
+      if (msg.v) {
+        const vid = document.createElement('video');
+        vid.className = 'mp-video';
+        vid.controls = true;
+
+// Para que el vídeo se reproduzca nada más enviarlo el máster:
+//    	vid.autoplay = true;
+
+// Para que el vídeo esté parado y le dé el jugador:
+	vid.preload = 'metadata';
+
+        vid.setAttribute('playsinline', '');
+        vid.src = msg.v;
+        body.appendChild(vid);
+      }
+
+      if (msg.a) {
+        const aud = document.createElement('audio');
+        aud.className = 'mp-audio';
+        aud.controls = true;
+        aud.autoplay = true;
+        aud.src = msg.a;
+        body.appendChild(aud);
+      }
+
+      if (msg.t) {
+        const p = document.createElement('div');
+        p.className = 'mp-texto';
+        p.textContent = msg.t;
+        body.appendChild(p);
+      }
+
+      if (msg.f) {
+        const cont = document.querySelector('#master-popup-modal .master-popup-buttons');
+        if (cont) {
+          const bf = document.createElement('button');
+          bf.id = 'mp-btn-final';
+          bf.className = 'confirm-btn btn-yes';
+          bf.textContent = 'FINAL';
+          bf.onclick = abrirFinalVotacion;
+          cont.insertBefore(bf, cont.firstChild);
+        }
+      }
+
+      body.scrollTop = 0;
+      mpIdActual = id;
+      document.getElementById('master-popup-modal').classList.add('active');
+    }
+
+    // El jugador lo cierra: se borra su master_msg en Firebase (solo si sigue siendo el mismo mensaje).
+    function cerrarMasterPopup() {
+      if (mpIdActual === null) return;
+      const idCerrado = mpIdActual;
+      mpIdCerrado = mpIdActual;
+      mpIdActual = null;
+      document.getElementById('master-popup-modal').classList.remove('active');
+      mpLimpiarMedios();
+
+      dbFirebase.ref('master_msg/' + JUGADOR_ACTUAL).transaction(function(actual) {
+        if (actual && String(actual.i || '') === String(idCerrado)) return null;   // borrar
+        if (typeof actual === 'string' && actual === idCerrado) return null;
+        return undefined;                                                         // otro mensaje nuevo: no tocar
+      }).catch(function(err) { console.error('Error al confirmar mensaje del máster:', err); });
+    }
+
+    // Se ejecuta al instante cada vez que el máster escribe o retira master_msg/<jugador>.
+    function comprobarMasterPopup(valor) {
+      let raw = valor;
+      if (raw === null || raw === undefined || raw === '') {
+        // El máster lo retiró (o ya está confirmado): se cierra sin más.
+        mpIdCerrado = null;
+        if (mpIdActual !== null) {
+          mpIdActual = null;
+          document.getElementById('master-popup-modal').classList.remove('active');
+          mpLimpiarMedios();
+        }
+        return;
+      }
+
+      let msg = raw;
+      if (typeof raw === 'string') {
+        try { msg = JSON.parse(raw); } catch (e) { msg = { t: raw }; }
+      }
+      if (!msg || typeof msg !== 'object') msg = { t: String(raw) };
+
+      const id = String(msg.i || JSON.stringify(msg));
+      if (id === mpIdActual) return;     // ya se está mostrando
+      if (id === mpIdCerrado) return;    // ya lo cerró el jugador
+      if (!(msg.im || msg.v || msg.a || msg.t || msg.f)) return;
+
+      mostrarMasterPopup(msg, id);
+    }
+
+    // Escucha en tiempo real (sustituye al sondeo de la hoja).
+    window.addEventListener('load', function() {
+      dbFirebase.ref('master_msg/' + JUGADOR_ACTUAL).on('value', function(snap) {
+        comprobarMasterPopup(snap.val());
+      });
+    });
+  </script>
+  <!-- ================= POP-UP PARA ESCRIBIR AL MÁSTER (estilo Logia) =================
+       Sustituye al antiguo mensaje_master.js (ya no hace falta cargarlo).
+       Se abre con el botón del sobre (abrirMensajeMaster) y envía el texto a la
+       hoja "mensajes_master" con la acción jugadorenviar del Apps Script.
+       Todo su aspecto está en este bloque <style>; usa las variables de la Logia. -->
+  <style>
+    #master-msg-modal {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(3,7,5,0.85);
+      display: none; align-items: center; justify-content: center;
+      z-index: 11500;
+    }
+    #master-msg-modal.active { display: flex; }
+
+    .master-msg-box {
+      position: relative;
+      width: 460px; max-width: 92vw;
+      padding: 30px 30px 26px 30px;
+      text-align: center;
+      border-radius: 2px;
+      border: 2px solid var(--laton);
+      box-shadow: 0 0 0 4px #000, 0 0 0 5px var(--laton-osc), 0 10px 40px rgba(0,0,0,0.9), 0 0 40px rgba(47,125,87,0.25);
+      background-image:
+        radial-gradient(ellipse at top, rgba(47,125,87,0.16), transparent 60%),
+        linear-gradient(180deg, #14291d 0%, #0b1710 100%);
+      animation: aparecerLogia 0.35s ease-out;
+    }
+    /* Filo fino interior de latón */
+    .master-msg-box::before {
+      content: "";
+      position: absolute; top: 5px; left: 5px; right: 5px; bottom: 5px;
+      border: 1px solid var(--laton-osc);
+      pointer-events: none;
+    }
+
+    .master-msg-box .close-btn {
+      position: absolute; top: 10px; right: 15px;
+      font-size: 1.5rem; font-weight: bold; cursor: pointer;
+      color: var(--laton); font-family: var(--fuente-sub);
+      z-index: 2;
+    }
+    .master-msg-box .close-btn:hover { color: var(--brillo); text-shadow: 0 0 8px var(--brillo); }
+
+    .master-msg-title {
+      font-family: var(--fuente-titulo);
+      font-size: 1.1rem;
+      color: var(--verdin);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px rgba(95,185,138,0.5);
+      border-bottom: 1px solid var(--laton-osc);
+      padding-bottom: 10px;
+      margin-bottom: 14px;
+    }
+
+    .master-msg-sub {
+      font-family: var(--fuente-cuerpo);
+      font-size: 1rem;
+      font-style: italic;
+      color: var(--pergamino-osc);
+      margin-bottom: 14px;
+      line-height: 1.4;
+    }
+
+    #master-msg-text {
+      display: block;
+      width: 100%;
+      height: 130px;
+      resize: none;
+      padding: 10px 12px;
+      background-color: #040806;
+      border: 1px solid var(--laton-osc);
+      border-radius: 2px;
+      color: var(--brillo);
+      font-family: var(--fuente-maquina);
+      font-size: 1rem;
+      line-height: 1.45;
+      outline: none;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+    #master-msg-text::placeholder { color: #4b6b58; }
+    #master-msg-text:focus {
+      border-color: var(--laton);
+      box-shadow: 0 0 12px rgba(95,185,138,0.6);
+    }
+
+    .master-msg-counter {
+      text-align: right;
+      margin-top: 4px;
+      font-family: var(--fuente-sub);
+      font-size: 0.65rem;
+      letter-spacing: 2px;
+      color: var(--pergamino-osc);
+    }
+    .master-msg-counter.casi { color: #ffc76b; }
+
+    .master-msg-status {
+      min-height: 1.3em;
+      margin-top: 10px;
+      font-family: var(--fuente-cuerpo);
+      font-size: 0.95rem;
+      font-style: italic;
+      color: var(--pergamino-osc);
+    }
+    .master-msg-status.ok { color: var(--brillo); text-shadow: 0 0 8px rgba(95,185,138,0.5); }
+    .master-msg-status.error { color: #ff6b6b; }
+
+    .master-msg-buttons {
+      display: flex; justify-content: center; gap: 15px;
+      margin-top: 14px;
+    }
+    .master-msg-buttons .confirm-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  </style>
+
+  <div id="master-msg-modal" onclick="cerrarMensajeMaster()">
+    <div class="master-msg-box" onclick="event.stopPropagation()">
+      <span class="close-btn" onclick="cerrarMensajeMaster()">X</span>
+      <div class="master-msg-title">Mensaje al Máster</div>
+      <div class="master-msg-sub">Escribe tu mensaje. Solo lo leerá el máster.</div>
+      <textarea id="master-msg-text" maxlength="500" placeholder="Escribe aquí..." autocomplete="off" oninput="actualizarContadorMensajeMaster()"></textarea>
+      <div class="master-msg-counter" id="master-msg-counter">0 / 500</div>
+      <div class="master-msg-status" id="master-msg-status"></div>
+      <div class="master-msg-buttons">
+        <button class="confirm-btn btn-yes" id="master-msg-send" onclick="enviarMensajeMaster()">ENVIAR</button>
+        <button class="confirm-btn btn-no" onclick="cerrarMensajeMaster()">CANCELAR</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function abrirMensajeMaster() {
+      document.getElementById('master-msg-text').value = '';
+      document.getElementById('master-msg-status').textContent = '';
+      document.getElementById('master-msg-status').className = 'master-msg-status';
+      document.getElementById('master-msg-send').disabled = false;
+      actualizarContadorMensajeMaster();
+      document.getElementById('master-msg-modal').classList.add('active');
+      setTimeout(function() { document.getElementById('master-msg-text').focus(); }, 50);
+    }
+
+    function cerrarMensajeMaster() {
+      document.getElementById('master-msg-modal').classList.remove('active');
+    }
+
+    function actualizarContadorMensajeMaster() {
+      var n = document.getElementById('master-msg-text').value.length;
+      var c = document.getElementById('master-msg-counter');
+      c.textContent = n + ' / 500';
+      c.className = 'master-msg-counter' + (n >= 450 ? ' casi' : '');
+    }
+
+    function enviarMensajeMaster() {
+      var txt = document.getElementById('master-msg-text').value.trim();
+      var estado = document.getElementById('master-msg-status');
+      var btn = document.getElementById('master-msg-send');
+
+      if (!txt) {
+        reproducirNope();
+        estado.textContent = 'Escribe algo antes de enviar.';
+        estado.className = 'master-msg-status error';
+        return;
+      }
+
+      btn.disabled = true;
+      estado.textContent = 'Enviando...';
+      estado.className = 'master-msg-status';
+
+      var nombreJugador = (typeof miJugadorData !== 'undefined' && miJugadorData && miJugadorData.nombre) ? miJugadorData.nombre : JUGADOR_ACTUAL;
+
+      dbFirebase.ref('mensajes_master').push({
+        j: JUGADOR_ACTUAL,
+        n: nombreJugador,
+        m: txt,
+        t: firebase.database.ServerValue.TIMESTAMP
+      })
+        .then(function() {
+          reproducirCorrect();
+          estado.textContent = 'Mensaje enviado al máster.';
+          estado.className = 'master-msg-status ok';
+          setTimeout(cerrarMensajeMaster, 1200);
+        })
+        .catch(function(err) {
+          console.error('Error al enviar mensaje al máster:', err);
+          reproducirNope();
+          btn.disabled = false;
+          estado.textContent = 'Error de conexión con el servidor.';
+          estado.className = 'master-msg-status error';
+        });
+    }
+
+    // =====================================================================
+    // AVISO DE "PREPARADO" AL MÁSTER (campana)
+    // Al pulsar la campana se escribe listos/<jugador> en Firebase; master.html
+    // pone un tick en la columna de la campana. Cuando el máster reinicia los
+    // avisos, listos/ se borra y la campana vuelve a poder pulsarse.
+    // =====================================================================
+    function avisarPreparado() {
+      var btn = document.getElementById('btn-campana');
+      if (btn.classList.contains('enviado')) return; // ya avisado
+      dbFirebase.ref('listos/' + JUGADOR_ACTUAL).set(firebase.database.ServerValue.TIMESTAMP)
+        .then(function() {
+          if (typeof reproducirCorrect === 'function') reproducirCorrect();
+        })
+        .catch(function(err) {
+          console.error('Error al avisar al máster:', err);
+          if (typeof reproducirNope === 'function') reproducirNope();
+        });
+    }
+
+    dbFirebase.ref('listos/' + JUGADOR_ACTUAL).on('value', function(snap) {
+      var btn = document.getElementById('btn-campana');
+      if (!btn) return;
+      var enviado = snap.val() !== null;
+      btn.classList.toggle('enviado', enviado);
+      btn.title = enviado ? 'YA HAS AVISADO AL MÁSTER' : 'AVISAR AL MÁSTER DE QUE ESTÁS PREPARADO';
+    });
+
+    // =====================================================================
+    // AVISO DE DINERO RECIBIDO
+    // Cuando alguien te envía dinero, aparece abajo un recuadro
+    // (con X para cerrarlo): "X te ha entregado Y dólares". El emisor deja el aviso en Firebase
+    // (transferencias_dinero/<destino>) y el destinatario lo muestra y lo borra.
+    // =====================================================================
+    function notificarDineroRecibido(destinoId, cantidad) {
+      try {
+        dbFirebase.ref('transferencias_dinero/' + destinoId).push({
+          de_id: JUGADOR_ACTUAL,
+          de_nombre: (miJugadorData && miJugadorData.nombre) ? miJugadorData.nombre : JUGADOR_ACTUAL,
+          cantidad: cantidad,
+          ts: firebase.database.ServerValue.TIMESTAMP
+        }).catch(function(err) {
+          console.error('No se pudo dejar el aviso de dinero:', err);
+        });
+      } catch (err) {
+        console.error('No se pudo dejar el aviso de dinero:', err);
+      }
+    }
+
+    function mostrarAvisoDinero(nombre, cantidad) {
+      const contenedor = document.getElementById('aviso-dinero-contenedor');
+      if (!contenedor) return;
+
+      const aviso = document.createElement('div');
+      aviso.className = 'aviso-dinero';
+
+      const icono = document.createElement('div');
+      icono.className = 'aviso-dinero-icono';
+      icono.textContent = '$';
+
+      const texto = document.createElement('div');
+      texto.className = 'aviso-dinero-texto';
+      const strongNombre = document.createElement('strong');
+      strongNombre.textContent = nombre;
+      const strongCantidad = document.createElement('strong');
+      strongCantidad.className = 'aviso-dinero-cantidad';
+      strongCantidad.textContent = cantidad;
+      texto.appendChild(strongNombre);
+      texto.appendChild(document.createTextNode(' te ha entregado '));
+      texto.appendChild(strongCantidad);
+      texto.appendChild(document.createTextNode(' dólares'));
+
+      const btnCerrar = document.createElement('button');
+      btnCerrar.className = 'aviso-dinero-cerrar';
+      btnCerrar.type = 'button';
+      btnCerrar.setAttribute('aria-label', 'Cerrar');
+      btnCerrar.textContent = '\u00D7';
+      btnCerrar.onclick = function() {
+        aviso.classList.remove('visible');
+        setTimeout(function() { aviso.remove(); }, 400);
+      };
+
+      aviso.appendChild(icono);
+      aviso.appendChild(texto);
+      aviso.appendChild(btnCerrar);
+      contenedor.appendChild(aviso);
+
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() { aviso.classList.add('visible'); });
+      });
+    }
+
+    dbFirebase.ref('transferencias_dinero/' + JUGADOR_ACTUAL).on('child_added', function(snap) {
+      const d = snap.val();
+      if (d && d.cantidad) {
+        mostrarAvisoDinero(d.de_nombre || 'Alguien', d.cantidad);
+      }
+      snap.ref.remove(); // para que no se repita al recargar
+    });
+
+    // =====================================================================
+    // AVISO DE CURACIÓN RECIBIDA
+    // Igual que el de dinero: el doctor deja el aviso en Firebase
+    // (avisos_curacion/<destino>) y el curado lo muestra en el mismo recuadro y lo borra.
+    // =====================================================================
+    function notificarCuracionRecibida(destinoId, stat, cantidad) {
+      try {
+        dbFirebase.ref('avisos_curacion/' + destinoId).push({
+          de_id: JUGADOR_ACTUAL,
+          de_nombre: (miJugadorData && miJugadorData.nombre) ? miJugadorData.nombre : JUGADOR_ACTUAL,
+          stat: stat,
+          cantidad: cantidad,
+          ts: firebase.database.ServerValue.TIMESTAMP
+        }).catch(function(err) {
+          console.error('No se pudo dejar el aviso de curación:', err);
+        });
+      } catch (err) {
+        console.error('No se pudo dejar el aviso de curación:', err);
+      }
+    }
+
+    function mostrarAvisoCuracion(nombre, cantidad, stat) {
+      const contenedor = document.getElementById('aviso-dinero-contenedor');
+      if (!contenedor) return;
+      const nombreStat = { vida: 'vida', puntos_accion: 'puntos de acción', cordura: 'cordura' }[stat] || stat;
+
+      const aviso = document.createElement('div');
+      aviso.className = 'aviso-dinero';
+
+      const icono = document.createElement('div');
+      icono.className = 'aviso-dinero-icono';
+      icono.textContent = '\u271A';
+
+      const texto = document.createElement('div');
+      texto.className = 'aviso-dinero-texto';
+      const strongNombre = document.createElement('strong');
+      strongNombre.textContent = nombre;
+      const strongCantidad = document.createElement('strong');
+      strongCantidad.className = 'aviso-dinero-cantidad';
+      strongCantidad.textContent = cantidad;
+      texto.appendChild(strongNombre);
+      texto.appendChild(document.createTextNode(' te ha curado '));
+      texto.appendChild(strongCantidad);
+      texto.appendChild(document.createTextNode(' de ' + nombreStat));
+
+      const btnCerrar = document.createElement('button');
+      btnCerrar.className = 'aviso-dinero-cerrar';
+      btnCerrar.type = 'button';
+      btnCerrar.setAttribute('aria-label', 'Cerrar');
+      btnCerrar.textContent = '\u00D7';
+      btnCerrar.onclick = function() {
+        aviso.classList.remove('visible');
+        setTimeout(function() { aviso.remove(); }, 400);
+      };
+
+      aviso.appendChild(icono);
+      aviso.appendChild(texto);
+      aviso.appendChild(btnCerrar);
+      contenedor.appendChild(aviso);
+
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() { aviso.classList.add('visible'); });
+      });
+    }
+
+    dbFirebase.ref('avisos_curacion/' + JUGADOR_ACTUAL).on('child_added', function(snap) {
+      const d = snap.val();
+      if (d && d.cantidad) {
+        mostrarAvisoCuracion(d.de_nombre || 'Alguien', d.cantidad, d.stat);
+      }
+      snap.ref.remove(); // para que no se repita al recargar
+    });
+
+    // =====================================================================
+    // AVISO DE REGISTRO RECIBIDO
+    // Igual que el de dinero y el de curación: el inspector deja el aviso en Firebase
+    // (avisos_registro/<destino>) y el registrado lo muestra en el mismo recuadro y lo borra.
+    // =====================================================================
+    function notificarRegistroRecibido(destinoId) {
+      try {
+        dbFirebase.ref('avisos_registro/' + destinoId).push({
+          de_id: JUGADOR_ACTUAL,
+          de_nombre: (miJugadorData && miJugadorData.nombre) ? miJugadorData.nombre : JUGADOR_ACTUAL,
+          ts: firebase.database.ServerValue.TIMESTAMP
+        }).catch(function(err) {
+          console.error('No se pudo dejar el aviso de registro:', err);
+        });
+      } catch (err) {
+        console.error('No se pudo dejar el aviso de registro:', err);
+      }
+    }
+
+    function mostrarAvisoRegistro(nombre) {
+      const contenedor = document.getElementById('aviso-dinero-contenedor');
+      if (!contenedor) return;
+
+      const aviso = document.createElement('div');
+      aviso.className = 'aviso-dinero';
+
+      const icono = document.createElement('div');
+      icono.className = 'aviso-dinero-icono';
+      icono.textContent = '\uD83D\uDD0D';
+
+      const texto = document.createElement('div');
+      texto.className = 'aviso-dinero-texto';
+      const strongNombre = document.createElement('strong');
+      strongNombre.textContent = nombre;
+      texto.appendChild(strongNombre);
+      texto.appendChild(document.createTextNode(' te ha registrado'));
+
+      const btnCerrar = document.createElement('button');
+      btnCerrar.className = 'aviso-dinero-cerrar';
+      btnCerrar.type = 'button';
+      btnCerrar.setAttribute('aria-label', 'Cerrar');
+      btnCerrar.textContent = '\u00D7';
+      btnCerrar.onclick = function() {
+        aviso.classList.remove('visible');
+        setTimeout(function() { aviso.remove(); }, 400);
+      };
+
+      aviso.appendChild(icono);
+      aviso.appendChild(texto);
+      aviso.appendChild(btnCerrar);
+      contenedor.appendChild(aviso);
+
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() { aviso.classList.add('visible'); });
+      });
+    }
+
+    dbFirebase.ref('avisos_registro/' + JUGADOR_ACTUAL).on('child_added', function(snap) {
+      const d = snap.val();
+      if (d) {
+        mostrarAvisoRegistro(d.de_nombre || 'Alguien');
+      }
+      snap.ref.remove(); // para que no se repita al recargar
+    });
+  </script>
+</body>
+</html>
