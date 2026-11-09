@@ -208,6 +208,26 @@
         font-size: 1.2rem;
     }
 
+    /* Cartel NEW! (capítulo desbloqueado y aún no leído) */
+    .objective-btn .new-badge {
+        display: inline-block;
+        margin-left: 8px;
+        padding: 1px 6px;
+        font-size: 0.7rem;
+        font-weight: bold;
+        letter-spacing: 1px;
+        color: #06210f;
+        background-color: #39ff14;
+        border-radius: 2px;
+        box-shadow: 0 0 8px #39ff14;
+        animation: newBadgeParpadeo 1s ease-in-out infinite;
+    }
+
+    @keyframes newBadgeParpadeo {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.25; }
+    }
+
     .btn-reset-chapters {
         background-color: #0f2218;
         border: 1px solid #1d4a33;
@@ -3818,6 +3838,33 @@ const texto = `¿Estás seguro que quieres usar <strong>${obtenerNombreVisible(n
     // Capítulos que se desbloquean desde inventario.html (capitulos/<jugador>/cap2, cap3, cap4).
     const CAPITULOS_FIREBASE = ['2', '3', '4'];
 
+    // Cartel NEW!: aparece en un capítulo desbloqueado hasta que el jugador lo abre.
+    function capituloVisto(id) {
+        return localStorage.getItem(`game_seen_${JUGADOR_ACTUAL}_ch_${id}`) === 'true';
+    }
+
+    function marcarCapituloVisto(id) {
+        if (CAPITULOS_FIREBASE.indexOf(String(id)) === -1) return;
+        localStorage.setItem(`game_seen_${JUGADOR_ACTUAL}_ch_${id}`, 'true');
+        actualizarBadgeNuevo(id, false);
+    }
+
+    function actualizarBadgeNuevo(id, mostrar) {
+        const btn = document.getElementById(`obj-btn-${id}`);
+        if (!btn) return;
+        const titulo = btn.firstElementChild;
+        if (!titulo) return;
+        const existente = titulo.querySelector('.new-badge');
+        if (mostrar && !existente) {
+            const badge = document.createElement('span');
+            badge.className = 'new-badge';
+            badge.textContent = 'NEW!';
+            titulo.appendChild(badge);
+        } else if (!mostrar && existente) {
+            existente.remove();
+        }
+    }
+
     function sincronizarCapitulosDesdeServidor() {
         if (!miJugadorData || capitulosFirebase === null) return;
 
@@ -3839,9 +3886,13 @@ const texto = `¿Estás seguro que quieres usar <strong>${obtenerNombreVisible(n
                 if (estaDesbloqueado) {
                     btn.classList.remove('locked');
                     icon.textContent = "👁️";
+                    actualizarBadgeNuevo(id, !capituloVisto(id));
                 } else {
                     btn.classList.add('locked');
                     icon.textContent = "🔒";
+                    actualizarBadgeNuevo(id, false);
+                    // Si se vuelve a bloquear, olvida que lo había leído: al desbloquearlo otra vez saldrá NEW!
+                    localStorage.removeItem(`game_seen_${JUGADOR_ACTUAL}_ch_${id}`);
                 }
             }
         });
@@ -3935,6 +3986,7 @@ const texto = `¿Estás seguro que quieres usar <strong>${obtenerNombreVisible(n
         const obj = objectivesData[id];
         const body = document.getElementById('phase-content-body');
         activeChapterModalId = id;
+        marcarCapituloVisto(id);
         
         let listItemsHTML = '';
         let checkCounter = 0;
@@ -3995,6 +4047,7 @@ const texto = `¿Estás seguro que quieres usar <strong>${obtenerNombreVisible(n
             for (let id in objectivesData) {
                 localStorage.removeItem(`game_checked_items_${JUGADOR_ACTUAL}_ch_${id}`);
                 localStorage.removeItem(`game_unlocked_${JUGADOR_ACTUAL}_ch_${id}`);
+                localStorage.removeItem(`game_seen_${JUGADOR_ACTUAL}_ch_${id}`);
             }
 
             for (let id in objectivesData) {
@@ -4013,6 +4066,7 @@ const texto = `¿Estás seguro que quieres usar <strong>${obtenerNombreVisible(n
                 if (btn && icon) {
                     btn.classList.add('locked');
                     icon.textContent = "🔒";
+                    actualizarBadgeNuevo(id, false);
                 }
             }
 

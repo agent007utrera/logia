@@ -105,7 +105,7 @@ const objectivesData = {
         items: [
             { text: 'El estudiante Harlan Pierce era tu amigo y desapareció hace un año exactamente. Sospechas que el profesor <span class="char-hover">RICE<img src="images/f_rice.jpg" class="char-hover-img" alt=""></span> tiene algo que ver con su desaparición. Lo ves en sueños (pipa humeante, gafas).', type: "info" },
             { text: 'Encontraste frascos de extracto de loto azul en la consulta del doctor <span class="char-hover">BREWER<img src="images/f_brewer.jpg" class="char-hover-img" alt=""></span> y te sientes muy «apagado» desde hace meses. Crees que te ha estado administrando eso.', type: "info" },
-            { text: 'Tu cuadro «El Banquete del Crepúsculo» lo llevas esta noche entre tus bocetos, es muy importante para ti, NO LO VENDAS. También llevas el cuadro «Ventana a ciudades de torres inclinadas y cielos con demasiadas lunas», ése sí puedes venderlo.', type: "info" },
+            { text: 'Tu cuadro «El Banquete del Crepúsculo» lo llevas esta noche entre tus bocetos, es muy importante para ti, <strong style="color:#e03c3c;">NO LO VENDAS</strong>. También llevas el cuadro «Ventana a ciudades de torres inclinadas y cielos con demasiadas lunas», ése sí puedes venderlo.', type: "info" },
        	    { text: 'Hace dos años exactamente, tú pintaste, antes de que ocurriera, la muerte de un paciente del Sanatorio.', type: "info" }
         ]
     },
@@ -117,12 +117,11 @@ const objectivesData = {
         sheetKey: "capitulo2",
         items: [
             { type: "space" },
-            { text: 'Si <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span> te pide que hagas algo, dile que lo harás.', type: "check" },
-            { text: 'Pregunta a <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span> qué significa que él tiene reservado «un destino especial» para ti.', type: "check" },
+            { text: 'Si <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span> te pide que hagas algo, dile que lo harás. Pregunta a <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span> qué significa que él tiene reservado «un destino especial» para ti.', type: "check" },
             { text: 'Dile al doctor <span class="char-hover">BREWER<img src="images/f_brewer.jpg" class="char-hover-img" alt=""></span> que has tenido nuevas visiones. Si te pide que te marches de allí, dile que no lo harás. Rechaza cualquier bebida o líquido que el doctor <span class="char-hover">BREWER<img src="images/f_brewer.jpg" class="char-hover-img" alt=""></span> te ofrezca: ya no te fías de él.', type: "check" },
             { text: 'Si el profesor <span class="char-hover">RICE<img src="images/f_rice.jpg" class="char-hover-img" alt=""></span> te invita a ir a algún sitio con él, acepta. En privado, dile al profesor <span class="char-hover">RICE<img src="images/f_rice.jpg" class="char-hover-img" alt=""></span> que sueñas con el que fuera su alumno, el desaparecido Harlan Pierce. Durante el sueño Pierce «está mirando fijamente a una persona con pipa y gafas». Pídele explicaciones. ¿Qué cree él que puede significar ese sueño?', type: "check" },
-            { text: 'Pide al inspector <span class="char-hover">NICHOLS<img src="images/f_nichols.jpg" class="char-hover-img" alt=""></span> el Expediente del caso de desaparición de tu amigo Harlan Pierce. Tienes que conseguirlo sea como sea. Pídele también que reabra el caso.', type: "check" },
-            { text: 'Si alguien te pide comprar algunos de tus cuadros, solamente lo harás a cambio del Expediente Policial de tu amigo Harlan Pierce. Recuerda que puedes vender el cuadro de «Ventana a ciudades de torres inclinadas», NUNCA PODRÁS VENDER el cuadro de «El Banquete del Crepúsculo».', type: "check" },
+            { text: 'Pide al inspector <span class="char-hover">NICHOLS<img src="images/f_nichols.jpg" class="char-hover-img" alt=""></span> el <strong style="color:#e03c3c;">EXPEDIENTE POLICIAL</strong> del caso de la desaparición de tu amigo Harlan Pierce. Tienes que conseguirlo sea como sea. Pídele también que reabra el caso.', type: "check" },
+            { text: 'Si alguien te pide comprar algunos de tus cuadros, solamente lo harás a cambio del Expediente Policial de tu amigo Harlan Pierce. Recuerda que puedes vender el cuadro de «Ventana a ciudades de torres inclinadas», <strong style="color:#e03c3c;">NUNCA PODRÁS VENDER</strong> el cuadro de «El Banquete del Crepúsculo» bajo ningún concepto.', type: "check" },
             { type: "line" },
             { text: 'Vende todas las visiones que puedas (una por persona, y sin repetir). Tú eliges qué vision decirle a cada uno:', type: "info" },
             { text: '◆	«Alguien caerá dos veces: primero su cuerpo, luego su alma».', type: "check" },
@@ -131,7 +130,7 @@ const objectivesData = {
             { text: '◆	«Sueño servido en una copa».', type: "check" },
             { text: '◆	«Hay una advertencia escrita que nadie quiso leer».', type: "check" },
             { type: "line" },
-       	    { text: 'A las 23:00 h, cuando <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span> se retire al Santuario, debes marcharte a solas al Observatorio, sin decir a nadie adónde vas y sin que nadie te vea allí. Después lee la parte «¿Qué hiciste?» Más tarde, cuando suene el gong 3 veces, podrás ir al Santuario.', type: "check" }
+       	    { text: 'A las 23:00 h, cuando <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span> se retire al Santuario, debes marcharte a solas al Observatorio, sin decir a nadie adónde vas y sin que nadie te vea allí. Después lee la parte «¿Qué hiciste?» Más tarde, cuando suene el gong 3 veces, podrás ir al Santuario.', type: "info" }
         ]
     },
 
@@ -142,7 +141,7 @@ const objectivesData = {
         sheetKey: "capitulo3",
         items: [
 
-	{ text: 'A las 23:00 estabas <a href="#" style="color:#9fd4ff;" onclick="abrirVideo(\'videos/puerta.mp4\'); return false;">🎬 pintando el Sello en la puerta del Santuario 🎬</a> como te pidió <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span> (por eso tienes las manos manchadas de pintura azul y roja). Después fuiste al Observatorio y por la ventana viste a <span class="char-hover">CRANE<img src="images/f_crane.jpg" class="char-hover-img" alt=""></span> en el Jardín hablando con un hombre que parecía un pescador o un marinero. Después alguien lanzó desde la puerta una bayoneta dentro del Observatorio, tuviste miedo y tiraste la bayoneta por la ventana hacia el Jardín.', type: "info" }
+	{ text: 'A las 23:00 estabas <a href="#" style="color:#9fd4ff;" onclick="abrirVideo(\'videos/puerta.mp4\'); return false;">🎬 pintando el Sello en la puerta del Santuario 🎬</a> como te pidió <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span> (por eso tienes las manos manchadas de pintura azul y roja). Después fuiste al Observatorio y por la ventana viste a <span class="char-hover">CRANE<img src="images/f_crane.jpg" class="char-hover-img" alt=""></span> en el Jardín hablando con un hombre que parecía un pescador o un marinero. Después alguien lanzó desde la puerta una bayoneta dentro del Observatorio, tuviste miedo y tiraste la bayoneta por la ventana hacia el Jardín. Ahora espera a que suene el gong 3 veces.', type: "info" }
 
         ]
     },
@@ -155,8 +154,8 @@ const objectivesData = {
         items: [
             { type: "space" },
             { text: 'No eres el asesino. Descubre quién mató a <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span>.', type: "check" },
-            { text: 'Entrega tu cuadro «El Banquete del Crepúsculo» (Prueba H) al inspector <span class="char-hover">NICHOLS<img src="images/f_nichols.jpg" class="char-hover-img" alt=""></span> cuando te lo pida y explícale cada detalle: la figura de abrigo largo, la hoja en cruz, la silla vacía, la luna doble («el Gran Maestre caerá dos veces»).', type: "check" },
-            { text: 'Consigue el Expediente policial de tu amigo Harlan Pierce si no lo tienes todavía.', type: "check" },
+            { text: 'Entrega tu <strong style="color:#e03c3c;">CUADRO</strong> «El Banquete del Crepúsculo» (Prueba H) al inspector <span class="char-hover">NICHOLS<img src="images/f_nichols.jpg" class="char-hover-img" alt=""></span> cuando te lo pida y explícale cada detalle: la figura de abrigo largo, la hoja en cruz, la silla vacía, la luna doble («el Gran Maestre caerá dos veces»).', type: "check" },
+            { text: 'Consigue el <strong style="color:#e03c3c;">EXPEDIENTE POLICIAL</strong> de tu amigo Harlan Pierce si no lo tienes todavía.', type: "check" },
             { text: 'Si alguien te desacredita (llamándote «lunático del sanatorio» por ejemplo), enfréntate a él diciendo que debe respetarte, que eres un gran artista.', type: "check" },
             { text: 'Cuando alguien afirme haber estado en el Jardín, cuenta que desde el Observatorio: solamente viste a <span class="char-hover">CRANE<img src="images/f_crane.jpg" class="char-hover-img" alt=""></span> y al marinero.', type: "check" },
             { text: 'Enfréntate al doctor <span class="char-hover">BREWER<img src="images/f_brewer.jpg" class="char-hover-img" alt=""></span>, grítale: «Sé lo que me estabas administrando. Extracto de Loto Azul». Exige la verdad. ¿Por qué te administraba eso?', type: "check" },

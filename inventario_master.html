@@ -111,6 +111,9 @@
     .tabla td:first-child { font-family: var(--fuente-cuerpo); font-size: 1.02rem; color: var(--pergamino); min-width: 230px; }
     .tabla td:first-child small { display: block; font-family: var(--fuente-maquina); font-size: .62rem; color: var(--muted); letter-spacing: 1px; }
     .tabla tr.alguien td:first-child { color: var(--brillo); }
+    .tabla tr.sep td { padding: 14px 6px 6px; background: #0b1710; border-top: 1px solid var(--laton-osc); border-bottom: 2px solid var(--laton-osc); }
+    .tabla tr.sep td:first-child { font-family: var(--fuente-sub); font-size: .75rem; letter-spacing: 3px; text-transform: uppercase; color: var(--laton); }
+    .tabla tr.sep td .jn { font-family: var(--fuente-cuerpo); font-size: .95rem; letter-spacing: 1px; color: var(--pergamino); }
     .tabla td.on { background: rgba(62,154,107,.16); }
     .tabla td.total { font-family: var(--fuente-sub); color: var(--laton); }
     .tabla input[type=checkbox] { width: 20px; height: 20px; cursor: pointer; accent-color: #6fdc9a; }
@@ -332,6 +335,12 @@ function irArriba() {
 
     let b = '';
     os.forEach(o => {
+      const seccion = (typeof OBJETOS_SECCIONES !== 'undefined') ? OBJETOS_SECCIONES[o] : null;
+      if (seccion) {
+        b += '<tr class="sep"><td>' + esc(seccion) + '</td>';
+        js.forEach(j => { b += '<td><span class="jn">' + esc(nombreJugador(j)) + '</span></td>'; });
+        b += '<td></td></tr>';
+      }
       b += '<tr data-obj="' + esc(o) + '"><td>' + esc(nombreObjeto(o)) + '<small>' + esc(o) + '</small></td>';
       js.forEach(j => {
         b += '<td data-celda="1"><input type="checkbox" data-j="' + esc(j) + '" data-o="' + esc(o) + '" title="' + esc(nombreJugador(j)) + ' · ' + esc(o) + '"></td>';
@@ -364,7 +373,7 @@ function irArriba() {
   // =====================================================================
   function actualizar(js, os) {
     // objetos
-    $('tbody-obj').querySelectorAll('tr').forEach(tr => {
+    $('tbody-obj').querySelectorAll('tr[data-obj]').forEach(tr => {
       const o = tr.dataset.obj;
       let total = 0;
       tr.querySelectorAll('input[type=checkbox]').forEach(chk => {
@@ -399,11 +408,12 @@ function irArriba() {
 
   function aplicarFiltro() {
     const q = filtro.toLowerCase().trim();
-    $('tbody-obj').querySelectorAll('tr').forEach(tr => {
+    $('tbody-obj').querySelectorAll('tr[data-obj]').forEach(tr => {
       const o = tr.dataset.obj;
       const visible = !q || o.toLowerCase().indexOf(q) !== -1 || nombreObjeto(o).toLowerCase().indexOf(q) !== -1;
       tr.style.display = visible ? '' : 'none';
     });
+    $('tbody-obj').querySelectorAll('tr.sep').forEach(tr => { tr.style.display = q ? 'none' : ''; });
   }
 
   function render() {

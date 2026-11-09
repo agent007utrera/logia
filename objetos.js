@@ -25,6 +25,8 @@
 //   recarga      Nombre de la función de recarga que se lanza al "Usar"
 //                (solicitarRecarga, solicitarRecargaRevolver, solicitarRecargaEscopeta).
 //   entregable   false = el botón "Entregar" sale deshabilitado. Por defecto true.
+//   seccion      (opcional) Título de una línea separadora que aparece en inventario_master.html
+//                justo ANTES de este objeto. Ponlo solo en el primer objeto de cada grupo.
 //
 // NOTA: el daño, la munición máxima y los empates de las armas NO están aquí:
 // siguen en CONFIG_ARMAS de INVENTARIO1.js (Apps Script, es el servidor).
@@ -37,6 +39,7 @@ const OBJETOS = {
 
 
   anillo_logia: {
+    seccion: "Objetos iniciales",
     nombre: "Anillo de la Logia",
     descripcion: "Un macizo sello de plata con el grabado de un ojo insomne bajo una luna creciente, cuya sola mirada evoca una frialdad arcaica y perturbadora.",
     entregable: false
@@ -53,7 +56,7 @@ const OBJETOS = {
 
   habilidad_curar: {
     nombre: "Habilidad: Curar",
-    descripcion: "Tu pericia médica puede calmar a un alma al borde del abismo. Una sola vez a cada jugador (nunca a ti mismo), puedes curarle 2 puntos de cordura. Coste: 1 Punto de Acción.",
+    descripcion: "Tu pericia médica puede calmar a un alma al borde del abismo. Una sola vez a cada jugador puedes curarle 2 puntos de  cordura. Nunca a ti mismo. Coste: 1 Punto de Acción.",
     entregable: false,
     gastaPA: true,   // true = la habilidad cuesta puntos de acción · false = gratis
     costePA: 1,      // cuántos puntos de acción cuesta (solo si gastaPA es true)
@@ -84,7 +87,7 @@ const OBJETOS = {
   },
 
   rel_colmillo: {
-    nombre: "Colmillo tallado de kraken",
+    nombre: "Colmillo tallado",
     descripcion: "Reliquia: Un marfil amarillento y agrietado grabado con serpenteantes tentáculos y runas impías, un vestigio profano de las profundidades marinas cuya mera presencia transmite el gélido abrazo del abismo.",
   },
 
@@ -107,28 +110,28 @@ const OBJETOS = {
 
   habilidad_registrar: {
     nombre: "Habilidad: Registrar",
-    descripcion: "Tu olfato de policía sabe dónde mirar. Una sola vez a cada jugador, puedes registrarlo y ver qué objetos lleva encima. Coste: 1 Punto de Acción.",
+    descripcion: "Tu olfato de policía sabe dónde mirar. Una sola vez por persona, puedes registrarlo y ver qué objetos lleva encima. Coste: 1 Punto de Acción.",
     entregable: false,
     gastaPA: true,   // true = la habilidad cuesta puntos de acción · false = gratis
     costePA: 1,      // cuántos puntos de acción cuesta (solo si gastaPA es true)
     registrar: true
   },
-
+ 
   expediente: {
     nombre: "Expediente policial",
-    descripcion: "Una ajada carpeta del departamento de policía de Arkham sobre el caso del alumno Harlan Pierce.",
+    descripcion: "Una ajada carpeta del departamento de policía de Arkham sobre el caso de la desaparición del alumno Harlan Pierce.",
   },
 
 // ======= PICKMAN
 
   boceto: {
     nombre: "Cuadro Ventana a Ciudades",
-    descripcion: "Un inquietante lienzo firmado por R. Pickman que muestra una urbe de torres imposibles e inclinadas bajo un firmamento pesadillesco plagado de múltiples lunas.",
+    descripcion: "Un inquietante lienzo firmado por Robert Pickman que muestra una urbe de torres imposibles e inclinadas bajo un firmamento pesadillesco plagado de múltiples lunas.",
   },
 
   prueba_h_cuadro: {
     nombre: "Cuadro de El Banquete del Crepúsculo",
-    descripcion: "Un lúgubre lienzo firmado por R. Pickman que retrata un banquete impío, donde figuras macilentas se sientan a la mesa bajo la mirada de una encapuchada entidad armada y dos lunas gemelas que desafían las leyes del firmamento. ",
+    descripcion: "Un lúgubre lienzo firmado por Robert Pickman que retrata un banquete impío, donde figuras macilentas se sientan a la mesa bajo la mirada de una encapuchada entidad armada y dos lunas gemelas que desafían las leyes del firmamento.",
   },
 
 // ======= RICE
@@ -148,8 +151,9 @@ const OBJETOS = {
 
 
   cafe: {
+    seccion: "Objetos usables",
     nombre: "Taza de café",
-    descripcion: "Una taza de café, de loza oscura con el grabado de la Logia, de la que emana un vapor denso. Si la usas, recuperas 4 puntos de acción.",
+    descripcion: "Una taza de café con el grabado de la Logia, de la que emana un vapor denso. Si la usas, recuperas 4 puntos de acción.",
     usar: { stat: "puntos_accion", cantidad: 4 }
   },
 
@@ -167,14 +171,13 @@ const OBJETOS = {
 
   galletas: {
     nombre: "Bandeja de galletas",
-    descripcion: "Una labrada bandeja de plata con una selección de pastas caseras. Si la usas, recuperas 2 puntos de vida.",
+    descripcion: "Una bandeja de plata con una selección de pastas caseras. Si la usas, recuperas 2 puntos de vida.",
     usar: { stat: "vida", cantidad: 2 }
   },
 
-
   lata_conservas: {
     nombre: "Lata de conservas",
-    descripcion: "Un cilindro metálico de etiqueta gastada y bordes herrumbrosos, en cuyo interior y bajo el rotulo de una falsa prosperidad costera se encierra una materia oleosa y opaca, evocadora de las inmundicias que flotan en las simas abisales. Si la usas, recuperas 2 de vida.",
+    descripcion: "Un cilindro metálico de etiqueta gastada y bordes herrumbrosos, en cuyo interior y bajo el rótulo de una falsa prosperidad costera se encierra una materia oleosa y opaca. Si la usas, recuperas 2 de vida.",
     usar: { stat: "vida", cantidad: 2 }
   },
 
@@ -186,7 +189,7 @@ const OBJETOS = {
 
   bourbon: {
     nombre: "Vaso de bourbon",
-    descripcion: "Un vaso de cristal tallado con bourbon. Si lo usas, recuperas 2 puntos de cordura.",
+    descripcion: "Un vaso de cristal tallado con bourbon en su interior. Si lo usas, recuperas 2 puntos de cordura.",
     usar: { stat: "cordura", cantidad: 2 }
   },
 
@@ -198,7 +201,7 @@ const OBJETOS = {
 
   pitillera: {
     nombre: "Pitillera",
-    descripcion: "Un estuche metálico de fría superficie plateada y filigranas geométricas, que resguarda en su interior una hilera de cigarrillos marcados con fechas fatídicas; un adminículo mundano que parece exhalar el vaho ceniciento de las horas previas a un sacrificio innombrable. Si la usas, recuperas 2 puntos de cordura.",
+    descripcion: "Un estuche metálico de fría superficie plateada y filigranas geométricas, que resguarda en su interior una hilera de cigarrillos. Si la usas, recuperas 2 puntos de cordura.",
     usar: { stat: "cordura", cantidad: 2 }
   },
 
@@ -207,13 +210,19 @@ const OBJETOS = {
 
 
   invitacion: {
+    seccion: "Varios",
     nombre: "Invitación a la Logia",
     descripcion: "Una elegante invitación en pergamino grueso de la Logia del Crepúsculo de Plata.",
   },
 
-  llave_cajon: {
-    nombre: "Llave pequeña",
-    descripcion: "Una llave de latón ennegrecido y corroído por una pátina antinatural.",
+  documento1: {
+    nombre: "Hemeroteca",
+    descripcion: "Desaparecidos en la víspera de Todos los Santos.",
+  },
+
+  traduccion3: {
+    nombre: "Traducción Tomo III",
+    descripcion: "Al final, has terminado de traducir el Tomo Prohibido III del Códice.",
   },
 
   pala: {
@@ -221,23 +230,29 @@ const OBJETOS = {
     descripcion: "Una pala de hierro forjado y tosca madera, manchada con la tierra de sepulturas olvidadas.",
   },
 
+  llave_cajon: {
+    nombre: "Llave pequeña",
+    descripcion: "Una llave de latón ennegrecido y corroído por una pátina antinatural.",
+  },
+
 
 // =========================PRUEBAS===========================
 
 
   prueba_a_reloj: {
+    seccion: "Pruebas",
     nombre: "Reloj de bolsillo",
     descripcion: "Prueba A: Reloj de bolsillo detenido a las 11:05. Roto. Encontrado en el bolsillo de la víctima en el Santuario.",
   },
 
   prueba_b_informe: {
     nombre: "Informe del Dr. Brewer",
-    descripcion: "Prueba B: Herida penetrante con arma de filo larga. Restos de hidrato de cloral.",
+    descripcion: "Prueba B: Herida penetrante compatible con arma de filo largo. Restos de hidrato de cloral en la sangre.",
   },
 
   prueba_c_copa: {
     nombre: "Copa de brandy con polvo",
-    descripcion: "Prueba C: Copa de brandy con poso de polvo blanquecino en el fondo. Encontrada en el Comedor.",
+    descripcion: "Prueba C: Copa de brandy con poso de polvo blanquecino en el fondo. Encontrada encima de la chimenea del Comedor.",
   },
 
   prueba_d_nota: {
@@ -247,17 +262,17 @@ const OBJETOS = {
 
   prueba_e_pagina: {
     nombre: "Página del Necronomicón",
-    descripcion: "Según el análisis de la tinta, es una falsificación. Encontrada en el Observatorio.",
+    descripcion: "Página de Necronomicón que, según el análisis de la tinta, es una falsificación. Encontrada en el Observatorio.",
   },
 
   prueba_f_pisadas: {
-    nombre: "Marcas de pisadas",
+    nombre: "Fotografía de pisadas",
     descripcion: "Prueba F: Fotografía de pisadas en el jardín de botas de pescador con algas y salitre. También hay pisadas de zapatos.",
   },
 
   prueba_g_bayoneta: {
     nombre: "Bayoneta",
-    descripcion: "Bayoneta con manchas de pintura azul y roja en el mango, y con mancha de sangre en la hoja. Encontrada en el Jardín.",
+    descripcion: "Bayoneta con manchas de pintura azul y roja en el mango, y con mancha de sangre en la hoja. Encontrada en el suelo del Jardín.",
   },
 
 
@@ -265,12 +280,13 @@ const OBJETOS = {
 
 
   escopeta1: {
+    seccion: "Armas",
     nombre: "Escopeta Ref.: 176",
     descripcion: "Una escopeta de doble cañón con culata de madera pulida y mecanismos de acero envejecidos. Daño: 3d6"
   },
   cartuchos_escopeta1: {
     nombre: "Cartuchos para escopeta",
-    descripcion: "2 cartuchos para escopeta. Si los usas, recargas tu escopeta.",
+    descripcion: "2 cartuchos para escopeta. Si lo usas, recargas tu escopeta.",
     recarga: "solicitarRecargaEscopeta"
   },
 
@@ -280,7 +296,7 @@ const OBJETOS = {
   },
   municion_revolver1: {
     nombre: "Munición para revólver",
-    descripcion: "Una ajada caja de cartón cobija seis balas de plomo y latón en su interior alveolado. Si la usas, recargas tu revólver.",
+    descripcion: "Una ajada caja de cartón cobija seis balas de plomo y latón en su interior alveolado. Si lo usas, recargas tu revólver.",
     recarga: "solicitarRecargaRevolver"
   },
 
@@ -325,6 +341,7 @@ const OBJETOS_CURAR = {};
 const OBJETOS_REGISTRAR = {};
 const OBJETOS_COSTE_PA = {};
 const OBJETOS_OCULTOS_REGISTRO = [];
+const OBJETOS_SECCIONES = {};
 Object.keys(OBJETOS).forEach(function (k) {
   var o = OBJETOS[k];
   NOMBRES_VISIBLES[k] = o.nombre;
@@ -336,4 +353,5 @@ Object.keys(OBJETOS).forEach(function (k) {
   if (o.recarga) OBJETOS_RECARGA[k] = o.recarga;
   if (o.entregable === false) OBJETOS_NO_ENTREGABLES.push(k);
   if (o.ocultoRegistro === true) OBJETOS_OCULTOS_REGISTRO.push(k);
+  if (o.seccion) OBJETOS_SECCIONES[k] = o.seccion;
 });

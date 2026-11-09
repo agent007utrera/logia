@@ -104,7 +104,7 @@ const objectivesData = {
         title: "Secretos que conoces",
         unlocked: true,
         items: [
-            { text: 'El ritual de Transposición con <span class="char-hover">PICKMAN<img src="images/f_pickman.jpg" class="char-hover-img" alt=""></span>, NO lo reveles bajo ningún concepto.', type: "info" },
+            { text: 'El ritual de Transposición con <span class="char-hover">PICKMAN<img src="images/f_pickman.jpg" class="char-hover-img" alt=""></span>, <strong style="color:#e03c3c;">NO</strong> lo reveles bajo ningún concepto.', type: "info" },
             { text: 'En 1923, un entrometido siguió a un sospechoso hasta la Sede: fue la Ofrenda de ese año. Fue sacrificado. No recuerdas su nombre.', type: "info" },
             { text: 'El doctor <span class="char-hover">BREWER<img src="images/f_brewer.jpg" class="char-hover-img" alt=""></span> hace desaparecer los cuerpos en el crematorio del Sanatorio. Su Ofrenda de 1924 fue un paciente suyo, Jonas P.', type: "info" },
             { text: 'El profesor <span class="char-hover">RICE<img src="images/f_rice.jpg" class="char-hover-img" alt=""></span> llevó a un alumno suyo, Harlan Pierce, a la Sede en la víspera de 1925: fue la Ofrenda de ese año.', type: "info" },
@@ -130,7 +130,7 @@ const objectivesData = {
             { text: 'Ordena al inspector <span class="char-hover">NICHOLS<img src="images/f_nichols.jpg" class="char-hover-img" alt=""></span> que vigile el Jardín sobre las 23:00, cuando tú te retires al Santurario. Que nadie entre ni salga por la verja. Prométele 100 dólares «por las molestias».', type: "check" },
             { text: 'Pide al doctor <span class="char-hover">BREWER<img src="images/f_brewer.jpg" class="char-hover-img" alt=""></span> que te lleve el elixir al Santuario a las 23:00. Acepta de él una copa de brandy si te la ofrece durante la velada.', type: "check" },
             { type: "line" },
-       	    { text: 'Hacia las 23:00 anuncia que te retiras al Santuario y que acudan allí cuando suene el gong 3 veces. Guarda en tu bolsillo interior la Prueba A (reloj de bolsillo detenido a las 23:05). Si alguien te ha colado una nota en el bolsillo, no la saques ni la leas. Más tarde, tendrás que caerte muerto en el Santuario, y entonces sonara el gong 3 veces.', type: "check" }
+       	    { text: 'Hacia las 23:00 anuncia que te retiras al Santuario y que acudan allí cuando suene el gong 3 veces. Guarda en tu bolsillo interior la Prueba A (reloj de bolsillo detenido a las 23:05). Si alguien te ha colado una nota en el bolsillo, no la saques ni la leas. Más tarde, tendrás que caerte muerto en el Santuario, y entonces sonara el gong 3 veces.', type: "info" }
         ]
     },
 
@@ -140,7 +140,7 @@ const objectivesData = {
         code: "mesa",
         sheetKey: "capitulo3",
         items: [
-       	    { text: 'Reportero del Arkham Advertiser, 29 años. Te has colado en la Logia porque estás investigando las desapariciones de años anteriores durante la víspera de Todos los Santos. Entraste en el Estudio de <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span>, forzando la cerradura y hojeando el Libro Mayor. Leíste entradas de 1923 («Ofrenda: Michael N.»), 1924 («Ofrenda: Jonas P.») y 1925 («Ofrenda: Harlan P.»), y la de esta noche: 1926 («Transposición. Receptáculo: R. P.»). No sabes qué significa. A las 23:10 entraste en el Santuario con todos y te presentaste.', type: "info" }
+       	    { text: 'Ahora eres REX SIMMONS. Reportero del Arkham Advertiser, 29 años. Te has colado en la Logia porque estás investigando las desapariciones de años anteriores durante la víspera de Todos los Santos. Entraste en el Estudio de <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span>, forzando la cerradura y hojeando el Libro Mayor. Leíste entradas de 1923 («Ofrenda: Michael N.»), 1924 («Ofrenda: Jonas P.») y 1925 («Ofrenda: Harlan P.»), y la de esta noche: 1926 («Transposición. Receptáculo: R. P.»). No sabes qué significa. A las 23:10 entraste en el Santuario con todos y te presentaste.', type: "info" }
         ]
     },
 
@@ -158,5 +158,4 @@ const objectivesData = {
        	    { text: 'Habla con todo el mundo. Saca información.', type: "check" }
         ]
     }
-
 };

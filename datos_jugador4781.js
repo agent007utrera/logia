@@ -103,7 +103,7 @@ const objectivesData = {
         title: "Secretos que conoces",
         unlocked: true,
         items: [
-            { text: 'Tu hermano Michael desapareció la víspera de Todos los Santos de 1923 en French Hill. Sospechas de la Logia. NADIE DEBE SABER QUE MICHAEL ERA TU HERMANO.', type: "info" },
+            { text: 'Tu hermano Michael desapareció la víspera de Todos los Santos de 1923 en French Hill. Sospechas de la Logia. <strong style="color:#e03c3c;">NADIE DEBE SABER QUE MICHAEL ERA TU HERMANO</strong>.', type: "info" },
             { text: 'Recibes dinero de la Logia. Eso no debe saberse.', type: "info" },
             { text: 'El doctor <span class="char-hover">BREWER<img src="images/f_brewer.jpg" class="char-hover-img" alt=""></span> sirvió contigo en el Argonne, durante la Gran Guerra. ', type: "info" },
             { text: 'Crees que el profesor <span class="char-hover">RICE<img src="images/f_rice.jpg" class="char-hover-img" alt=""></span> miente sobre la desaparición de su alumno Harlan Pierce. ', type: "info" },
@@ -122,14 +122,14 @@ const objectivesData = {
             { type: "space" },
             { text: 'Si <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span> te ordena hacer algo, respóndele: «A sus órdenes, gran maestre».', type: "check" },
             { text: 'Interroga al profesor <span class="char-hover">RICE<img src="images/f_rice.jpg" class="char-hover-img" alt=""></span> por su alumno Harlan Pierce: ¿dónde está? ¿qué pasó con él? Presiónalo.', type: "check" },
-            { text: 'Pide al doctor <span class="char-hover">BREWER<img src="images/f_brewer.jpg" class="char-hover-img" alt=""></span> los registros del Sanatorio de 1923 a 1925. Tienes que conseguir ese documento sea como sea. Si no te lo da, dile que vas a abrir una investigación en su Sanatorio para encontrar irregularidades.', type: "check" },
+            { text: 'Pide al doctor <span class="char-hover">BREWER<img src="images/f_brewer.jpg" class="char-hover-img" alt=""></span> los <strong style="color:#e03c3c;">REGISTROS DEL SANATORIO</strong> de 1923 a 1925. Tienes que conseguir ese documento sea como sea. Si no te lo da, dile que vas a abrir una investigación en su Sanatorio para encontrar irregularidades.', type: "check" },
             { text: 'Si alguien te pide el Expediente de Harlan Pierce, entrégalo solamente a cambio de los Registros del Sanatorio de 1923 a 1925. Si ya tienes los Registros en tu poder, pide algo de dinero por el Expediente, recuerda: eres corrupto.', type: "check" },
             { text: 'Averigua qué hace <span class="char-hover">CRANE<img src="images/f_crane.jpg" class="char-hover-img" alt=""></span> tratando con marineros de Innsmouth en el puerto. Estuviste investigando y te dieron ese chivatazo.', type: "check" },
             { text: 'Observa a <span class="char-hover">PICKMAN<img src="images/f_pickman.jpg" class="char-hover-img" alt=""></span>: ¿qué ve cuando «ve cosas»? Que te hable de sus visiones. Que te cuente al menos una.', type: "check" },
             { text: 'No te gusta hablar de tu época durante la Gran Guerra. Fue un periodo traumático para ti. Si alguien te habla de la guerra, cambia de tema.', type: "check" },
             { text: 'Gánate la confianza de todos: pregunta a cada uno si teme a alguien esta noche.', type: "check" },
             { type: "line" },
-            { text: 'A las 23:00 h, cuando <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span> se retire al Santuario, debes marcharte a solas a la Biblioteca, sin decir a nadie adónde vas y sin que nadie te vea allí. Después lee la parte «¿Qué hiciste?» Más tarde, cuando suene el gong 3 veces, podrás ir al Santuario.', type: "check" }
+            { text: 'A las 23:00 h, cuando <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span> se retire al Santuario, debes marcharte a solas a la Biblioteca, sin decir a nadie adónde vas y sin que nadie te vea allí. Después lee la parte «¿Qué hiciste?» Más tarde, cuando suene el gong 3 veces, podrás ir al Santuario.', type: "info" }
         ]
     },
 
@@ -139,8 +139,8 @@ const objectivesData = {
         code: "mesa",
         sheetKey: "capitulo3",
         items: [
-            { text: 'Eres el asesino. No se lo digas a nadie. Hace dos semanas viste el Libro Mayor abierto sobre el escritorio de <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span>: «1923 — Ofrenda: patrullero Michael Nichols». Desde entonces supiste que el Gran Maestre mató a tu hermano Michael. Decidiste que ese bastardo debía morir.', type: "info" },
-       	    { text: 'A las 23:00 simulaste ir a las celdas, pero entraste en la Biblioteca y te ocultaste tras la estantería de los atlas. Gracias a los planos del Archivo Municipal que consultaste hace una semana, sabías que había un pasadizo secreto que llevaba al Santuario desde allí. Bajo tu uniforme, llevabas una bayoneta Lebel de tu época de la Gran Guerra. Esperaste a que el doctor <span class="char-hover">BREWER<img src="images/f_brewer.jpg" class="char-hover-img" alt=""></span> saliera por el pasadizo, venía de darle el elixir. A las 23:05, entraste al Santuario por el pasadizo y viste a <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span> adormilado, te reconoció, sonrió y te dijo: «Es pronto aún, Inspector». No terminó de hablar, cuando le clavaste la bayoneta bajo las costillas. No hubo lucha. El reloj de <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span> se cayó y se rompió. Saliste de nuevo por la Biblioteca. Lanzaste la bayoneta desde el pasillo al Observatorio y fuiste a las Celdas. Delante de todo el mundo debes parecer el más inocente de todos, y tendrás que decir que estuviste en las Celdas todo el tiempo.', type: "info" }
+            { text: '<strong style="color:#e03c3c;">ERES EL ASESINO</strong>. No se lo digas a nadie. Hace dos semanas viste el Libro Mayor abierto sobre el escritorio de <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span>: «1923 — Ofrenda: patrullero Michael Nichols». Desde entonces supiste que el Gran Maestre mató a tu hermano Michael. Decidiste que ese bastardo debía morir.', type: "info" },
+       	    { text: 'A las 23:00 simulaste ir a las celdas, pero entraste en la Biblioteca y te ocultaste tras la estantería de los atlas. Gracias a los planos del Archivo Municipal que consultaste hace una semana, sabías que había un pasadizo secreto que llevaba al Santuario desde allí. Bajo tu uniforme, llevabas una bayoneta Lebel de tu época de la Gran Guerra. Esperaste a que el doctor <span class="char-hover">BREWER<img src="images/f_brewer.jpg" class="char-hover-img" alt=""></span> saliera por el pasadizo, venía de darle el elixir. A las 23:05, entraste al Santuario por el pasadizo y viste a <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span> adormilado, te reconoció, sonrió y te dijo: «Es pronto aún, Inspector». No terminó de hablar, cuando le clavaste la bayoneta bajo las costillas. No hubo lucha. El reloj de <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span> se cayó y se rompió. Saliste de nuevo por la Biblioteca. Lanzaste la bayoneta desde el pasillo al Observatorio y fuiste a las Celdas. Delante de todo el mundo debes parecer el más inocente de todos, y tendrás que decir que estuviste en las <strong style="color:#e03c3c;">CELDAS TODO EL TIEMPO</strong>.', type: "info" }
         ]
     },
 
@@ -151,21 +151,20 @@ const objectivesData = {
         sheetKey: "capitulo4",
         items: [
             { type: "space" },
-            { text: 'Lee las Instrucciones después del asesinato en voz alta. ', type: "check" },
-            { text: 'Recoge el reloj (Prueba A) del bolsillo de la víctima.', type: "check" },
-            { text: 'Pide al doctor <span class="char-hover">BREWER<img src="images/f_brewer.jpg" class="char-hover-img" alt=""></span> el Informe preliminar de la víctima (Prueba B).', type: "check" },
-            { text: 'Pide a <span class="char-hover">PICKMAN<img src="images/f_pickman.jpg" class="char-hover-img" alt=""></span> la Prueba H. Que te hable de ese cuadro, El Banquete del Crepúsculo.', type: "check" },
-            { text: 'Tienes que conseguir las Pruebas C, D, E, F y G.', type: "check" },
-            { text: 'Si te preguntan, miente y di que estuviste en las Celdas todo el tiempo, por orden de <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span>.', type: "check" },
+            { text: 'Recoge el reloj (<strong style="color:#e03c3c;">PRUEBA A</strong>) del bolsillo de la víctima.', type: "check" },
+            { text: 'Pide al doctor <span class="char-hover">BREWER<img src="images/f_brewer.jpg" class="char-hover-img" alt=""></span> el Informe preliminar de la víctima (<strong style="color:#e03c3c;">PRUEBA B</strong>).', type: "check" },
+            { text: 'Pide a <span class="char-hover">PICKMAN<img src="images/f_pickman.jpg" class="char-hover-img" alt=""></span> la <strong style="color:#e03c3c;">PRUEBA H</strong>. Que te hable de ese cuadro, El Banquete del Crepúsculo.', type: "check" },
+            { text: 'Tienes que conseguir las <strong style="color:#e03c3c;">PRUEBAS C, D, E, F y G</strong>.', type: "check" },
+            { text: 'Si te preguntan, miente y di que estuviste en las <strong style="color:#e03c3c;">CELDAS TODO EL TIEMPO</strong>, por orden de <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span>.', type: "check" },
             { text: 'Sin que sea muy «evidente», orienta las sospechas hacia el doctor <span class="char-hover">BREWER<img src="images/f_brewer.jpg" class="char-hover-img" alt=""></span> (ya que la víctima fue drogada con cloral y fue el último en visitarlo para llevarle el elixir).', type: "check" },
-            { text: 'Consigue los Registros del Sanatorio de <span class="char-hover">BREWER<img src="images/f_brewer.jpg" class="char-hover-img" alt=""></span> si no lo has hecho todavía.', type: "check" },
+            { text: 'Consigue los <strong style="color:#e03c3c;">REGISTROS DEL SANATORIO</strong> de <span class="char-hover">BREWER<img src="images/f_brewer.jpg" class="char-hover-img" alt=""></span> si no lo has hecho todavía.', type: "check" },
             { text: 'Pregúntale al doctor <span class="char-hover">BREWER<img src="images/f_brewer.jpg" class="char-hover-img" alt=""></span> cómo llegó al Santuario si la puerta estaba cerrada.', type: "check" },
             { text: 'Desacredita a <span class="char-hover">PICKMAN<img src="images/f_pickman.jpg" class="char-hover-img" alt=""></span> dile a todos que «es un lunático del Sanatorio».', type: "check" },
             { text: '¿Por qué <span class="char-hover">PICKMAN<img src="images/f_pickman.jpg" class="char-hover-img" alt=""></span> tiene las manos manchadas de pintura roja y azul?', type: "check" },
        	    { text: 'Interroga a cada sospechoso al menos una vez y toma notas de lo que digan. Haz el paripé.', type: "check" },
        	    { text: 'Si te preguntan por la bayoneta: di que no guardas ningún recuerdo de la guerra, detestas esa época de tu vida. Cambia de tema.', type: "check" },
             { type: "line" },
-       	    { text: 'Ganas si la mayoría no te incrimina durante la votación. Tu deber es presentar las pruebas, no resolver el caso. Votarás a quién tú creas que va a votar la mayoría, para que tenga más votos en contra que tú.', type: "check" }
+       	    { text: 'Ganas si la mayoría no te incrimina durante la votación. Tu deber es presentar las pruebas, no resolver el caso. Votarás a quién tú creas que va a votar la mayoría, para que tenga más votos en contra que tú.', type: "info" }
         ]
     }
 };

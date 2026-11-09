@@ -106,17 +106,57 @@ body::after {
     box-shadow: inset 0 0 22px rgba(155, 240, 192, 0.85);
 }
 
-#hsPuerta { top: 7.2%; left: 34.3%; width: 21.4%; height: 84.6%; clip-path: polygon(0.0% 0.0%, 95.9% 8.5%, 100.0% 82.3%, 8.6% 100.0%, 0.0% 91.5%); }
+#hsPuerta {
+    top: 5%;
+    left: 33%;
+    width: 21%;
+    height: 95%;
+    clip-path: polygon(0% 0%, 100% 12%, 100% 86%, 31% 100%, 3% 100%);
+}
+
+#hsRejaFondo {
+    top: 16%;
+    left: 67%;
+    width: 10%;
+    height: 59%;
+    clip-path: polygon(0% 100%, 94% 80%, 100% 21%, 95% 15%, 85% 10%, 78% 6%, 69% 3%, 63% 1%, 51% 1%, 38% 0%, 33% 1%, 23% 4%, 17% 7%, 13% 10%, 11% 14%, 5% 18%);
+}
+
+#hsMuro {
+    top: 0%;
+    left: 88%;
+    width: 12%;
+    height: 99%;
+    clip-path: polygon(24% 0%, 7% 87%, 0% 89%, 0% 93%, 61% 100%, 100% 100%, 99% 0%);
+}
+
+#hsCorredor {
+    top: 10%;
+    left: 77%;
+    width: 13%;
+    height: 55%;
+    clip-path: polygon(6% 12%, 100% 0%, 89% 100%, 0% 98%);
+}
+
+#hsLosas {
+    top: 62%;
+    left: 46%;
+    width: 49%;
+    height: 37%;
+    clip-path: polygon(0% 99%, 66% 0%, 89% 6%, 87% 80%, 100% 100%);
+}
+
+#hsCamastro {
+    top: 49%;
+    left: 19%;
+    width: 11%;
+    height: 21%;
+    clip-path: polygon(5% 92%, 0% 6%, 18% 5%, 22% 12%, 87% 6%, 96% 0%, 100% 100%, 25% 78%, 22% 91%);
+}
+
 #hsVentanuco { top: 24.5%; left: 40.8%; width: 9.7%; height: 15.2%; clip-path: polygon(0.0% 0.0%, 100.0% 23.1%, 98.5% 100.0%, 1.5% 95.7%); }
-#hsPlaca { top: 42.1%; left: 43.5%; width: 4.9%; height: 4.2%; clip-path: polygon(0.0% 0.0%, 100.0% 6.2%, 97.0% 100.0%, 3.0% 100.0%); }
-#hsCandado { top: 48.4%; left: 32.7%; width: 9.7%; height: 16.7%; clip-path: polygon(0.0% 0.0%, 100.0% 0.0%, 100.0% 41.4%, 75.8% 53.1%, 75.8% 100.0%, 50.8% 100.0%, 50.8% 53.1%, 0.0% 37.5%); }
 #hsCadena { top: 44.9%; left: 13.5%; width: 4.2%; height: 15.0%; clip-path: polygon(0.0% 0.0%, 100.0% 0.0%, 100.0% 100.0%, 0.0% 100.0%); }
-#hsCamastro { top: 50.5%; left: 19.3%; width: 10.6%; height: 20.4%; clip-path: polygon(0.0% 0.0%, 96.6% 2.5%, 100.0% 84.1%, 65.5% 100.0%, 3.4% 74.5%); }
 #hsFarol { top: 22.1%; left: 62.0%; width: 3.8%; height: 13.7%; clip-path: polygon(0.0% 0.0%, 90.4% 1.9%, 100.0% 71.4%, 51.9% 100.0%, 3.8% 95.2%); }
-#hsRejaFondo { top: 16.3%; left: 67.1%; width: 9.1%; height: 54.0%; clip-path: polygon(0.0% 6.0%, 37.9% 0.0%, 90.3% 16.9%, 100.0% 71.1%, 74.2% 89.2%, 1.6% 100.0%); }
-#hsCorredor { top: 13.0%; left: 78.4%; width: 11.2%; height: 51.4%; clip-path: polygon(0.0% 2.5%, 100.0% 0.0%, 100.0% 100.0%, 24.8% 93.7%, 0.0% 70.9%); }
-#hsLosas { top: 65.1%; left: 49.7%; width: 43.9%; height: 34.9%; clip-path: polygon(16.7% 56.0%, 60.0% 0.0%, 90.0% 22.4%, 100.0% 100.0%, 0.0% 100.0%); }
-#hsMuro { top: 0.0%; left: 89.3%; width: 10.7%; height: 91.1%; clip-path: polygon(3.4% 0.0%, 100.0% 0.0%, 100.0% 100.0%, 0.0% 98.6%); }
 
 .player-hud {
     position: fixed; top: 15px; right: 20px;
@@ -235,7 +275,7 @@ body.susto-activo .player-hud, body.susto-activo .back-btn, body.susto-activo #t
 
         <!-- HOTSPOTS (los marcados como OBJETO RECOGIBLE dan un objeto; el resto solo describen) -->
         <!-- Puerta de la celda -->
-        <div class="hotspot" id="hsPuerta" data-etiqueta="Puerta de la celda" onclick="playClick(); abrirInfo('La puerta de la celda', 'La puerta de roble, reforzada con flejes de hierro devorados por el óxido, está cerrada desde fuera. Y sin embargo la madera ha sido arañada desde dentro: surcos largos y profundos, agrupados de tres en tres, que a medida que ascienden por las tablas se hacen más desesperados y menos humanos. Algunas uñas, o lo que hayan sido, siguen incrustadas en la veta. Al apoyar el oído oís un lento rasgueo, como de alguien que contase algo contra la madera.')"></div>
+        <div class="hotspot" id="hsPuerta" data-etiqueta="Puerta de la celda" onclick="playClick(); abrirInfo('La puerta de la celda', 'La puerta de roble, reforzada con flejes de hierro devorados por el óxido, está abierta. La madera ha sido arañada desde dentro: surcos largos y profundos, agrupados de tres en tres, que a medida que ascienden por las tablas se hacen más desesperados y menos humanos. Algunas uñas, o lo que hayan sido, siguen incrustadas en la veta.')"></div>
 
         <!-- Ventanuco -->
         <div class="hotspot" id="hsVentanuco" data-etiqueta="Ventanuco" onclick="playClick(); abrirInfo('El ventanuco', 'Por el ventanuco enrejado solo se ve una oscuridad compacta, más espesa que la de la propia celda. No sentís una corriente de aire, sino un tibio vaho, como si algo hubiera estado respirando al otro lado hasta hace un segundo. Retiráis el rostro justo a tiempo: sobre los barrotes brilla un reguero húmedo y filamentoso, a la altura exacta de vuestros ojos.')"></div>
@@ -404,11 +444,11 @@ const OBJETOS = {
 const SUSTOS = {
     losas: {
         video: "videos/jumpscare_rat.mp4",
-        cordura: 2,
+        cordura: 1,
         titulo: "Las losas",
         // Tras ver el susto, las siguientes veces ESE jugador ve la descripción original del hotspot.
         // (si quieres volver a la frase corta tipo "No pienso mirar ahí otra vez", usa textoYaVisto en vez de textoOriginal)
-        textoOriginal: "Grandes losas de piedra, desiguales, ennegrecidas por siglos de humedad. Entre las juntas se acumulan manchas oscuras y viscosas que alguien ha intentado fregar, sin éxito, con un cepillo cuyas cerdas aún yacen en los surcos. Las manchas trazan un arrastre, ancho como un cuerpo, que arranca a los pies de la celda 3 y se pierde en el corredor sin que las marcas permitan saber si lo que se arrastraba iba hacia dentro o hacia fuera.",
+        textoOriginal: "Grandes losas de piedra, desiguales, ennegrecidas por siglos de humedad. Entre las juntas se acumulan manchas oscuras y viscosas que alguien ha intentado fregar, sin éxito, con un cepillo cuyas cerdas aún yacen en los surcos. Las manchas trazan un arrastre, ancho como un cuerpo, que arranca a los pies de la celda y se pierde en el corredor sin que las marcas permitan saber si lo que se arrastraba iba hacia dentro o hacia fuera.",
         zoom: 1.3,   // acerca el vídeo para dejar fuera franjas negras que lleve el propio .mp4 (1 = sin zoom). Prueba con &zoom=1.5 en la dirección
         tituloTras: "¡ADVERTENCIA!",
         textoTras: "Una rata enorme surge de entre las juntas de las losas con un chillido que os hiela la sangre. Del susto has perdido"   // + " 2 de cordura."

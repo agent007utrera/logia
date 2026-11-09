@@ -92,7 +92,7 @@ const objectivesData = {
             { type: "line" },
             { text: "Habilidad especial: Traducción", type: "subheading" },
             { type: "space" },
-            { text: 'Cualquier jugador puede pedirte que le traduzcas un Tomo Prohibido de la Biblioteca y, por 50 dólares, puedes hacerlo «con autoridad académica». Puedes traducirlo fielmente o con un pequeño matiz a tu favor. Tú decides. Solamente has traducido los Tomos I y II. Para traducir el Tomo III necesitas el Espejo de Nitocris. Las traducciones las tienes en tu inventario.', type: "info" },
+            { text: 'Cualquier jugador puede pedirte que le traduzcas un Tomo Prohibido de la Biblioteca y, por 50 dólares, puedes hacerlo «con autoridad académica». Solamente has traducido los Tomos I y II. Para traducir el Tomo III necesitas el Espejo de Nitocris. Las traducción de los Tomos I y II la tienes en tu inventario.', type: "info" },
             { type: "line" },
             { text: "Actuando y vestuario", type: "subheading" },
             { type: "space" },
@@ -104,7 +104,7 @@ const objectivesData = {
         title: "Secretos que conoces",
         unlocked: true,
         items: [
-            { text: 'Según el Códice, esta noche el Gran Maestre <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span> realizará un ritual de Transposición, en el que la mente del Receptáculo morirá (el cuerpo del receptáculo recibirá la mente del Gran Maestre). Sospechas que va a ser el cuerpo de <span class="char-hover">PICKMAN<img src="images/f_pickman.jpg" class="char-hover-img" alt=""></span>. No lo reveles sin ganar nada a cambio.', type: "info" },
+            { text: 'Según el Códice, esta noche el Gran Maestre <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span> realizará un ritual de Transposición, en el que la mente del Receptáculo morirá (el cuerpo del receptáculo recibirá la mente del Gran Maestre). Sospechas que va a ser el cuerpo de <span class="char-hover">PICKMAN<img src="images/f_pickman.jpg" class="char-hover-img" alt=""></span> ya que es más joven, aunque no estás seguro. No lo reveles sin ganar nada a cambio.', type: "info" },
             { text: 'Sabes que el doctor <span class="char-hover">BREWER<img src="images/f_brewer.jpg" class="char-hover-img" alt=""></span> hace desaparecer los cuerpos de los sacrificios de la Logia en el crematorio del Sanatorio.', type: "info" },
             { text: 'El anticuario <span class="char-hover">CRANE<img src="images/f_crane.jpg" class="char-hover-img" alt=""></span> vende falsificaciones de páginas del Necronomicón que tú fabricas. También sabes que <span class="char-hover">CRANE<img src="images/f_crane.jpg" class="char-hover-img" alt=""></span> le debe mucho dinero a un marinero de Innsmouth.', type: "info" },
             { text: 'El inspector <span class="char-hover">NICHOLS<img src="images/f_nichols.jpg" class="char-hover-img" alt=""></span> es corrupto. Él recibe dinero de la Logia.', type: "info" },
@@ -121,14 +121,14 @@ const objectivesData = {
             { type: "space" },
             { text: 'Habla con <span class="char-hover">CRANE<img src="images/f_crane.jpg" class="char-hover-img" alt=""></span>: crees que <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span> sospecha que la página del Necronomicón, que tú fabricaste y que él le vendió, es una falsificación. Tenéis que mentir y dar la misma versión los dos: «la página es auténtica; la tinta es del siglo VIII». Pídele a <span class="char-hover">CRANE<img src="images/f_crane.jpg" class="char-hover-img" alt=""></span> algo de dinero si quiere que tú mientas y des esa versión.', type: "check" },
             { text: 'Pregunta a <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span> si tú vas a ser su sucesor.', type: "check" },
-            { text: 'Si <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span> te pide que termines de traducir el Códice, dile que te falta el último Tomo Prohibido, el número III. Para terminar de traducirlo, necesitas el Espejo de Nitocris y mirar su reverso. Averigua si alguien lo tiene. Consigue ese espejo como sea.', type: "check" },
-            { text: 'Introduce, sin que nadie te vea, la nota anónima que tienes en tu inventario en el bolsillo de <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span>. Cuando estés hablando con él a solas, entrégaselo sin que se dé cuenta.', type: "check" },
-            { text: 'Convence a <span class="char-hover">PICKMAN<img src="images/f_pickman.jpg" class="char-hover-img" alt=""></span> para hablar en privado con él. Dile: «Es urgente, es sobre tu destino». Puedes comentarle en privado tus sospechas a cambio de dinero.', type: "check" },
+            { text: 'Si <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span> te pide que termines de traducir el Códice, dile que te falta el último Tomo Prohibido, el número III. Para terminar de traducirlo, necesitas el <strong style="color:#e03c3c;">ESPEJO DE NITOCRIS</strong>. Averigua si alguien lo tiene. Consigue ese espejo como sea.', type: "check" },
+            { text: 'Introduce, sin que nadie te vea, la <strong style="color:#e03c3c;">NOTA ANÓNIMA</strong> que tienes en tu inventario en el bolsillo de <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span>. Cuando estés hablando con él a solas, entrégaselo sin que se dé cuenta.', type: "check" },
+            { text: 'Convence a <span class="char-hover">PICKMAN<img src="images/f_pickman.jpg" class="char-hover-img" alt=""></span> para hablar en privado con él. Dile: «Es urgente, es sobre tu destino». A cambio de dinero y en privado, puedes comentarle lo que está planeando <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span>.', type: "check" },
             { text: 'Pregúntale al doctor <span class="char-hover">BREWER<img src="images/f_brewer.jpg" class="char-hover-img" alt=""></span> qué le ocurrió a tu alumno Harlan Pierce hace un año. Tú lo trajiste a la Logia, pero no sabes nada más. No sabes qué le hicieron.', type: "check" },
             { text: 'Si el inspector <span class="char-hover">NICHOLS<img src="images/f_nichols.jpg" class="char-hover-img" alt=""></span> te pregunta por tu alumno Harlan Pierce, dile que no sabes nada de él desde hace un año. Miéntele, dile que crees que se marchó a Europa a estudiar o algo así.', type: "check" },
-            { text: 'Ofrécete para traducir los Tomos Prohibidos a todos los jugadores, por unos 50$ cada uno. Las traducciones están en tu inventario.', type: "check" },
+            { text: 'Ofrécete para traducir los Tomos Prohibidos a todos los jugadores, por unos 50$ cada uno. La traducción de los Tomos I y II está en tu inventario.', type: "check" },
             { type: "line" },
-       	    { text: 'A las 23:00 h, cuando <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span> se retire al Santuario, debes marcharte a solas al Vestíbulo, sin decir a nadie adónde vas y sin que nadie te vea allí. Después lee la parte «¿Qué hiciste?» Más tarde, cuando suene el gong 3 veces, podrás ir al Santuario.', type: "check" }
+       	    { text: 'A las 23:00 h, cuando <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span> se retire al Santuario, debes marcharte a solas al Vestíbulo, sin decir a nadie adónde vas y sin que nadie te vea allí. Después lee la parte «¿Qué hiciste?» Más tarde, cuando suene el gong 3 veces, podrás ir al Santuario.', type: "info" }
         ]
     },
 
@@ -138,7 +138,7 @@ const objectivesData = {
         code: "mesa",
         sheetKey: "capitulo3",
         items: [
-       	    { text: 'Estuviste en el Vestíbulo hasta que sonó el gong. Estuviste traduciendo el Tomo Prohibido III del Códice: «Si la sangre del Maestro cae antes de la hora señalada, su espíritu quedará atado a esta casa hasta que la verdad sea dicha». Puedes vender esa traducción también si quieres.', type: "info" }
+       	    { text: 'A las 23:00 h, estuviste en el Vestíbulo traduciendo el Tomo Prohibido III del Códice. Si conseguiste el «Espejo de Nitocris», has completado la traducción y la tienes en tu inventario. Después, puedes vender esa traducción también al resto de miembros si quieres. Ahora espera a que suene el gong 3 veces.', type: "info" }
         ]
     },
 
@@ -150,7 +150,7 @@ const objectivesData = {
         items: [
             { type: "space" },
             { text: 'No eres el asesino. Descubre quién mató a <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span>.', type: "check" },
-            { text: 'Consigue el Espejo de Nitocris, si aún no lo has hecho.', type: "check" },
+            { text: 'Consigue el <strong style="color:#e03c3c;">ESPEJO DE NITOCRIS</strong>, si aún no lo has hecho.', type: "check" },
             { text: 'No cuentes que avisaste a <span class="char-hover">PICKMAN<img src="images/f_pickman.jpg" class="char-hover-img" alt=""></span>, ni que conocías el ritual de Transposición. Aunque si te acorralan, tendrás que confesar.', type: "check" },
             { text: 'Si te acusan con la nota anónima (Prueba D): puedes decir que fue un gesto desesperado para frenar a <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span>; di que «presentías» que iba a ocurrir algo malo, aunque no sabías exactamente qué iba a pasar.', type: "check" },
             { text: 'Acusa al doctor <span class="char-hover">BREWER<img src="images/f_brewer.jpg" class="char-hover-img" alt=""></span>: es el único con conocimiento de sedantes y fue el último en dar el elixir a <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span> en el Santuario.', type: "check" },

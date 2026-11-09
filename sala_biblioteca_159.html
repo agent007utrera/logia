@@ -130,14 +130,28 @@ body::after {
     clip-path: polygon(0% 42%, 29% 4%, 49% 0%, 99% 16%, 100% 50%, 65% 100%, 20% 76%);
 }
 
+#hsLampara {
+    top: 53%;
+    left: 68%;
+    width: 9%;
+    height: 22%;
+    clip-path: polygon(100% 33%, 93% 4%, 19% 0%, 0% 19%, 13% 31%, 47% 36%, 41% 52%, 35% 76%, 20% 90%, 39% 99%, 69% 100%, 85% 93%, 71% 77%, 73% 61%, 73% 45%);
+}
+
+#hsPergaminos {
+    top: 75%;
+    left: 44%;
+    width: 13%;
+    height: 12%;
+    clip-path: polygon(5% 55%, 91% 0%, 100% 36%, 16% 100%, 8% 96%, 0% 72%);
+}
+
 #hsPasadizo { top: 28.0%; left: 29.2%; width: 9.4%; height: 44.9%; clip-path: polygon(0.0% 2.9%, 74.2% 0.0%, 97.7% 5.8%, 100.0% 94.2%, 62.5% 100.0%, 3.9% 95.7%); }
 #hsEstanteria { top: 26.0%; left: 38.6%; width: 12.7%; height: 44.9%; clip-path: polygon(0.0% 1.4%, 96.0% 0.0%, 100.0% 98.6%, 4.0% 100.0%); }
+
 #hsTapiz { top: 0.0%; left: 27.1%; width: 13.2%; height: 17.6%; clip-path: polygon(0.0% 3.7%, 98.9% 0.0%, 100.0% 100.0%, 1.7% 92.6%); }
-#hsLampara { top: 53.6%; left: 68.8%; width: 8.2%; height: 20.8%; clip-path: polygon(0.0% 5.0%, 89.3% 0.0%, 100.0% 20.6%, 80.4% 36.2%, 67.0% 98.8%, 17.9% 100.0%, 31.2% 36.2%); }
 #hsLibroDibujos { top: 75.9%; left: 64.0%; width: 18.3%; height: 12.9%; clip-path: polygon(0.0% 39.4%, 42.0% 0.0%, 100.0% 37.4%, 84.0% 69.7%, 36.0% 100.0%); }
 #hsLibroCentral { top: 65.8%; left: 52.5%; width: 13.3%; height: 10.8%; clip-path: polygon(0.0% 42.2%, 50.5% 0.0%, 100.0% 27.7%, 89.0% 66.3%, 28.6% 100.0%); }
-#hsPergaminos { top: 76.8%; left: 45.2%; width: 12.5%; height: 9.4%; clip-path: polygon(0.0% 48.6%, 36.5% 11.1%, 89.4% 0.0%, 100.0% 69.4%, 36.5% 100.0%, 7.1% 97.2%); }
-#hsLupa { top: 81.8%; left: 59.8%; width: 8.6%; height: 7.6%; clip-path: polygon(0.0% 6.9%, 53.0% 0.0%, 100.0% 75.9%, 91.5% 100.0%, 44.4% 55.2%, 3.4% 37.9%); }
 #hsTelescopio { top: 47.5%; left: 0.0%; width: 16.4%; height: 46.2%; clip-path: polygon(0.0% 0.0%, 56.6% 1.4%, 57.5% 18.3%, 100.0% 29.6%, 100.0% 57.7%, 62.0% 71.8%, 57.5% 95.8%, 0.0% 100.0%); }
 #hsMapas { top: 38.8%; left: 16.6%; width: 10.1%; height: 10.4%; clip-path: polygon(0.0% 0.0%, 99.3% 2.5%, 100.0% 92.5%, 1.4% 100.0%); }
 
@@ -256,7 +270,7 @@ body::after {
     40%  { filter: blur(1px) hue-rotate(-25deg); transform: skewX(-0.8deg); }
     100% { filter: none; transform: none; }
 }
-.game-container.resaca { animation: resaca 3.2s ease-out; }
+.game-container.resaca { animation: resaca 10s ease-out; }
 @media (prefers-reduced-motion: reduce) { .game-container.resaca { animation: none; } }
 @keyframes tomoAparece { from { opacity: 0; transform: scale(0.96); filter: blur(3px); } to { opacity: 1; transform: none; filter: none; } }
 
@@ -545,6 +559,11 @@ function closeModal() {
     pararLocura();
     if (!tomoPendiente) pararSusurros();   // al cerrar un tomo siguen sonando hasta pulsar CONTINUAR en el aviso
     document.getElementById('gameModal').style.display = 'none';
+    if (resacaPendiente) {
+        resacaPendiente = false;
+        const gc = document.getElementById('gameContainer');
+        gc.classList.remove('resaca'); void gc.offsetWidth; gc.classList.add('resaca');
+    }
     // Si se cerraba un tomo (botón CERRAR o la X), sale el aviso de la cordura perdida
     if (tomoPendiente) { const pendiente = tomoPendiente; tomoPendiente = null; mostrarPerdidaTomo(pendiente); }
 }
@@ -582,6 +601,7 @@ const TOMO_SOLO_UNA_VEZ = false;
 const TITULO_TRAS_TOMO = "¡ADVERTENCIA!";
 const TEXTO_TRAS_TOMO = "Los signos se retuercen bajo vuestros párpados y algo en vuestra mente cede, como un hilo que se rompe. Por la lectura has perdido";   // + " 1 de cordura."
 const tomosVistos = {};      // tomos ya abiertos por este jugador en esta visita
+let resacaPendiente = false;   // la resaca se lanza al cerrar el aviso de cordura
 let tomoPendiente = null;    // promesa de la cordura descontada, a la espera de que cierre el pop-up
 const TOMOS = {
     tomo1: {
@@ -616,7 +636,7 @@ async function restarEstadistica(campo, cantidad) {
 
 // Pop-up de aviso tras cerrar el tomo (mismo estilo que el de pérdida de cordura por susto).
 function mostrarPerdidaTomo(promesa) {
-    const gc = document.getElementById('gameContainer'); gc.classList.remove('resaca'); void gc.offsetWidth; gc.classList.add('resaca');
+    resacaPendiente = true;
     openModal(TITULO_TRAS_TOMO, `<p style="color:var(--verdin)">Actualizando cordura...</p>`);
     promesa
         .then(res => {
@@ -683,7 +703,7 @@ function abrirTomo(clave) {
                 <img class="tomo-ghost c" src="${cfg.imagen}" alt="">
             </div>
         </div>
-        <p class="tomo-ampliar">Pulsa la imagen para ampliarla</p>
+
         ${cfg.pie ? `<p class="tomo-pie">${cfg.pie}</p>` : ''}
         ${btnCerrar()}`);
     document.getElementById('modalContent').classList.add('modal-ancho');
