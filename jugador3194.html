@@ -1406,6 +1406,25 @@
     .aviso-dinero-cerrar:hover { color: #9bf0c0; }
     .aviso-dinero-texto strong { color: #9bf0c0; font-weight: normal; }
     .aviso-dinero-texto .aviso-dinero-cantidad { color: #6fdc9a; font-size: 1.15rem; }
+
+
+
+#phase-content-body {
+    padding-right: 18px;          /* separa el texto de la barra */
+    scrollbar-gutter: stable;     /* reserva sitio siempre, sin saltos */
+    scrollbar-width: thin;
+    scrollbar-color: var(--laton) #07100b;
+    padding-bottom: 45px;         /* que el cartel CONTINÚA no tape la última línea */
+}
+#phase-content-body::-webkit-scrollbar { width: 10px; }
+#phase-content-body::-webkit-scrollbar-track { background: #07100b; }
+#phase-content-body::-webkit-scrollbar-thumb {
+    background: var(--laton-osc);
+    border: 2px solid #07100b;
+    border-radius: 4px;
+}
+
+
   </style>
 
   <!-- AVISO DE DINERO RECIBIDO -->
