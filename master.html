@@ -736,7 +736,7 @@
       <div class="amb-canal" id="amb-card-canal4" style="display:none">
         <h3>Canal 4 · Cuarto plano</h3>
         <label class="lbl" for="amb-canal4-archivo">Archivo (mp3)</label>
-        <input type="text" id="amb-canal4-archivo" list="dl-amb" placeholder="ambiente.mp3" autocomplete="off">
+        <input type="text" id="amb-canal4-archivo" list="dl-amb" placeholder="introduccion.mp3" autocomplete="off">
         <label class="lbl" for="amb-canal4-vol">Volumen</label>
         <div class="amb-vol"><input type="range" id="amb-canal4-vol" min="0" max="100" value="50"><b id="amb-canal4-vol-txt">50</b></div>
         <label class="lbl" for="amb-canal4-loop">Loop</label>
@@ -1993,7 +1993,7 @@ const ARMAS_INICIALES = {
 // Sugerencias que aparecen al hacer clic en los campos de audio y vídeo.
 // Puedes escribir cualquier otra ruta a mano.
 const AUDIOS = ['audio/audio1.mp3', 'audio/audio2.mp3', 'audio/audio3.mp3'];
-const VIDEOS = ['videos/video1.mp4', 'videos/video2.mp4', 'videos/video3.mp4'];
+const VIDEOS = ['videos/video1.mp4', 'videos/video2.mp4', 'videos/epilogo.mp4'];
 
 // Sugerencias del campo de imagen.
 const IMAGENES = ['images/image1.jpg', 'images/image2.jpg', 'images/image3.jpg'];
@@ -2405,7 +2405,7 @@ document.addEventListener('keydown', e => {
 // "ts" solo cambia al pulsar APLICAR o PARAR (así los jugadores reinician el sonido);
 // mover el volumen o el loop cambia únicamente ese campo.
 (function () {
-  const AMBIENTES = ['ambiente.mp3', 'ir_salon.mp3', 'ir_santuario.mp3'];   // sugerencias del campo Archivo
+  const AMBIENTES = ['ambiente.mp3', 'ir_salon.mp3', 'ir_santuario.mp3', 'introduccion.mp3'];   // sugerencias del campo Archivo
 
   if (!firebase.apps.length) firebase.initializeApp({
     apiKey: "AIzaSyDBMQU4fRGw-BjfAx8dv84GmcHzA-1ncoY",
