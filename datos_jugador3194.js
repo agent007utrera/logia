@@ -154,7 +154,7 @@ const objectivesData = {
             { text: 'Si te preguntan dónde estuviste, di que estuviste todo el tiempo en el Jardín.', type: "check" },
             { text: 'Intenta que nadie te relacione con las pisadas del marinero (Prueba F) del suelo del Jardín.', type: "check" },
             { text: 'Acusa al doctor <span class="char-hover">BREWER<img src="images/f_brewer.jpg" class="char-hover-img" alt=""></span> del asesinato (porque la víctima fue drogada con cloral).', type: "check" },
-            { text: 'Si el profesor <span class="char-hover">RICE<img src="images/f_rice.jpg" class="char-hover-img" alt=""></span> te amenaza con contar que las páginas del Necronomicón son falsificaciones, dile que eso no le conviene a él tampoco.', type: "check" },
+            { text: 'Si el profesor <span class="char-hover">RICE<img src="images/f_rice.jpg" class="char-hover-img" alt=""></span> te amenaza con contar que las páginas del Necronomicón son falsificaciones, dile que eso no le conviene a él tampoco. Que si tú caes, él caerá contigo.', type: "check" },
             { text: '¿Por qué <span class="char-hover">PICKMAN<img src="images/f_pickman.jpg" class="char-hover-img" alt=""></span> tiene las manos manchadas de pintura roja y azul?', type: "check" },
             { text: 'Cómprale un <strong style="color:#e03c3c;">CUADRO</strong> a <span class="char-hover">PICKMAN<img src="images/f_pickman.jpg" class="char-hover-img" alt=""></span> si no lo has hecho todavía.', type: "check" },
             { text: 'Intenta vender tus reliquias a los demás, si te quedan algunas.', type: "check" },

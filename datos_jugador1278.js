@@ -122,7 +122,7 @@ const objectivesData = {
         items: [
             { type: "space" },
             { text: 'Lee la Introducción en voz alta en el Salón, cuando hayan llegado todos.', type: "check" },
-            { text: 'Reúnete en privado con cada hermano y hazles creer a cada uno que podría ser tu sucesor. A <span class="char-hover">PICKMAN<img src="images/f_pickman.jpg" class="char-hover-img" alt=""></span> dile que tienes «un destino especial» para él. Mira a ver quién se lo cree.', type: "check" },
+            { text: 'Reúnete en privado con cada hermano y hazles creer a cada uno que podría ser tu sucesor. A <span class="char-hover">PICKMAN<img src="images/f_pickman.jpg" class="char-hover-img" alt=""></span> dile que tienes «un destino especial» para él. Mira a ver quién se lo cree. Pídele que te cuente una de sus visiones.', type: "check" },
             { text: 'Cobra el Tributo (50 dólares) a todos los hermanos que puedas.', type: "check" },
             { text: 'Pide a <span class="char-hover">PICKMAN<img src="images/f_pickman.jpg" class="char-hover-img" alt=""></span> que pinte el Sello del Crepúsculo en la puerta del Santuario sobre las 23:00h.', type: "check" },
             { text: 'Dile al profesor <span class="char-hover">RICE<img src="images/f_rice.jpg" class="char-hover-img" alt=""></span> que termine su traducción del Códice. Exígele que termine de traducir el último tomo que queda antes de medianoche.', type: "check" },
