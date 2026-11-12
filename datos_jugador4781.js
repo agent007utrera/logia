@@ -154,7 +154,7 @@ const objectivesData = {
             { text: 'Recoge el reloj (<strong style="color:#e03c3c;">PRUEBA A</strong>) del bolsillo de la víctima.', type: "check" },
             { text: 'Pide al doctor <span class="char-hover">BREWER<img src="images/f_brewer.jpg" class="char-hover-img" alt=""></span> el Informe preliminar de la víctima (<strong style="color:#e03c3c;">PRUEBA B</strong>).', type: "check" },
             { text: 'Pide a <span class="char-hover">PICKMAN<img src="images/f_pickman.jpg" class="char-hover-img" alt=""></span> la <strong style="color:#e03c3c;">PRUEBA H</strong>. Que te hable de ese cuadro, El Banquete del Crepúsculo.', type: "check" },
-            { text: 'Tienes que conseguir las <strong style="color:#e03c3c;">PRUEBAS C, D, E, F y G</strong>.', type: "check" },
+            { text: 'Tienes que conseguir en total, las <strong style="color:#e03c3c;">PRUEBAS de la A, B, C, D, E, F, G, H, I</strong>.', type: "check" },
             { text: 'Si te preguntan, miente y di que estuviste en las <strong style="color:#e03c3c;">CELDAS TODO EL TIEMPO</strong>, por orden de <span class="char-hover">WETHERBY<img src="images/f_wetherby.jpg" class="char-hover-img" alt=""></span>.', type: "check" },
             { text: 'Sin que sea muy «evidente», orienta las sospechas hacia el doctor <span class="char-hover">BREWER<img src="images/f_brewer.jpg" class="char-hover-img" alt=""></span> (ya que la víctima fue drogada con cloral y fue el último en visitarlo para llevarle el elixir).', type: "check" },
             { text: 'Consigue los <strong style="color:#e03c3c;">REGISTROS DEL SANATORIO</strong> de <span class="char-hover">BREWER<img src="images/f_brewer.jpg" class="char-hover-img" alt=""></span> si no lo has hecho todavía.', type: "check" },
